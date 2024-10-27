@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:background="@color/my_primary"
+    android:layout_height="match_parent"
+    tools:context=".SplashActivity">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center">
+
+            <!-- Overlayed Image (e.g., icon) -->
+            <ImageView
+                android:layout_width="333dp"
+                android:layout_height="333dp"
+                android:layout_gravity="center"
+                android:src="@drawable/chat_icon"
+                app:tint="@color/my_secondary" />
+            <!-- Background Image (e.g., logo) -->
+            <ImageView
+                android:id="@+id/logoImageView"
+                android:layout_width="280dp"
+                android:layout_height="220dp"
+                android:layout_gravity="center"
+                android:padding="15dp"
+                android:src="@drawable/academicalliancepng" />
+        </FrameLayout>
+
+        <ProgressBar
+            android:layout_width="32dp"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/developer_info"
+        android:layout_alignParentBottom="true"
+        android:gravity="center"
+        android:layout_marginBottom="10dp"
+        android:textColor="@color/off_white"/>
+
+</RelativeLayout>
