@@ -7,7 +7,9 @@ public class UserModel{
     private String username;
     private Timestamp createdTimestamp;
     private String userId;
-
+    // No-argument constructor
+    public UserModel() {
+    }
     public UserModel(String phone, String username, Timestamp createdTimestamp, String userId) {
         this.phone = phone;
         this.username = username;

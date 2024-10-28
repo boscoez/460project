@@ -5,9 +5,7 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="username">Username</string>
 
-    <string name="todo">TODO</string>
     <string name="user_name">User name</string>
-    <string name="_1_000_000_0000">+1 000 000 0000</string>
     <string name="profile_screen">Profile Screen</string>
     <string name="search_users">Search User</string>
 </resources>

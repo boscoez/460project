@@ -6,8 +6,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.ezchat.R;
 import com.example.ezchat.model.UserModel;
 import com.example.ezchat.utils.FirebaseUtil;
@@ -16,8 +18,7 @@ import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 
 public class SearchUserRecyclerAdapter extends FirestoreRecyclerAdapter<UserModel, SearchUserRecyclerAdapter.UserModelViewHolder> {
     Context context;
-
-    public SearchUserRecyclerAdapter(@NonNull FirestoreRecyclerOptions<UserModel> options, Context applicationContext) {
+    public SearchUserRecyclerAdapter(@NonNull FirestoreRecyclerOptions<UserModel> options, Context context) {
         super(options);
         this.context = context;
     }
@@ -27,21 +28,23 @@ public class SearchUserRecyclerAdapter extends FirestoreRecyclerAdapter<UserMode
         holder.usernameText.setText(model.getUsername());
         holder.phoneText.setText(model.getPhone());
         if(model.getUserId().equals(FirebaseUtil.currentUserId())){
-            holder.usernameText.setText(model.getUsername() + "(Me)");
+            holder.usernameText.setText(model.getUsername()+" (Me) ");
         }
-    }
+        holder.itemView.setOnClickListener(v -> {
 
+        });
+    }
     @NonNull
     @Override
     public UserModelViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.search_user_recycler_row, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.search_user_recycler_row, parent, false);
         return new UserModelViewHolder(view);
     }
-
-    static class UserModelViewHolder extends RecyclerView.ViewHolder {
+    class UserModelViewHolder extends RecyclerView.ViewHolder{
         TextView usernameText;
         TextView phoneText;
         ImageView profilePic;
+
         public UserModelViewHolder(@NonNull View itemView){
             super(itemView);
             usernameText = itemView.findViewById(R.id.user_name_text);
@@ -49,5 +52,6 @@ public class SearchUserRecyclerAdapter extends FirestoreRecyclerAdapter<UserMode
             profilePic = itemView.findViewById(R.id.profile_pic_image_view);
         }
     }
-
 }
+
+
