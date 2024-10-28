@@ -18,7 +18,6 @@ public class SearchUserActivity extends AppCompatActivity {
     ImageButton backButton;
     RecyclerView recyclerView;
     SearchUserRecyclerAdapter adapter;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,7 +27,6 @@ public class SearchUserActivity extends AppCompatActivity {
         searchButton = findViewById(R.id.search_user_btn);
         backButton =  findViewById(R.id.back_btn);
         recyclerView = findViewById(R.id.search_user_recycler_view);
-
         searchInput.requestFocus();
 
         backButton.setOnClickListener(v->{

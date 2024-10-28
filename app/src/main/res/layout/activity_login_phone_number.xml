@@ -29,7 +29,7 @@
                 android:layout_centerInParent="true"
                 android:textColor="@color/white"
                 android:textSize="18sp"
-                android:text="1"/>
+                android:text="@string/_1"/>
         </RelativeLayout>
         <RelativeLayout
                 android:layout_width="32dp"
@@ -43,7 +43,7 @@
                     android:layout_centerInParent="true"
                     android:textColor="@color/white"
                     android:textSize="18sp"
-                    android:text="2"/>
+                    android:text="@string/_2"/>
         </RelativeLayout>
         <RelativeLayout
                 android:layout_width="32dp"
@@ -57,7 +57,7 @@
                     android:layout_centerInParent="true"
                     android:textColor="@color/white"
                     android:textSize="18sp"
-                    android:text="3"/>
+                    android:text="@string/_3"/>
         </RelativeLayout>
     </LinearLayout>
     
@@ -66,13 +66,12 @@
         android:layout_height="222dp"
         android:src="@drawable/phone_icon"
         app:tint="@color/my_primary"
-        android:layout_weight="20"
-        />
+        android:layout_weight="20"/>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Enter mobile number"
+        android:text="@string/enter_mobile_number"
         android:layout_gravity="center_vertical"
         android:letterSpacing="0.07"
         android:textStyle="bold"
@@ -97,14 +96,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="10dp"
-            android:hint="Mobile"
+            android:hint="@string/mobile"
             android:inputType="phone"
             android:layout_margin="10dp"
             android:background="@drawable/edit_text_rounded_corner"
             android:elevation="5dp"
-            android:id="@+id/login_mobile_number"
-
-            />
+            android:id="@+id/login_mobile_number"/>
 
     </LinearLayout>
 
@@ -118,7 +115,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/btn_rounded_corner"
-            android:text=" SEND "
+            android:text="@string/send"
             android:id="@+id/send_otp_btn"/>
         <ProgressBar
             android:layout_width="32dp"
