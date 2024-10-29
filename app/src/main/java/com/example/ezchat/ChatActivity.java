@@ -7,23 +7,28 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.ezchat.adapter.ChatRecyclerAdapter;
 import com.example.ezchat.model.ChatMessageModel;
 import com.example.ezchat.model.ChatroomModel;
 import com.example.ezchat.model.UserModel;
 import com.example.ezchat.utils.AndroidUtil;
 import com.example.ezchat.utils.FirebaseUtil;
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.Query;
 
 import java.util.Arrays;
 
 public class ChatActivity extends AppCompatActivity {
     String chatroomId;
     ChatroomModel chatroomModel;
+    ChatRecyclerAdapter adapter;
     UserModel otherUser;
     EditText messageInput;
     ImageButton sendMessageBtn;
@@ -44,9 +49,7 @@ public class ChatActivity extends AppCompatActivity {
         otherUsername = findViewById(R.id.other_username);
         recyclerView = findViewById(R.id.chat_recycler_view);
 
-        backBtn.setOnClickListener(v -> {
-            onBackPressed();
-        });
+        backBtn.setOnClickListener(v -> onBackPressed());
         otherUsername.setText(otherUser.getUsername());
 
         sendMessageBtn.setOnClickListener((v -> {
@@ -57,8 +60,23 @@ public class ChatActivity extends AppCompatActivity {
         }));
 
         getOrCreateChatroomModel();
-    }
+        setupChatRecyclerView();
 
+    }
+    void setupChatRecyclerView(){
+        Query query = FirebaseUtil.getChatroomMessageReference(chatroomId)
+                .orderBy("timestamp", Query.Direction.DESCENDING);
+
+        FirestoreRecyclerOptions<ChatMessageModel> options = new FirestoreRecyclerOptions.Builder<ChatMessageModel>()
+                .setQuery(query, ChatMessageModel.class).build();
+
+        adapter = new ChatRecyclerAdapter(options, getApplicationContext());
+        LinearLayoutManager manager = new LinearLayoutManager(this);
+        manager.setReverseLayout(true);
+        recyclerView.setLayoutManager(manager);
+        recyclerView.setAdapter(adapter);
+        adapter.startListening();
+    }
     void sendMessageToUser(String message){
 
         chatroomModel.setLastMessageTimestamp(Timestamp.now());
