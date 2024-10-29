@@ -3,7 +3,6 @@ package com.example.ezchat.utils;
 import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
-
 import com.example.ezchat.model.UserModel;
 
 public class AndroidUtil {
@@ -15,7 +14,6 @@ public class AndroidUtil {
         intent.putExtra("phone",model.getPhone());
         intent.putExtra("userId",model.getUserId());
     }
-
     public static UserModel getUserModelFromIntent(Intent intent){
         UserModel userModel = new UserModel();
         userModel.setUsername(intent.getStringExtra("username"));

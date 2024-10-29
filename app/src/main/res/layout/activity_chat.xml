@@ -48,7 +48,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/toolbar"
-        android:layout_above="@id/bottom_layout"/>
+        android:layout_above="@id/bottom_layout"
+        android:id="@+id/chat_recycler_view"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -69,7 +70,7 @@
             android:elevation="4dp"
             android:hint="@string/write_message_here"
             android:padding="10dp"
-            android:id="@+id/chat_message_btn"/>
+            android:id="@+id/chat_message_input"/>
         
         <ImageButton
             android:layout_width="48dp"
