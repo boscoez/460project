@@ -147,6 +147,7 @@ public class LoginOtpActivity extends AppCompatActivity {
      * Starts a timer for the "Resend OTP" button, making it clickable again after the timeout period.
      * Updates the button text to display the countdown.
      */
+
     void startResendTimer(){
         resendOtpTextView.setEnabled(false);
         Timer timer = new Timer();
