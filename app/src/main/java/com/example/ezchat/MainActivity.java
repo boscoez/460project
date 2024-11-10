@@ -13,6 +13,14 @@ public class MainActivity extends AppCompatActivity {
     ChatFragment chatFragment;
     ProfileFragment profileFragment;
 
+<<<<<<< HEAD
+=======
+    /**
+     * Initializes the main activity, sets up UI components, fragments, and bottom navigation functionality.
+     *
+     * @param savedInstanceState The saved instance state for the activity.
+     */
+>>>>>>> 2fa863b40ad565a15776b66eac7d0625c1989002
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

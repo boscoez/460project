@@ -15,6 +15,15 @@ CountryCodePicker countryCodePicker;
 EditText phoneInput;
 Button sendOtpBtn;
 ProgressBar progressBar;
+<<<<<<< HEAD
+=======
+    /**
+     * Initializes the phone number login activity, sets up UI components,
+     * validates the phone number input, and initiates the OTP sending process.
+     *
+     * @param savedInstanceState The saved instance state for the activity.
+     */
+>>>>>>> 2fa863b40ad565a15776b66eac7d0625c1989002
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

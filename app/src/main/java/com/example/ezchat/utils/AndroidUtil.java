@@ -6,14 +6,42 @@ import android.widget.Toast;
 import com.example.ezchat.model.UserModel;
 
 public class AndroidUtil {
+<<<<<<< HEAD
     public static void showToast(Context context, String message) {
         Toast.makeText(context, message, Toast.LENGTH_LONG).show();
     }
+=======
+    /**
+     *  Displays a toast message on the screen.
+     * @param context   The context in which the toast should be shown.
+     * @param message   The message to display in the toast.
+     */
+    public static void showToast(Context context, String message) {
+        Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+    }
+
+    /**
+     * Adds user details from a UserModel object as extras to an Intent.
+     *This enables passing user information between activities.
+     *
+     * @param intent        The Intent to add user details to.
+     * @param model         The UserModel object containing user data to pass.
+     */
+>>>>>>> 2fa863b40ad565a15776b66eac7d0625c1989002
     public static void passUserModelAsIntent(Intent intent, UserModel model){
         intent.putExtra("username",model.getUsername());
         intent.putExtra("phone",model.getPhone());
         intent.putExtra("userId",model.getUserId());
     }
+<<<<<<< HEAD
+=======
+
+    /**
+     * Retrieves user details from an Intent and returns them as a UserModel object.
+     * @param intent        The Intent containing user data as extras.
+     * @return          A UserModel object populated with data from the Intent extras.
+     */
+>>>>>>> 2fa863b40ad565a15776b66eac7d0625c1989002
     public static UserModel getUserModelFromIntent(Intent intent){
         UserModel userModel = new UserModel();
         userModel.setUsername(intent.getStringExtra("username"));

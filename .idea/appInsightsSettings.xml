@@ -2,5 +2,29 @@
 <project version="4">
   <component name="AppInsightsSettings">
     <option name="selectedTabId" value="Firebase Crashlytics" />
+<<<<<<< HEAD
+=======
+    <option name="tabSettings">
+      <map>
+        <entry key="Firebase Crashlytics">
+          <value>
+            <InsightsFilterSettings>
+              <option name="connection">
+                <ConnectionSetting>
+                  <option name="appId" value="com.example.ezchat" />
+                  <option name="mobileSdkAppId" value="1:931341039629:android:4d80b046b022b19e6c7d44" />
+                  <option name="projectId" value="ezchatbackend" />
+                  <option name="projectNumber" value="931341039629" />
+                </ConnectionSetting>
+              </option>
+              <option name="signal" value="SIGNAL_UNSPECIFIED" />
+              <option name="timeIntervalDays" value="THIRTY_DAYS" />
+              <option name="visibilityType" value="ALL" />
+            </InsightsFilterSettings>
+          </value>
+        </entry>
+      </map>
+    </option>
+>>>>>>> 2fa863b40ad565a15776b66eac7d0625c1989002
   </component>
 </project>

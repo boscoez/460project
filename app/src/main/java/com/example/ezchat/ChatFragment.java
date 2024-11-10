@@ -11,6 +11,17 @@ public class ChatFragment extends Fragment {
     public ChatFragment() {
         // Required empty public constructor
     }
+<<<<<<< HEAD
+=======
+    /**
+     * Called to have the fragment instantiate its user interface view.
+     *
+     * @param inflater           The LayoutInflater object that can be used to inflate views in the fragment.
+     * @param container          The parent ViewGroup that the fragment's UI will be attached to.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed from a previous saved state.
+     * @return The View for the fragment's UI, or null.
+     */
+>>>>>>> 2fa863b40ad565a15776b66eac7d0625c1989002
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
