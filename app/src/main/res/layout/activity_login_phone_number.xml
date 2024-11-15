@@ -5,17 +5,18 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
     android:layout_margin="20dp"
+    android:gravity="center"
+    android:orientation="vertical"
     android:weightSum="100"
     tools:context=".LoginPhoneNumberActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:layout_weight="20">
+        android:layout_weight="20"
+        android:gravity="center">
+
         <RelativeLayout
             android:layout_width="32dp"
             android:layout_height="32dp"
@@ -27,102 +28,108 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
+                android:text="@string/_1"
                 android:textColor="@color/white"
-                android:textSize="18sp"
-                android:text="@string/_1"/>
+                android:textSize="18sp" />
         </RelativeLayout>
+
         <RelativeLayout
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_margin="10dp"
-                android:background="@drawable/circular_bg"
-                android:backgroundTint="@color/light_gray">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:textColor="@color/white"
-                    android:textSize="18sp"
-                    android:text="@string/_2"/>
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_margin="10dp"
+            android:background="@drawable/circular_bg"
+            android:backgroundTint="@color/light_gray">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="@string/_2"
+                android:textColor="@color/white"
+                android:textSize="18sp" />
         </RelativeLayout>
+
         <RelativeLayout
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_margin="10dp"
-                android:background="@drawable/circular_bg"
-                android:backgroundTint="@color/light_gray">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:textColor="@color/white"
-                    android:textSize="18sp"
-                    android:text="@string/_3"/>
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_margin="10dp"
+            android:background="@drawable/circular_bg"
+            android:backgroundTint="@color/light_gray">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="@string/_3"
+                android:textColor="@color/white"
+                android:textSize="18sp" />
         </RelativeLayout>
     </LinearLayout>
-    
+
     <ImageView
         android:layout_width="222dp"
         android:layout_height="222dp"
+        android:layout_weight="20"
         android:src="@drawable/phone_icon"
-        app:tint="@color/my_primary"
-        android:layout_weight="20"/>
+        app:tint="@color/my_primary" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/enter_mobile_number"
         android:layout_gravity="center_vertical"
+        android:layout_weight="5"
         android:letterSpacing="0.07"
-        android:textStyle="bold"
+        android:text="@string/enter_mobile_number"
         android:textSize="22sp"
-        android:layout_weight="5"/>
+        android:textStyle="bold" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_weight="5"
         android:gravity="center"
-        android:layout_weight="5">
+        android:orientation="horizontal">
 
         <com.hbb20.CountryCodePicker
+            android:id="@+id/login_countrycode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:ccp_showFlag="false"
-            app:ccp_showNameCode="false"
-            android:id="@+id/login_countrycode"/>
+            app:ccp_showNameCode="false" />
 
         <EditText
+            android:id="@+id/login_mobile_number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:hint="@string/mobile"
-            android:inputType="phone"
             android:layout_margin="10dp"
             android:background="@drawable/edit_text_rounded_corner"
             android:elevation="5dp"
-            android:id="@+id/login_mobile_number"/>
+            android:hint="@string/mobile"
+            android:inputType="phone"
+            android:padding="10dp" />
 
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="100dp"
+        android:layout_weight="20"
         android:gravity="center_vertical"
-        android:orientation="vertical"
-        android:layout_weight="20">
+        android:orientation="vertical">
+
         <Button
+            android:id="@+id/send_otp_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/btn_rounded_corner"
-            android:text="@string/send"
-            android:id="@+id/send_otp_btn"/>
+            android:text="@string/send" />
+
         <ProgressBar
+            android:id="@+id/login_progress_bar"
             android:layout_width="32dp"
             android:layout_height="wrap_content"
-            android:indeterminateTint="@color/my_primary"
             android:layout_gravity="center"
-            android:id="@+id/login_progress_bar"/>
+            android:indeterminateTint="@color/my_primary" />
 
     </LinearLayout>
 
