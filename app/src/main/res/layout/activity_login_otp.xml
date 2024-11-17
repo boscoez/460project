@@ -11,6 +11,15 @@
     android:weightSum="100"
     tools:context=".LoginOtpActivity">
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:text="Welcome to Academic Alliance"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@color/primary_dark"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
