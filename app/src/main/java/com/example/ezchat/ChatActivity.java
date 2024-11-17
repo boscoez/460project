@@ -35,16 +35,12 @@ public class ChatActivity extends AppCompatActivity {
     ImageButton backBtn;
     TextView otherUsername;
     RecyclerView recyclerView;
-<<<<<<< HEAD
-
-=======
     /**
      * Initializes the ChatActivity, retrieves the chatroom ID, sets up UI components,
      * and sets up click listeners for sending messages and navigating back.
      *
      * @param savedInstanceState The saved instance state for the activity.
      */
->>>>>>> 2fa863b40ad565a15776b66eac7d0625c1989002
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,14 +68,11 @@ public class ChatActivity extends AppCompatActivity {
         setupChatRecyclerView();
 
     }
-<<<<<<< HEAD
-=======
 
     /**
      * Sets up the RecyclerView to display chat messages in reverse chronological order.
      * Initializes the Firestore query and adapter for real-time message updates.
      */
->>>>>>> 2fa863b40ad565a15776b66eac7d0625c1989002
     void setupChatRecyclerView(){
         Query query = FirebaseUtil.getChatroomMessageReference(chatroomId)
                 .orderBy("timestamp", Query.Direction.DESCENDING);
@@ -94,15 +87,12 @@ public class ChatActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
         adapter.startListening();
     }
-<<<<<<< HEAD
-=======
     /**
      * Sends a message to the chatroom by updating the chatroom model's timestamp,
      * creating a new ChatMessageModel, and saving it in Firestore.
      *
      * @param message The message content to be sent to the chatroom.
      */
->>>>>>> 2fa863b40ad565a15776b66eac7d0625c1989002
     void sendMessageToUser(String message){
 
         chatroomModel.setLastMessageTimestamp(Timestamp.now());
@@ -120,13 +110,10 @@ public class ChatActivity extends AppCompatActivity {
                     }
                 });
     }
-<<<<<<< HEAD
-=======
     /**
      * Retrieves the existing ChatroomModel from Firestore or creates a new one if it doesn't exist.
      * If a new chatroom model is created, it initializes it with the current and other user IDs.
      */
->>>>>>> 2fa863b40ad565a15776b66eac7d0625c1989002
     void getOrCreateChatroomModel() {
         FirebaseUtil.getChatroomReference(chatroomId).get().addOnCompleteListener(task -> {
             if(task.isSuccessful()){

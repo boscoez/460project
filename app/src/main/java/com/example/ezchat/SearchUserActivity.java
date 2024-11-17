@@ -12,99 +12,94 @@ import com.example.ezchat.utils.FirebaseUtil;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.firebase.firestore.Query;
 
+/**
+ * Activity for searching users by their username. Displays a search bar and a RecyclerView
+ * for showing matching user profiles fetched from Firebase Firestore.
+ */
 public class SearchUserActivity extends AppCompatActivity {
-    EditText searchInput;
-    ImageButton searchButton;
-    ImageButton backButton;
-    RecyclerView recyclerView;
-    SearchUserRecyclerAdapter adapter;
-<<<<<<< HEAD
-=======
+    // UI Components
+    EditText searchInput; // Input field for entering the username to search
+    ImageButton searchButton; // Button to trigger the search
+    ImageButton backButton; // Button to navigate back to the previous activity
+    RecyclerView recyclerView; // RecyclerView to display the search results
+    SearchUserRecyclerAdapter adapter; // Adapter for managing search results
     /**
-     * Initializes the search user activity, sets up UI components, and adds listeners for the back and search buttons.
-     *
+     * Initializes the search user activity, sets up UI components, and adds listeners for
+     * the back and search buttons.
      * @param savedInstanceState The saved instance state for the activity.
      */
->>>>>>> 2fa863b40ad565a15776b66eac7d0625c1989002
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_user);
-
+        // Initialize UI components
         searchInput = findViewById(R.id.search_username_input);
         searchButton = findViewById(R.id.search_user_btn);
-        backButton =  findViewById(R.id.back_btn);
+        backButton = findViewById(R.id.back_btn);
         recyclerView = findViewById(R.id.search_user_recycler_view);
+        // Automatically focus on the search input field
         searchInput.requestFocus();
-
-        backButton.setOnClickListener(v->{
-            onBackPressed();
-        });
-
+        // Listener for the back button to navigate back
+        backButton.setOnClickListener(v -> onBackPressed());
+        // Listener for the search button to validate input and trigger search
         searchButton.setOnClickListener(v -> {
             String searchTerm = searchInput.getText().toString();
-            if(searchTerm.isEmpty() || searchTerm.length() < 3){
-                searchInput.setError("Invalid Username");
+            // Validate search term
+            if (searchTerm.isEmpty() || searchTerm.length() < 3) {
+                searchInput.setError("Invalid Username"); // Show error if invalid
                 return;
             }
+            // Set up the RecyclerView for displaying search results
             setupSearchRecyclerView(searchTerm);
         });
     }
-<<<<<<< HEAD
-=======
     /**
-     * Configures the RecyclerView to display search results for users whose usernames match the search term.
-     *
+     * Configures the RecyclerView to display search results for users whose usernames
+     * match the search term.
      * @param searchTerm The search term to filter usernames.
      */
->>>>>>> 2fa863b40ad565a15776b66eac7d0625c1989002
-    void setupSearchRecyclerView(String searchTerm){
-
+    void setupSearchRecyclerView(String searchTerm) {
+        // Query Firestore for usernames matching the search term
         Query query = FirebaseUtil.allUserCollectionReference()
                 .whereGreaterThanOrEqualTo("username", searchTerm);
-
+        // Set up FirestoreRecyclerOptions with the query
         FirestoreRecyclerOptions<UserModel> options = new FirestoreRecyclerOptions.Builder<UserModel>()
-                .setQuery(query, UserModel.class).build();
-
+                .setQuery(query, UserModel.class)
+                .build();
+        // Initialize the adapter with options and bind it to the RecyclerView
         adapter = new SearchUserRecyclerAdapter(options, getApplicationContext());
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(adapter);
-        adapter.startListening();
+        recyclerView.setLayoutManager(new LinearLayoutManager(this)); // Set layout manager
+        recyclerView.setAdapter(adapter); // Attach adapter to RecyclerView
+        adapter.startListening(); // Start listening for Firestore updates
     }
-<<<<<<< HEAD
-=======
     /**
      * Starts the adapter listening when the activity is started.
      */
->>>>>>> 2fa863b40ad565a15776b66eac7d0625c1989002
     @Override
-    protected void onStart(){
+    protected void onStart() {
         super.onStart();
-        if(adapter != null)
+        if (adapter != null) {
             adapter.startListening();
+        }
     }
-<<<<<<< HEAD
-=======
     /**
      * Stops the adapter listening when the activity is stopped.
      */
->>>>>>> 2fa863b40ad565a15776b66eac7d0625c1989002
     @Override
     protected void onStop() {
         super.onStop();
-        if(adapter != null)
+        if (adapter != null) {
             adapter.stopListening();
+        }
     }
-<<<<<<< HEAD
-=======
     /**
      * Resumes the adapter listening when the activity is resumed.
      */
->>>>>>> 2fa863b40ad565a15776b66eac7d0625c1989002
     @Override
     protected void onResume() {
         super.onResume();
-        if(adapter != null)
+        if (adapter != null) {
             adapter.startListening();
+        }
     }
 }

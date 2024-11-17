@@ -35,16 +35,14 @@ public class LoginOtpActivity extends AppCompatActivity {
     ProgressBar progressBar;
     TextView resendOtpTextView;
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
-<<<<<<< HEAD
 
-=======
     /**
      * Initializes the OTP login activity, sets up UI components, sends OTP to the provided phone number,
      * and sets click listeners for the "Next" and "Resend OTP" buttons.
      *
      * @param savedInstanceState The saved instance state for the activity.
      */
->>>>>>> 2fa863b40ad565a15776b66eac7d0625c1989002
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,15 +67,14 @@ public class LoginOtpActivity extends AppCompatActivity {
             sendOtp(phoneNum, true);
         });
     }
-<<<<<<< HEAD
-=======
+
     /**
      * Sends an OTP to the specified phone number. Uses Firebase's PhoneAuthProvider to initiate or resend the OTP code.
      *
      * @param phoneNum The phone number to send the OTP to.
      * @param isResend Boolean indicating if this is a resend request.
      */
->>>>>>> 2fa863b40ad565a15776b66eac7d0625c1989002
+
     void sendOtp(String phoneNum, boolean isResend){
         startResendTimer();
         setInProgress(true);
@@ -113,14 +110,13 @@ public class LoginOtpActivity extends AppCompatActivity {
             PhoneAuthProvider.verifyPhoneNumber(builder.build());
         }
     }
-<<<<<<< HEAD
-=======
+
     /**
      * Sets the in-progress state for UI components, showing a progress bar and hiding the "Next" button.
      *
      * @param inProgress Boolean indicating whether to show the progress bar and hide the "Next" button.
      */
->>>>>>> 2fa863b40ad565a15776b66eac7d0625c1989002
+
     void  setInProgress(boolean inProgress){
         if(inProgress) {
             progressBar.setVisibility(View.VISIBLE);
@@ -130,14 +126,13 @@ public class LoginOtpActivity extends AppCompatActivity {
             nxtBtn.setVisibility(View.VISIBLE);
         }
     }
-<<<<<<< HEAD
-=======
+
     /**
      * Signs the user in with the provided PhoneAuthCredential. If successful, navigates to LoginUserNameActivity.
      *
      * @param phoneAuthCredential The credential obtained after OTP verification.
      */
->>>>>>> 2fa863b40ad565a15776b66eac7d0625c1989002
+
     void singIn(PhoneAuthCredential phoneAuthCredential){
         //login  and go to next activity
         setInProgress(true);
@@ -156,14 +151,12 @@ public class LoginOtpActivity extends AppCompatActivity {
             }
         });
     }
-<<<<<<< HEAD
-=======
+
     /**
      * Starts a timer for the "Resend OTP" button, making it clickable again after the timeout period.
      * Updates the button text to display the countdown.
      */
 
->>>>>>> 2fa863b40ad565a15776b66eac7d0625c1989002
     void startResendTimer(){
         resendOtpTextView.setEnabled(false);
         Timer timer = new Timer();

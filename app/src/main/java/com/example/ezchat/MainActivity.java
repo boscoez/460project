@@ -3,60 +3,65 @@ package com.example.ezchat;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.widget.ImageButton;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.ezchat.utils.FirebaseUtil;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationBarView;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 public class MainActivity extends AppCompatActivity {
+
     BottomNavigationView bottomNavigationView;
     ImageButton searchButton;
+
     ChatFragment chatFragment;
     ProfileFragment profileFragment;
 
-<<<<<<< HEAD
-=======
-    /**
-     * Initializes the main activity, sets up UI components, fragments, and bottom navigation functionality.
-     *
-     * @param savedInstanceState The saved instance state for the activity.
-     */
->>>>>>> 2fa863b40ad565a15776b66eac7d0625c1989002
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Set the content view first to load the layout
         setContentView(R.layout.activity_main);
 
-        // Initialize fragments
         chatFragment = new ChatFragment();
         profileFragment = new ProfileFragment();
 
-        // Initialize UI elements
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         searchButton = findViewById(R.id.main_search_btn);
-        searchButton.setOnClickListener((v) -> {
-            startActivity(new Intent(MainActivity.this, SearchUserActivity.class));
+
+        searchButton.setOnClickListener((v)->{
+            startActivity(new Intent(MainActivity.this,SearchUserActivity.class));
         });
 
-        if (bottomNavigationView != null) {
-            bottomNavigationView.setOnItemSelectedListener(menuItem -> {
-                int itemId = menuItem.getItemId();
-
-                if (itemId == R.id.menu_chat) {
-                    getSupportFragmentManager().beginTransaction().replace(R.id.main_frame_layout, chatFragment).commit();
-                    return true;
-                } else if (itemId == R.id.menu_profile) {
-                    getSupportFragmentManager().beginTransaction().replace(R.id.main_frame_layout, profileFragment).commit();
-                    return true;
+        bottomNavigationView.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                if(item.getItemId()==R.id.menu_chat){
+                    getSupportFragmentManager().beginTransaction().replace(R.id.main_frame_layout,chatFragment).commit();
                 }
-                return false;
-            });
+                if(item.getItemId()==R.id.menu_profile){
+                    getSupportFragmentManager().beginTransaction().replace(R.id.main_frame_layout,profileFragment).commit();
+                }
+                return true;
+            }
+        });
+        bottomNavigationView.setSelectedItemId(R.id.menu_chat);
 
-            // Set default selected item
-            bottomNavigationView.setSelectedItemId(R.id.menu_chat);
-        } else {
-            Log.e("MainActivity", "BottomNavigationView is null. Check layout ID.");
-        }
+        getFCMToken();
+
+    }
+
+    void getFCMToken(){
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+            if(task.isSuccessful()){
+                String token = task.getResult();
+                FirebaseUtil.currentUserDetails().update("fcmToken",token);
+
+            }
+        });
     }
 }

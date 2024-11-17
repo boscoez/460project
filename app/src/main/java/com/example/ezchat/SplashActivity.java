@@ -9,22 +9,21 @@ import com.example.ezchat.utils.FirebaseUtil;
 
 @SuppressLint("CustomSplashScreen")
 public class SplashActivity extends AppCompatActivity {
-<<<<<<< HEAD
-=======
+
     /**
      * Initializes the splash screen activity, waits briefly, then checks login status to navigate accordingly.
      *
      * @param savedInstanceState The saved instance state for the activity.
      */
->>>>>>> 2fa863b40ad565a15776b66eac7d0625c1989002
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
         new Handler().postDelayed(() -> {
-            if(FirebaseUtil.isLoggedIn()){
+            if (FirebaseUtil.isLoggedIn()) {
                 startActivity(new Intent(SplashActivity.this, MainActivity.class));
-            }else {
+            } else {
                 startActivity(new Intent(SplashActivity.this, LoginPhoneNumberActivity.class));
             }
             finish();
