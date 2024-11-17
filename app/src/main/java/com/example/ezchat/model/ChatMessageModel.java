@@ -2,11 +2,13 @@ package com.example.ezchat.model;
 
 import com.google.firebase.Timestamp;
 
+
 /**
  *Model class representing a chat message.
  *Contains fields for the message content, the sender's ID, and the timestamp of the message.
  *Used to deserialize and serialize data to and from Firebase Firestore.
  */
+
 public class ChatMessageModel {
     private String message;
     private String senderId;
@@ -21,6 +23,7 @@ public class ChatMessageModel {
      * @param senderId       The ID of the user who sent the message.
      * @param timestamp     The timestamp indicating when the message was sent.
      */
+
     public ChatMessageModel(String message, String senderId, Timestamp timestamp) {
         this.message = message;
         this.senderId = senderId;
@@ -30,6 +33,7 @@ public class ChatMessageModel {
     /** Retrieves the message content.
      * @return The chat message as a String.
      */
+
     public String getMessage() {
         return message;
     }
@@ -38,39 +42,48 @@ public class ChatMessageModel {
      * Sets the message content.
      * @param message The chat message content to set.
      */
+
     public void setMessage(String message) {
         this.message = message;
     }
+
 
     /**
      *   Retrieves the sender ID.
      * @return The ID of the user who sent the message.
      */
 
+
     public String getSenderId() {
         return senderId;
     }
+
 
     /**
      * Sets the sender ID.
      * @param senderId The ID of the user to set as the sender.
      */
+
     public void setSenderId(String senderId) {
         this.senderId = senderId;
     }
+
 
     /**
      * Retrieves the timestamp of the message.
      * @return  A Timestamp object representing when the message was sent.
      */
+
     public Timestamp getTimestamp() {
         return timestamp;
     }
+
 
     /**
      * Sets the timestamp of the message.
      * @param timestamp The Timestamp object to set as the message timestamp.
      */
+
     public void setTimestamp(Timestamp timestamp) {
         this.timestamp = timestamp;
     }

@@ -22,11 +22,13 @@ public class LoginUserNameActivity extends AppCompatActivity {
     ProgressBar progressBar;
     String phoneNumber;
     UserModel userModel;
+
     /**
      * Initializes the username setup activity, sets up UI components, and retrieves any existing username.
      *
      * @param savedInstanceState The saved instance state for the activity.
      */
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,10 +43,12 @@ public class LoginUserNameActivity extends AppCompatActivity {
 
         letMeInBtn.setOnClickListener((v -> setUsername()));
     }
+
     /**
      * Validates and sets the username for the user. If a UserModel doesn't already exist, it creates one,
      * saves it in Firebase, and navigates to the MainActivity on success.
      */
+
     void setUsername() {
 
         String username = usernameInput.getText().toString();
@@ -71,9 +75,11 @@ public class LoginUserNameActivity extends AppCompatActivity {
             }
         });
     }
+
     /**
      * Retrieves the existing username from Firebase Firestore if it exists and populates the input field.
      */
+
     void getUsername(){
         setInProgress(true);
         FirebaseUtil.currentUserDetails().get().addOnCompleteListener(task -> {
@@ -86,11 +92,13 @@ public class LoginUserNameActivity extends AppCompatActivity {
             }
         });
     }
+
     /**
      * Shows or hides the progress bar and "Let Me In" button based on the inProgress parameter.
      *
      * @param inProgress Boolean indicating if the operation is in progress.
      */
+
     void  setInProgress(boolean inProgress){
         if(inProgress) {
             progressBar.setVisibility(View.VISIBLE);

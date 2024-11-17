@@ -1,73 +1,81 @@
 package com.example.ezchat.utils;
 
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
+import java.text.SimpleDateFormat;
+import java.util.List;
+
 public class FirebaseUtil {
-    /**
-     *  Retrieves the current user's ID.
-     * @return  The unique ID of the currently logged-in user as a String, or null if the user is not logged in.
-     */
+
     public static String currentUserId(){
         return FirebaseAuth.getInstance().getUid();
     }
-    /**
-     * Checks if a user is currently logged in.
-     *
-     * @return True if the user is logged in; false otherwise.
-     */
+
     public static boolean isLoggedIn(){
-        return currentUserId() != null;
+        if(currentUserId()!=null){
+            return true;
+        }
+        return false;
     }
-    /**
-     * Retrieves a DocumentReference for the currently logged-in user's details in Firestore.
-     *
-     * @return A DocumentReference pointing to the current user's document in the "users" collection.
-     */
+
     public static DocumentReference currentUserDetails(){
         return FirebaseFirestore.getInstance().collection("users").document(currentUserId());
     }
-    /**
-     * Retrieves a CollectionReference for all user documents in the "users" collection.
-     *
-     * @return A CollectionReference pointing to the "users" collection in Firestore.
-     */
+
     public static CollectionReference allUserCollectionReference(){
         return FirebaseFirestore.getInstance().collection("users");
     }
-    /**
-     * Retrieves a DocumentReference for a specific chatroom based on its chatroom ID.
-     *
-     * @param chatroomId The unique ID of the chatroom.
-     * @return A DocumentReference pointing to the specified chatroom document in the "chatrooms" collection.
-     */
+
     public static DocumentReference getChatroomReference(String chatroomId){
         return FirebaseFirestore.getInstance().collection("chatrooms").document(chatroomId);
     }
-    /**
-     * Retrieves a CollectionReference for messages within a specific chatroom.
-     *
-     * @param chatroomId The unique ID of the chatroom.
-     * @return A CollectionReference pointing to the "chats" sub-collection within the specified chatroom.
-     */
+
     public static CollectionReference getChatroomMessageReference(String chatroomId){
         return getChatroomReference(chatroomId).collection("chats");
     }
-    /**
-     * Generates a unique chatroom ID based on two user IDs.
-     * Ensures a consistent ordering by hashing and comparing the two IDs, so the chatroom ID is the same
-     * regardless of the order in which the user IDs are provided.
-     *
-     * @param userId1 The first user's unique ID.
-     * @param userId2 The second user's unique ID.
-     * @return A unique chatroom ID as a String in the format "userId1_userId2" or "userId2_userId1" (ordered alphabetically).
-     */
-    public static  String getChatroomId(String userId1, String userId2) {
-        if(userId1.hashCode() < userId2.hashCode()){
+
+    public static String getChatroomId(String userId1,String userId2){
+        if(userId1.hashCode()<userId2.hashCode()){
             return userId1+"_"+userId2;
-        }else {
+        }else{
             return userId2+"_"+userId1;
         }
     }
+
+    public static CollectionReference allChatroomCollectionReference(){
+        return FirebaseFirestore.getInstance().collection("chatrooms");
+    }
+
+    public static DocumentReference getOtherUserFromChatroom(List<String> userIds){
+        if(userIds.get(0).equals(FirebaseUtil.currentUserId())){
+            return allUserCollectionReference().document(userIds.get(1));
+        }else{
+            return allUserCollectionReference().document(userIds.get(0));
+        }
+    }
+
+    public static String timestampToString(Timestamp timestamp){
+        return new SimpleDateFormat("HH:MM").format(timestamp.toDate());
+    }
+
+    public static void logout(){
+        FirebaseAuth.getInstance().signOut();
+    }
+
+    public static StorageReference  getCurrentProfilePicStorageRef(){
+        return FirebaseStorage.getInstance().getReference().child("profile_pic")
+                .child(FirebaseUtil.currentUserId());
+    }
+
+    public static StorageReference  getOtherProfilePicStorageRef(String otherUserId){
+        return FirebaseStorage.getInstance().getReference().child("profile_pic")
+                .child(otherUserId);
+    }
+
 }
