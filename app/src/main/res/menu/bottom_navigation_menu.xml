@@ -10,4 +10,9 @@
         android:icon="@drawable/chat_icon"
         android:title="Chats"
         />
+
+    <item
+        android:id="@+id/menu_logout"
+
+        android:title="Log out"/>
 </menu>
