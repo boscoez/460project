@@ -22,7 +22,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:mcv_showOtherDates="all"
-        app:mcv_selectionColor="@color/success"
+        app:mcv_selectionColor="@color/purple_200"
         android:layout_marginBottom="16dp" />
 
     <!-- Tasks Header -->
