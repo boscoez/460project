@@ -15,7 +15,6 @@ gifdecoder = "5.0.0-rc01"
 glide = "5.0.0-rc01"
 imagepicker = "2.1"
 media3Common = "1.4.1"
-materialCalendarview = "2.0.1"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -33,7 +32,6 @@ gifdecoder = { group = "com.github.bumptech.glide", name = "gifdecoder", version
 glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
 imagepicker = { group = "com.github.dhaval2404", name = "imagepicker", version.ref = "imagepicker" }
 media3-common = { group = "androidx.media3", name = "media3-common", version.ref = "media3Common" }
-material-calendarview = { group = "com.github.prolificinteractive", name = "material-calendarview", version.ref = "materialCalendarview" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

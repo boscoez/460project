@@ -44,7 +44,6 @@ dependencies {
     implementation(libs.glide)
     implementation(libs.imagepicker)
     implementation(libs.media3.common)
-    implementation("com.github.prolificinteractive:material-calendarview:2.0.1")
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
