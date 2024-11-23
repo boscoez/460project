@@ -1,3 +1,4 @@
+# Android Studio specific
 *.iml
 .gradle
 /local.properties
@@ -7,9 +8,58 @@
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
+/.idea/**/tasks.xml
+/.idea/**/usage.statistics.xml
+/.idea/**/dictionaries
+/.idea/**/misc.xml
 .DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
-local.properties
+
+# Build output
+/build/
+.cxx/
+.externalNativeBuild/
+captures/
+
+# Keystore files (keep signing keys private)
+*.jks
+*.keystore
+
+# Log files
+*.log
+
+# Gradle Wrapper files
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+
+# Application files
+*.apk
+*.ap_
+*.aab
+
+# ProGuard
+*.pro.user
+
+# Temporary files
+*.swp
+*.tmp
+*.temp
+*.bak
+*.orig
+
+# Google services (keep API keys private)
+google-services.json
+app/google-services.json
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+*~
+
+# Other generated files
+output.json
+
+# JetBrains related
+.idea/
+.idea/**/runConfigurations/
+.idea/**/codeStyles/
