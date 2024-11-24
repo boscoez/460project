@@ -30,6 +30,11 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+
+    buildFeatures {
+        // Enables View Binding, which generates binding classes for your XML layouts.
+        viewBinding = true // Connects layout XML directly to Java code without findViewById
+    }
 }
 
 dependencies {
