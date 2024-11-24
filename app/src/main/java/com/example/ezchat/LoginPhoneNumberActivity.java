@@ -36,6 +36,10 @@ ProgressBar progressBar;
 
         progressBar.setVisibility(View.GONE);
 
+        // Set default country to US
+        countryCodePicker.setDefaultCountryUsingNameCode("US");
+        countryCodePicker.setCountryForNameCode("US"); // Ensure it reflects correctly
+
         countryCodePicker.registerCarrierNumberEditText(phoneInput);
         sendOtpBtn.setOnClickListener((v) -> {
             if (!countryCodePicker.isValidFullNumber()) {
