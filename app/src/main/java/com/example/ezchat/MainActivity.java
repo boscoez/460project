@@ -21,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
 
     ChatFragment chatFragment;
     ProfileFragment profileFragment;
+    CalendarFragment calendarFragment;  // Add CalendarFragment
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,38 +30,39 @@ public class MainActivity extends AppCompatActivity {
 
         chatFragment = new ChatFragment();
         profileFragment = new ProfileFragment();
+        calendarFragment = new CalendarFragment();  // Initialize CalendarFragment
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         searchButton = findViewById(R.id.main_search_btn);
 
-        searchButton.setOnClickListener((v)->{
-            startActivity(new Intent(MainActivity.this,SearchUserActivity.class));
+        searchButton.setOnClickListener((v) -> {
+            startActivity(new Intent(MainActivity.this, SearchUserActivity.class));
         });
 
         bottomNavigationView.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                if(item.getItemId()==R.id.menu_chat){
-                    getSupportFragmentManager().beginTransaction().replace(R.id.main_frame_layout,chatFragment).commit();
-                }
-                if(item.getItemId()==R.id.menu_profile){
-                    getSupportFragmentManager().beginTransaction().replace(R.id.main_frame_layout,profileFragment).commit();
+                if (item.getItemId() == R.id.menu_chat) {
+                    getSupportFragmentManager().beginTransaction().replace(R.id.main_frame_layout, chatFragment).commit();
+                } else if (item.getItemId() == R.id.menu_profile) {
+                    getSupportFragmentManager().beginTransaction().replace(R.id.main_frame_layout, profileFragment).commit();
+                } else if (item.getItemId() == R.id.menu_calendar) {  // Handle Calendar menu item
+                    getSupportFragmentManager().beginTransaction().replace(R.id.main_frame_layout, calendarFragment).commit();
                 }
                 return true;
             }
         });
+
         bottomNavigationView.setSelectedItemId(R.id.menu_chat);
 
         getFCMToken();
-
     }
 
-    void getFCMToken(){
+    void getFCMToken() {
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
-            if(task.isSuccessful()){
+            if (task.isSuccessful()) {
                 String token = task.getResult();
-                FirebaseUtil.currentUserDetails().update("fcmToken",token);
-
+                FirebaseUtil.currentUserDetails().update("fcmToken", token);
             }
         });
     }

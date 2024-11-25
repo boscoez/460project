@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="CustomCalendarStyle" parent="Widget.MaterialComponents.MaterialCalendar">
+        <item name="android:dateTextAppearance">@style/CustomDateTextAppearance</item>
+        <item name="android:weekDayTextAppearance">@style/CustomWeekDayTextAppearance</item>
+    </style>
+    <style name="CustomDateTextAppearance">
+        <item name="android:textSize">28sp</item> <!-- Larger date numbers -->
+        <item name="android:textColor">@color/error</item> <!-- Black date text -->
+    </style>
+
+    <style name="CustomWeekDayTextAppearance">
+        <item name="android:textSize">22sp</item> <!-- Larger weekday text -->
+        <item name="android:textColor">@color/black</item> <!-- Gray weekday text -->
+    </style>
+</resources>
