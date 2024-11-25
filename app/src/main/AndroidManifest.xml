@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -12,91 +12,31 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.EZChat"
         tools:targetApi="31">
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@drawable/ic_launcher" />
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_color"
-            android:resource="@color/my_primary" />
 
-        <activity
-            android:name=".SplashActivity"
-            android:exported="true">
+        <!-- Activity Declarations -->
+        <activity android:name=".ChatActivity" android:exported="false" />
+        <activity android:name=".SearchUserActivity" android:exported="false" />
+        <activity android:name=".LoginUserNameActivity" android:exported="false" />
+        <activity android:name=".LoginOtpActivity" android:exported="false" />
+        <activity android:name=".LoginPhoneNumberActivity" android:exported="false" />
+        <activity android:name=".SplashActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value=""/>
+        </activity>
+        <activity android:name=".MainActivity" android:exported="false">
+            <meta-data android:name="android.app.lib_name" android:value="" />
         </activity>
 
-        <activity
-            android:name=".ChatActivity"
-            android:exported="false" />
-
-        <meta-data
-            android:name="android.app.lib_name"
-            android:value=""/>
-
-        <activity
-            android:name=".SearchUserActivity"
-            android:exported="false" />
-
-        <meta-data
-            android:name="android.app.lib_name"
-            android:value=""/>
-
-        <activity
-            android:name=".LoginUserNameActivity"
-            android:exported="false" />
-
-        <meta-data
-            android:name="android.app.lib_name"
-            android:value=""/>
-
-        <activity
-            android:name=".LoginOtpActivity"
-            android:exported="false" />
-
-        <meta-data
-            android:name="android.app.lib_name"
-            android:value=""/>
-
-        <activity
-            android:name=".LoginPhoneNumberActivity"
-            android:exported="false" />
-
-        <meta-data
-            android:name="android.app.lib_name"
-            android:value=""/>
-
-        <activity
-            android:name=".MainActivity"
-            android:enableOnBackInvokedCallback="true"
-            android:exported="false"
-            tools:targetApi="tiramisu" />
-
-        <meta-data
-            android:name="android.app.lib_name"
-            android:value=""/>
-
+        <!-- Firebase Messaging Service -->
         <service
             android:name=".FCMNotificationService"
-            android:exported="false">
-
-            <meta-data
-                android:name="com.google.firebase.messaging.default_notification_channel_id" />
-
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
-                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
-                <action android:name="com.google.firebase.POST_NOTIFICATIONS"/>
             </intent-filter>
         </service>
 
     </application>
-
 </manifest>
