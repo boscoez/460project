@@ -12,10 +12,8 @@ public class SplashActivity extends AppCompatActivity {
 
     /**
      * Initializes the splash screen activity, waits briefly, then checks login status to navigate accordingly.
-     *
      * @param savedInstanceState The saved instance state for the activity.
      */
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -95,7 +95,6 @@ public class LoginUserNameActivity extends AppCompatActivity {
 
     /**
      * Shows or hides the progress bar and "Let Me In" button based on the inProgress parameter.
-     *
      * @param inProgress Boolean indicating if the operation is in progress.
      */
 
