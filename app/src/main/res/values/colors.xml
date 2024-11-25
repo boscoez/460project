@@ -2,4 +2,15 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="CaldendarBackground">#9EA2BF</color>
+    <color name="titleBackground">#3C3A3A</color>
+    <color name="my_primary">#000833</color>
+    <color name="my_secondary">#FFFFFF</color>
+    <color name="off_white">#FAFAFA</color>
+    <color name="light_gray">#6C6C6C</color>
+    <color name="primary_dark">#FF000000</color>
+    <color name="chat_color_sender">#6C6C6C</color>
+    <color name="chat_color_receiver">#000833</color>
+    <color name="ToDoList">#9EA2BF</color>
+    <color name="ToDoBackground">#9EA2BF</color>
 </resources>

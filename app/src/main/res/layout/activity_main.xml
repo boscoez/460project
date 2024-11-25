@@ -1,34 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/my_primary"
+        android:padding="10dp">
+
+        <TextView
+            android:id="@+id/other_username"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="10dp"
+            android:layout_toRightOf="@id/profile_pic_layout"
+            android:text="Username's Calendar"
+            android:textColor="@color/white"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <include
+            android:id="@+id/profile_pic_layout"
+            layout="@layout/profile_pic_view"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="10dp"
+            android:layout_toRightOf="@id/back_btn" />
+
+        <ImageButton
+            android:id="@+id/back_btn"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:layout_centerVertical="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/icon_back"
+            app:tint="@color/white" />
+
+    </RelativeLayout>
 
     <!-- Add TextView to display the date -->
     <TextView
         android:id="@+id/date_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="150dp"
-        android:layout_marginTop="100dp"
-        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="0dp"
+        android:layout_marginTop="50dp"
+        android:background="@color/my_primary"
         android:text="Set the Date"
-        android:textSize="20sp"
-        android:textColor="@android:color/background_dark"
-        android:textStyle="bold" />
+        android:layout_gravity="center"
+        android:textColor="@color/white"
+        android:textSize="22sp" />
 
     <!-- Add CalendarView to display the Calendar -->
+
     <CalendarView
         android:id="@+id/calendarView"
-        android:layout_marginTop="130dp"
-        android:layout_marginLeft="30dp"
-        android:layout_centerHorizontal="true"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="0dp"
+        android:weekDayTextAppearance="@color/black"
+        android:background="@color/CaldendarBackground" />
 
+    <TextView
+        android:id="@+id/To_DoListTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:textAlignment="center"
+        android:text="To Do List"
+        android:textStyle="bold"
+        android:textSize="14dp"
+        android:background="@color/my_primary"
+        android:textColor="@color/white">
+    </TextView>
 
-</RelativeLayout>
+    <!-- display updated tasks blow the calendar -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewTasks"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="31dp"
+        android:background="@color/ToDoBackground"/>
+
+    <!-- add a add task button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAddTask"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity=""
+        android:layout_margin="16dp"
+        android:background="@color/black"
+        app:srcCompat="@android:drawable/ic_input_add" />
+
+</LinearLayout>
 
