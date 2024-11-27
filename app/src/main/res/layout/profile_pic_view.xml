@@ -8,7 +8,7 @@
         android:layout_width="52dp"
         android:layout_height="52dp"
         android:background="@drawable/circular_bg"
-        android:src="@drawable/person_icon"
+        android:src="@drawable/ic_person"
         android:padding="4dp"
         app:tint="@color/light_gray"
         android:backgroundTint="@color/off_white"

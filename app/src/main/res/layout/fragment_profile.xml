@@ -13,7 +13,7 @@
         android:layout_height="160dp"
         android:background="@drawable/circular_bg"
         android:backgroundTint="@color/light_gray"
-        android:src="@drawable/person_icon"
+        android:src="@drawable/ic_person"
         android:scaleType="centerCrop"
         android:layout_marginBottom="40dp"
         android:id="@+id/profile_image_view"/>
