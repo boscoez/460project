@@ -1,4 +1,4 @@
-package com.example.ezchat;
+package com.example.ezchat.activities;
 
 import android.os.Bundle;
 import android.widget.EditText;
@@ -6,8 +6,10 @@ import android.widget.ImageButton;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.example.ezchat.adapter.SearchUserRecyclerAdapter;
-import com.example.ezchat.model.UserModel;
+
+import com.example.ezchat.R;
+import com.example.ezchat.adapters.SearchUserRecyclerAdapter;
+import com.example.ezchat.models.UserModel;
 import com.example.ezchat.utils.FirebaseUtil;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.firebase.firestore.Query;

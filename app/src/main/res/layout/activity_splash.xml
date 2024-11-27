@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:background="@color/my_primary"
     android:layout_height="match_parent"
-    tools:context=".SplashActivity">
+    tools:context=".activities.SplashActivity">
 
 
     <LinearLayout
@@ -25,7 +25,7 @@
                 android:layout_width="333dp"
                 android:layout_height="333dp"
                 android:layout_gravity="center"
-                android:src="@drawable/chat_icon"
+                android:src="@drawable/icon_chat"
                 app:tint="@color/my_secondary" />
             <!-- Background Image (e.g., logo) -->
             <ImageView

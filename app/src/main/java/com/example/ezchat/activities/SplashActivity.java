@@ -1,10 +1,12 @@
-package com.example.ezchat;
+package com.example.ezchat.activities;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.ezchat.R;
 import com.example.ezchat.utils.FirebaseUtil;
 
 @SuppressLint("CustomSplashScreen")

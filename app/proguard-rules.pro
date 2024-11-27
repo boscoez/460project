@@ -19,6 +19,6 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
--keepclassmembers class com.example.ezchat.model.UserModel {
+-keepclassmembers class com.example.ezchat.models.UserModel {
     public <init>();  #Keep the no-argument constructor
 }

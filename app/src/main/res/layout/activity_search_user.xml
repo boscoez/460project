@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SearchUserActivity">
+    tools:context=".activities.SearchUserActivity">
 
   <RelativeLayout
       android:id="@+id/toolbar"
@@ -49,7 +49,7 @@
       android:layout_height="wrap_content"
       android:layout_margin="10dp"
       android:layout_toStartOf="@id/search_user_btn"
-      android:background="@drawable/edit_text_rounded_corner"
+      android:background="@drawable/shape_rectangle"
       android:elevation="4dp"
       android:hint="@string/username"
       android:padding="10dp"/>

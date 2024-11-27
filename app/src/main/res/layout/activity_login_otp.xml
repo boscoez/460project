@@ -9,7 +9,7 @@
     android:gravity="center"
     android:orientation="vertical"
     android:weightSum="100"
-    tools:context=".LoginOtpActivity">
+    tools:context=".activities.LoginOtpActivity">
 
     <TextView
         android:layout_width="wrap_content"
@@ -30,7 +30,7 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_margin="10dp"
-            android:background="@drawable/circular_bg"
+            android:background="@drawable/shape_circle"
             android:backgroundTint="@color/light_gray">
 
             <TextView
@@ -46,7 +46,7 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_margin="10dp"
-            android:background="@drawable/circular_bg"
+            android:background="@drawable/shape_circle"
             android:backgroundTint="@color/my_primary">
 
             <TextView
@@ -62,7 +62,7 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_margin="10dp"
-            android:background="@drawable/circular_bg"
+            android:background="@drawable/shape_circle"
             android:backgroundTint="@color/light_gray">
 
             <TextView
@@ -79,7 +79,7 @@
         android:layout_width="222dp"
         android:layout_height="222dp"
         android:layout_weight="20"
-        android:src="@drawable/code_icon"
+        android:src="@drawable/icon_password"
         app:tint="@color/my_primary" />
 
     <TextView
@@ -104,7 +104,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            android:background="@drawable/edit_text_rounded_corner"
+            android:background="@drawable/shape_rectangle"
             android:elevation="5dp"
             android:hint="CODE"
             android:inputType="number"
@@ -124,7 +124,7 @@
             android:id="@+id/login_next_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/btn_rounded_corner"
+            android:background="@drawable/shape_rectangle"
             android:text=" NEXT " />
 
         <ProgressBar

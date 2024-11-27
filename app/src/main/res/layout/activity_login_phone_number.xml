@@ -9,7 +9,7 @@
     android:gravity="center"
     android:orientation="vertical"
     android:weightSum="100"
-    tools:context=".LoginPhoneNumberActivity">
+    tools:context=".activities.LoginPhoneNumberActivity">
 
     <TextView
         android:layout_width="wrap_content"
@@ -30,7 +30,7 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_margin="10dp"
-            android:background="@drawable/circular_bg"
+            android:background="@drawable/shape_circle"
             android:backgroundTint="@color/my_primary">
 
             <TextView
@@ -46,7 +46,7 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_margin="10dp"
-            android:background="@drawable/circular_bg"
+            android:background="@drawable/shape_circle"
             android:backgroundTint="@color/light_gray">
 
             <TextView
@@ -62,7 +62,7 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_margin="10dp"
-            android:background="@drawable/circular_bg"
+            android:background="@drawable/shape_circle"
             android:backgroundTint="@color/light_gray">
 
             <TextView
@@ -79,7 +79,7 @@
         android:layout_width="222dp"
         android:layout_height="222dp"
         android:layout_weight="20"
-        android:src="@drawable/phone_icon"
+        android:src="@drawable/icon_phone"
         app:tint="@color/my_primary" />
 
     <TextView
@@ -111,7 +111,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            android:background="@drawable/edit_text_rounded_corner"
+            android:background="@drawable/shape_rectangle"
             android:elevation="5dp"
             android:hint="@string/mobile"
             android:inputType="phone"
@@ -130,7 +130,7 @@
             android:id="@+id/send_otp_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/btn_rounded_corner"
+            android:background="@drawable/shape_rectangle"
             android:text="@string/send" />
 
         <ProgressBar

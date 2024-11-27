@@ -1,4 +1,4 @@
-package com.example.ezchat.adapter;
+package com.example.ezchat.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ezchat.R;
-import com.example.ezchat.model.ChatMessageModel;
+import com.example.ezchat.models.ChatMessageModel;
 import com.example.ezchat.utils.FirebaseUtil;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;

@@ -1,4 +1,4 @@
-package com.example.ezchat.adapter;
+package com.example.ezchat.adapters;
 
 import android.content.Context;
 import android.content.Intent;
@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ezchat.ChatActivity;
 import com.example.ezchat.R;
-import com.example.ezchat.model.UserModel;
+import com.example.ezchat.models.UserModel;
 import com.example.ezchat.utils.AndroidUtil;
 import com.example.ezchat.utils.FirebaseUtil;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;

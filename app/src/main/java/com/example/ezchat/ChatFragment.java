@@ -9,8 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.ezchat.adapter.RecentChatRecyclerAdapter;
-import com.example.ezchat.model.ChatroomModel;
+import com.example.ezchat.models.ChatroomModel;
 import com.example.ezchat.utils.FirebaseUtil;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.firebase.firestore.Query;

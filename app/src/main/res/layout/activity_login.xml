@@ -43,7 +43,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            android:background="@drawable/edit_text_rounded_corner"
+            android:background="@drawable/shape_rectangle"
             android:elevation="5dp"
             android:hint="Username"
             android:inputType="text"
@@ -55,7 +55,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            android:background="@drawable/edit_text_rounded_corner"
+            android:background="@drawable/shape_rectangle"
             android:elevation="5dp"
             android:hint="Password"
             android:inputType="text"
@@ -73,7 +73,7 @@
                 android:id="@+id/login_code_btn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/btn_rounded_corner"
+                android:background="@drawable/shape_rectangle"
                 android:text=" SIGN IN " />
 
 

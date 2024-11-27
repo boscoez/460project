@@ -10,10 +10,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.ezchat.adapter.ChatRecyclerAdapter;
-import com.example.ezchat.model.ChatMessageModel;
-import com.example.ezchat.model.ChatroomModel;
-import com.example.ezchat.model.UserModel;
+import com.example.ezchat.adapters.ChatRecyclerAdapter;
+import com.example.ezchat.models.ChatMessageModel;
+import com.example.ezchat.models.ChatroomModel;
+import com.example.ezchat.models.UserModel;
 import com.example.ezchat.utils.AndroidUtil;
 import com.example.ezchat.utils.FirebaseUtil;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;

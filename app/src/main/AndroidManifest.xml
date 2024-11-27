@@ -15,17 +15,17 @@
 
         <!-- Activity Declarations -->
         <activity android:name=".ChatActivity" android:exported="false" />
-        <activity android:name=".SearchUserActivity" android:exported="false" />
-        <activity android:name=".LoginUserNameActivity" android:exported="false" />
-        <activity android:name=".LoginOtpActivity" android:exported="false" />
-        <activity android:name=".LoginPhoneNumberActivity" android:exported="false" />
-        <activity android:name=".SplashActivity" android:exported="true">
+        <activity android:name=".activities.SearchUserActivity" android:exported="false" />
+        <activity android:name=".activities.LoginUserNameActivity" android:exported="false" />
+        <activity android:name=".activities.LoginOtpActivity" android:exported="false" />
+        <activity android:name=".activities.LoginPhoneNumberActivity" android:exported="false" />
+        <activity android:name=".activities.SplashActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity" android:exported="false">
+        <activity android:name=".activities.MainActivity" android:exported="false">
             <meta-data android:name="android.app.lib_name" android:value="" />
         </activity>
 

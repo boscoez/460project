@@ -1,4 +1,4 @@
-package com.example.ezchat.model;
+package com.example.ezchat.models;
 
 import com.google.firebase.Timestamp;
 import java.util.List;

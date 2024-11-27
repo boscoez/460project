@@ -8,7 +8,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-import com.example.ezchat.model.UserModel;
+import com.example.ezchat.models.UserModel;
 /**
  * Utility class for Android-specific operations such as showing toasts,
  * managing intents, and setting profile pictures.

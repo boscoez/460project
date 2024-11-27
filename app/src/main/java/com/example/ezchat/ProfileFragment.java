@@ -2,7 +2,6 @@ package com.example.ezchat;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -10,7 +9,6 @@ import androidx.media3.common.util.Log;
 import androidx.media3.common.util.UnstableApi;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
 import androidx.fragment.app.Fragment;
@@ -23,26 +21,20 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.example.ezchat.model.UserModel;
+import com.example.ezchat.activities.SplashActivity;
+import com.example.ezchat.models.UserModel;
 import com.example.ezchat.utils.AndroidUtil;
 import com.example.ezchat.utils.FirebaseUtil;
 import com.github.dhaval2404.imagepicker.ImagePicker;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
-import java.io.ByteArrayOutputStream;
 import java.util.Objects;
 
-import kotlin.Unit;
-import kotlin.jvm.functions.Function1;
 /**
  * A Fragment that allows the user to view and update their profile information,
  * including username, phone number, and profile picture.
@@ -208,7 +200,7 @@ public class ProfileFragment extends Fragment {
                         Uri uri = Uri.parse(currentUserModel.getProfilePicUrl());
                         AndroidUtil.setProfilePic(getContext(), uri, profilePic);
                     } else {
-                        profilePic.setImageResource(R.drawable.person_icon);
+                        profilePic.setImageResource(R.drawable.icon_person);
                     }
                 } else {
                     AndroidUtil.showToast(getContext(), "User data is null");
