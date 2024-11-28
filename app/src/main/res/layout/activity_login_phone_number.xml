@@ -115,7 +115,7 @@
             android:layout_margin="10dp"
             android:background="@drawable/bg_rectangle"
             android:elevation="5dp"
-            android:hint="@string/mobile"
+            android:hint="phone"
             android:inputType="phone"
             android:padding="10dp"
             android:textSize="25dp" />

@@ -11,15 +11,34 @@
     android:padding="10dp"
     tools:context=".fragments.ProfileFragment">
 
-    <com.makeramen.roundedimageview.RoundedImageView
-        android:id="@+id/profile_image_view"
-        android:layout_width="171dp"
-        android:layout_height="171dp"
-        android:layout_margin="40dp"
-        android:background="@drawable/bg_circle"
-        android:scaleType="centerCrop"
-        android:src="@drawable/ic_person"
-        app:riv_oval="true" />
+
+    <!-- FrameLayout containing the profile image and "Add Image" text -->
+    <FrameLayout
+        android:id="@+id/layoutImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp">
+
+        <!-- RoundedImageView for the user's profile picture -->
+        <com.makeramen.roundedimageview.RoundedImageView
+            android:id="@+id/profile_image_view"
+            android:layout_width="171dp"
+            android:layout_height="171dp"
+            android:background="@drawable/bg_circle"
+            android:scaleType="centerCrop"
+            android:layout_margin="40dp"
+            app:riv_oval="true" />
+
+        <!-- TextView prompting the user to add an image -->
+        <TextView
+            android:id="@+id/textAddImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Add Image"
+            android:textColor="@color/light_gray"
+            android:textSize="25sp" />
+    </FrameLayout>
 
     <EditText
         android:id="@+id/profile_username"
@@ -43,6 +62,7 @@
         android:layout_height="50dp"
         android:layout_marginTop="20dp"
         android:background="@drawable/bg_rectangle"
+        android:enabled="false"
         android:hint="Phone"
         android:imeOptions="actionDone"
         android:importantForAutofill="no"
