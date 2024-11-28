@@ -6,25 +6,20 @@ import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.ezchat.ChatActivity;
+import com.example.ezchat.NewChatActivity;
 import com.example.ezchat.R;
+import com.example.ezchat.databinding.SearchUserRecyclerRowBinding;
 import com.example.ezchat.models.UserModel;
-import com.example.ezchat.utils.AndroidUtil;
-import com.example.ezchat.utils.FirebaseUtil;
+import com.example.ezchat.utilities.AndroidUtil;
+import com.example.ezchat.utilities.Constants;
+import com.example.ezchat.utilities.FirebaseUtil;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 
-/**
- * A RecyclerView adapter for displaying a list of users retrieved from Firestore.
- * This adapter binds data from a {@link UserModel} object to the corresponding views
- * in the RecyclerView row layout.
- */
 public class SearchUserRecyclerAdapter extends FirestoreRecyclerAdapter<UserModel, SearchUserRecyclerAdapter.UserModelViewHolder> {
 
     private final Context context;
@@ -47,31 +42,32 @@ public class SearchUserRecyclerAdapter extends FirestoreRecyclerAdapter<UserMode
      */
     @Override
     protected void onBindViewHolder(@NonNull UserModelViewHolder holder, int position, @NonNull UserModel model) {
-        // Set the username and phone number.
-        holder.usernameText.setText(model.getUsername());
-        holder.phoneText.setText(model.getPhone());
+        // Use binding for populating the data
+        //holder.binding.setUser(model);
 
-        // Append "(Me)" if the user ID matches the current user.
+        // Check if the current user is displayed
         if (model.getUserId().equals(FirebaseUtil.currentUserId())) {
-            holder.usernameText.setText(model.getUsername() + " (Me)");
+            holder.binding.textViewUsername.setText(model.getUsername() + " (Me)");
         }
 
-        // Fetch and set the user's profile picture using Firebase Storage.
+        // Fetch and set the user's profile picture using Firebase Storage
         FirebaseUtil.getOtherProfilePicStorageRef(model.getUserId()).getDownloadUrl()
-                .addOnCompleteListener(t -> {
-                    if (t.isSuccessful()) {
-                        Uri uri = t.getResult();
-                        AndroidUtil.setProfilePic(context, uri, holder.profilePic);
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Uri uri = task.getResult();
+                        AndroidUtil.setProfilePic(context, uri, holder.binding.profilePic);
                     }
                 });
-        // Set an onClick listener to navigate to the chat activity with the selected user's details.
+
+        // Set the click listener to open the new chat activity when a user is clicked
         holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(context, ChatActivity.class);
+            Intent intent = new Intent(context, NewChatActivity.class);
             AndroidUtil.passUserModelAsIntent(intent, model);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         });
     }
+
     /**
      * Creates a new {@link UserModelViewHolder} by inflating the row layout.
      * @param parent   The parent ViewGroup into which the new view will be added.
@@ -81,28 +77,25 @@ public class SearchUserRecyclerAdapter extends FirestoreRecyclerAdapter<UserMode
     @NonNull
     @Override
     public UserModelViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.search_user_recycler_row, parent, false);
-        return new UserModelViewHolder(view);
+        SearchUserRecyclerRowBinding binding = SearchUserRecyclerRowBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
+        return new UserModelViewHolder(binding);
     }
+
     /**
      * A ViewHolder that holds references to the views in the RecyclerView row layout.
      * Used to display a single user's details.
      */
-    class UserModelViewHolder extends RecyclerView.ViewHolder {
-        TextView usernameText;
-        TextView phoneText;
-        ImageView profilePic;
+    public class UserModelViewHolder extends RecyclerView.ViewHolder {
+        private final SearchUserRecyclerRowBinding binding;
 
         /**
          * Constructor that initializes view references for a single row.
          *
-         * @param itemView The root view of the RecyclerView row layout.
+         * @param binding The binding object to access the views in the layout.
          */
-        public UserModelViewHolder(@NonNull View itemView) {
-            super(itemView);
-            usernameText = itemView.findViewById(R.id.user_name_text);
-            phoneText = itemView.findViewById(R.id.phone_text);
-            profilePic = itemView.findViewById(R.id.profile_pic_image_view);
+        public UserModelViewHolder(SearchUserRecyclerRowBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
         }
     }
 }

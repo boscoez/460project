@@ -11,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.ezchat.ChatFragment;
 import com.example.ezchat.ProfileFragment;
 import com.example.ezchat.R;
-import com.example.ezchat.utils.FirebaseUtil;
+import com.example.ezchat.utilities.FirebaseUtil;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.firebase.messaging.FirebaseMessaging;

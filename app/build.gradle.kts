@@ -47,11 +47,12 @@ dependencies {
     implementation(libs.glide)
     implementation(libs.imagepicker)
     implementation(libs.media3.common)
+    implementation(libs.roundedimageview)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     implementation("com.hbb20:ccp:2.7.3")
-    implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
+    implementation(platform("com.google.firebase:firebase-bom:33.6.0"))
     implementation("com.google.firebase:firebase-auth:23.1.0")
     implementation("com.firebaseui:firebase-ui-firestore:8.0.2")
 

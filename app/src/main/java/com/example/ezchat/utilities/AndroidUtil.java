@@ -1,14 +1,20 @@
-package com.example.ezchat.utils;
+package com.example.ezchat.utilities;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.example.ezchat.R;
 import com.example.ezchat.models.UserModel;
+
+import java.io.IOException;
+
 /**
  * Utility class for Android-specific operations such as showing toasts,
  * managing intents, and setting profile pictures.
@@ -61,4 +67,34 @@ public class AndroidUtil {
                 .apply(RequestOptions.circleCropTransform())
                 .into(imageView);
     }
+
+    /**
+     * Sets the profile picture from a Base64-encoded string.
+     * @param context The context.
+     * @param base64Image The Base64-encoded image string.
+     * @param imageView The ImageView to set the image.
+     */
+    public static void setProfilePicFromBase64(Context context, String base64Image, ImageView imageView) {
+        try {
+            byte[] decodedBytes = android.util.Base64.decode(base64Image, android.util.Base64.DEFAULT);
+            Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+            imageView.setImageBitmap(bitmap);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            imageView.setImageResource(R.drawable.ic_person); // Default image
+        }
+    }
+
+    /**
+     * Retrieves a Bitmap from a given URI.
+     * @param context The context.
+     * @param uri The URI of the image.
+     * @return The Bitmap representation of the image.
+     * @throws IOException If an error occurs during reading the image.
+     */
+    public static Bitmap getBitmapFromUri(Context context, Uri uri) throws IOException {
+        return BitmapFactory.decodeStream(context.getContentResolver().openInputStream(uri));
+    }
+
+
 }

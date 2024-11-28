@@ -7,7 +7,7 @@ import android.os.Handler;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ezchat.R;
-import com.example.ezchat.utils.FirebaseUtil;
+import com.example.ezchat.utilities.FirebaseUtil;
 
 @SuppressLint("CustomSplashScreen")
 public class SplashActivity extends AppCompatActivity {

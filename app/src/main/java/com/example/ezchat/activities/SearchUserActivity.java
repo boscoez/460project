@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.ezchat.R;
 import com.example.ezchat.adapters.SearchUserRecyclerAdapter;
 import com.example.ezchat.models.UserModel;
-import com.example.ezchat.utils.FirebaseUtil;
+import com.example.ezchat.utilities.FirebaseUtil;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.firebase.firestore.Query;
 

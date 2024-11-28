@@ -75,7 +75,7 @@
         android:layout_width="110dp"
         android:layout_height="90dp"
         android:layout_weight="20"
-        android:src="@drawable/icon_person"
+        android:src="@drawable/ic_person"
         app:tint="@color/my_primary"
         />
 

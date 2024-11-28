@@ -79,7 +79,7 @@
         android:layout_width="222dp"
         android:layout_height="222dp"
         android:layout_weight="20"
-        android:src="@drawable/icon_phone"
+        android:src="@drawable/ic_phone"
         app:tint="@color/my_primary" />
 
     <TextView
