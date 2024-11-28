@@ -1,70 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ProfileFragment"
-    android:orientation="vertical"
+    android:layout_marginTop="70dp"
+    android:background="@drawable/bg_content_top"
     android:gravity="center"
-    android:layout_margin="20dp">
+    android:orientation="vertical"
+    android:padding="10dp"
+    tools:context=".fragments.ProfileFragment">
 
-    <ImageView
-        android:layout_width="160dp"
-        android:layout_height="160dp"
-        android:background="@drawable/shape_circle"
-        android:backgroundTint="@color/light_gray"
-        android:src="@drawable/ic_person"
+    <com.makeramen.roundedimageview.RoundedImageView
+        android:id="@+id/profile_image_view"
+        android:layout_width="171dp"
+        android:layout_height="171dp"
+        android:layout_margin="40dp"
+        android:background="@drawable/bg_circle"
         android:scaleType="centerCrop"
-        android:layout_marginBottom="40dp"
-        android:id="@+id/profile_image_view"/>
+        android:src="@drawable/ic_person"
+        app:riv_oval="true" />
 
     <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="10dp"
-        android:hint="Username"
-        android:inputType="text"
-        android:layout_margin="10dp"
-        android:background="@drawable/shape_rectangle"
-        android:elevation="5dp"
         android:id="@+id/profile_username"
-        />
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/bg_rectangle"
+        android:hint="Username"
+        android:imeOptions="actionDone"
+        android:importantForAutofill="no"
+        android:inputType="textCapWords"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:textAlignment="gravity"
+        android:textColor="@color/my_primary"
+        android:textSize="25sp" />
+
     <EditText
+        android:id="@+id/profile_phone"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/bg_rectangle"
+        android:hint="Phone"
+        android:imeOptions="actionDone"
+        android:importantForAutofill="no"
+        android:inputType="phone"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:textAlignment="gravity"
+        android:textColor="@color/my_primary"
+        android:textSize="25sp" />
+
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="10dp"
-        android:hint="Phone"
-        android:inputType="text"
-        android:layout_margin="10dp"
-        android:background="@drawable/shape_rectangle"
-        android:elevation="5dp"
-        android:enabled="false"
-        android:id="@+id/profile_phone"
-        />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:gravity="center_vertical"
         android:layout_marginTop="20dp"
+        android:animateLayoutChanges="true"
         android:orientation="vertical">
-        <Button
+
+        <!-- MaterialButton for signing up -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/profile_update_btn"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/shape_rectangle"
-            android:text="Update Profile"
-            android:id="@+id/profile_update_btn"/> <!-- Corrected ID -->
+            android:layout_height="60dp"
+            android:backgroundTint="@color/my_primary"
+            android:text="UPDATE PROFILE"
+            android:textColor="@color/white"
+            android:textSize="25sp"
+            android:textStyle="bold"
+            app:cornerRadius="8dp" />
+
+        <!-- ProgressBar displayed during sign-up process -->
         <ProgressBar
-            android:layout_width="32dp"
-            android:layout_height="wrap_content"
-            android:indeterminateTint="@color/my_primary"
+            android:id="@+id/profile_progress_bar"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
             android:layout_gravity="center"
-            android:id="@+id/profile_progress_bar"/>
-    </LinearLayout>
+            android:visibility="invisible" />
+    </FrameLayout>
 
     <TextView
+        android:id="@+id/logout_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Logout"
-        android:id="@+id/logout_btn"/>
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:text="LogOut"
+        android:textAlignment="center"
+        android:textColor="@color/light_gray"
+        android:textSize="30sp"
+        android:textStyle="bold" />
 </LinearLayout>

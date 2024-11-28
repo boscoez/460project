@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.ezchat.R;
 import com.example.ezchat.adapters.SearchUserRecyclerAdapter;
 import com.example.ezchat.models.UserModel;
+import com.example.ezchat.utilities.Constants;
 import com.example.ezchat.utilities.FirebaseUtil;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.firebase.firestore.Query;
@@ -63,7 +64,7 @@ public class SearchUserActivity extends AppCompatActivity {
     void setupSearchRecyclerView(String searchTerm) {
         // Query Firestore for usernames matching the search term
         Query query = FirebaseUtil.allUserCollectionReference()
-                .whereGreaterThanOrEqualTo("username", searchTerm);
+                .whereGreaterThanOrEqualTo(Constants.KEY_USERNAME, searchTerm);
         // Set up FirestoreRecyclerOptions with the query
         FirestoreRecyclerOptions<UserModel> options = new FirestoreRecyclerOptions.Builder<UserModel>()
                 .setQuery(query, UserModel.class)

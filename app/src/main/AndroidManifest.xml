@@ -16,7 +16,7 @@
             android:name=".activities.ChatRoomActivity"
             android:exported="false" />
         <activity
-            android:name=".NewChatActivity"
+            android:name=".activities.NewChatActivity"
             android:exported="false" /> <!-- Activity Declarations -->
         <activity
             android:name=".activities.SearchUserActivity"
@@ -47,7 +47,7 @@
                 android:value="" />
         </activity> <!-- Firebase Messaging Service -->
         <service
-            android:name=".FCMNotificationService"
+            android:name=".utilities.FCMNotificationService"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />

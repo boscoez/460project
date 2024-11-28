@@ -13,9 +13,5 @@
     <color name="chat_color_sender">#6C6C6C</color>
     <color name="chat_color_receiver">#000833</color>
 
-    <!-- custom toast colors -->
-    <color name="error">#EC7063</color>
-    <color name="warning">#F4D03F</color>
-    <color name="success">#138D75</color>
-    <color name="info">#2980B9</color>
+    <color name="input_background">#ECECEC</color>
 </resources>

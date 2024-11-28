@@ -30,7 +30,7 @@ public class ChatRoomActivity extends AppCompatActivity {
         setContentView(binding.getRoot()); // Set the root of the layout
 
         // Get the chat room ID from the intent
-        chatRoomId = getIntent().getStringExtra("chatRoomId");
+        chatRoomId = getIntent().getStringExtra(Constants.EXTRA_CHATROOM_ID);
         currentUserId = FirebaseUtil.currentUserId(); // Get the current user's phone number
 
         db = FirebaseFirestore.getInstance();

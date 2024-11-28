@@ -7,7 +7,9 @@ This is where you select the user(s) you want to chat with:
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/my_primary">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/my_primary"
+    tools:context=".activities.NewChatActivity">
 
     <!-- Title for the New Chat Screen -->
     <TextView
@@ -43,7 +45,7 @@ This is where you select the user(s) you want to chat with:
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="17dp"
-        android:background="@drawable/background_content"
+        android:background="@drawable/bg_content_top"
         android:padding="17dp"
         app:layout_constraintBottom_toTopOf="@id/startChatButton"
         app:layout_constraintEnd_toEndOf="parent"

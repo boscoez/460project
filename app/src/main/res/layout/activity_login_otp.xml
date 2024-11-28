@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="20dp"
+    android:padding="19dp"
     android:gravity="center"
     android:orientation="vertical"
     android:weightSum="100"
@@ -14,11 +14,11 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="5dp"
         android:text="Welcome to Academic Alliance"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="@color/primary_dark"/>
+        android:textColor="@color/primary_dark"
+        android:textSize="25sp"
+        android:textStyle="bold" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -27,10 +27,10 @@
         android:gravity="center">
 
         <RelativeLayout
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
             android:layout_margin="10dp"
-            android:background="@drawable/shape_circle"
+            android:background="@drawable/bg_circle"
             android:backgroundTint="@color/light_gray">
 
             <TextView
@@ -39,14 +39,14 @@
                 android:layout_centerInParent="true"
                 android:text="1"
                 android:textColor="@color/white"
-                android:textSize="18sp" />
+                android:textSize="25sp" />
         </RelativeLayout>
 
         <RelativeLayout
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:layout_margin="10dp"
-            android:background="@drawable/shape_circle"
+            android:background="@drawable/bg_circle"
             android:backgroundTint="@color/my_primary">
 
             <TextView
@@ -55,14 +55,14 @@
                 android:layout_centerInParent="true"
                 android:text="2"
                 android:textColor="@color/white"
-                android:textSize="18sp" />
+                android:textSize="25sp" />
         </RelativeLayout>
 
         <RelativeLayout
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
             android:layout_margin="10dp"
-            android:background="@drawable/shape_circle"
+            android:background="@drawable/bg_circle"
             android:backgroundTint="@color/light_gray">
 
             <TextView
@@ -71,7 +71,7 @@
                 android:layout_centerInParent="true"
                 android:text="3"
                 android:textColor="@color/white"
-                android:textSize="18sp" />
+                android:textSize="25sp" />
         </RelativeLayout>
     </LinearLayout>
 
@@ -83,66 +83,67 @@
         app:tint="@color/my_primary" />
 
     <TextView
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="5"
-        android:letterSpacing="0.07"
+        android:layout_marginTop="28dp"
         android:text="Enter CODE sent to your SMS."
-        android:textSize="22sp"
+        android:textColor="@color/my_primary"
+        android:textSize="27sp"
         android:textStyle="bold" />
 
-    <LinearLayout
+    <EditText
+        android:id="@+id/login_otp"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/bg_rectangle"
+        android:hint="Code"
+        android:imeOptions="actionDone"
+        android:importantForAutofill="no"
+        android:inputType="number"
+        android:maxLength="6"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:textAlignment="gravity"
+        android:textColor="@color/my_primary"
+        android:textSize="25sp" />
+
+
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="5"
-        android:gravity="center"
-        android:orientation="horizontal">
+        android:layout_marginTop="20dp"
+        android:animateLayoutChanges="true">
 
-        <EditText
-            android:id="@+id/login_otp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:background="@drawable/shape_rectangle"
-            android:elevation="5dp"
-            android:hint="CODE"
-            android:inputType="number"
-            android:maxLength="6"
-            android:padding="10dp" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:layout_weight="10"
-        android:gravity="center_vertical"
-        android:orientation="vertical">
-
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/login_next_btn"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/shape_rectangle"
-            android:text=" NEXT " />
+            android:layout_height="60dp"
+            android:backgroundTint="@color/my_primary"
+            android:text="NEXT"
+            android:textColor="@color/white"
+            android:textSize="25sp"
+            android:textStyle="bold"
+            app:cornerRadius="8dp" />
 
+        <!-- ProgressBar displayed during sign-up process -->
         <ProgressBar
             android:id="@+id/login_progress_bar"
-            android:layout_width="32dp"
-            android:layout_height="wrap_content"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
             android:layout_gravity="center"
-            android:indeterminateTint="@color/my_primary" />
-
-    </LinearLayout>
+            android:visibility="invisible" />
+    </FrameLayout>
 
     <TextView
         android:id="@+id/resend_otp_textview"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="10"
+        android:layout_marginTop="28dp"
         android:gravity="center"
-        android:text="Resend CODE in 30 seconds." />
+        android:text="Resend CODE in 30 seconds."
+        android:textSize="25sp"
+        android:textStyle="bold" />
 
 
 </LinearLayout>

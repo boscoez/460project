@@ -5,11 +5,10 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="20dp"
+    android:padding="19dp"
     android:gravity="center"
     android:orientation="vertical"
-    android:weightSum="100"
-    tools:context=".Login_page">
+    android:weightSum="100">
     
     
     <TextView
@@ -43,7 +42,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            android:background="@drawable/shape_rectangle"
+            android:background="@drawable/bg_rectangle"
             android:elevation="5dp"
             android:hint="Username"
             android:inputType="text"
@@ -55,7 +54,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            android:background="@drawable/shape_rectangle"
+            android:background="@drawable/bg_rectangle"
             android:elevation="5dp"
             android:hint="Password"
             android:inputType="text"
@@ -73,7 +72,7 @@
                 android:id="@+id/login_code_btn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/shape_rectangle"
+                android:background="@drawable/bg_rectangle"
                 android:text=" SIGN IN " />
 
 

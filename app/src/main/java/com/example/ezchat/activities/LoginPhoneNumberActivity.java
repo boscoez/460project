@@ -2,54 +2,58 @@ package com.example.ezchat.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ProgressBar;
-import androidx.activity.EdgeToEdge;
+
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.ezchat.R;
-import com.hbb20.CountryCodePicker;
+import com.example.ezchat.databinding.ActivityLoginPhoneNumberBinding;
+import com.example.ezchat.utilities.AndroidUtil;
+import com.example.ezchat.utilities.Constants;
+import com.example.ezchat.utilities.PreferenceManager;
 
+/**
+ * LoginPhoneNumberActivity handles the collection of the user's phone number.
+ * It passes the phone number to LoginOtpActivity for OTP-based authentication.
+ */
 public class LoginPhoneNumberActivity extends AppCompatActivity {
-CountryCodePicker countryCodePicker;
-EditText phoneInput;
-Button sendOtpBtn;
-ProgressBar progressBar;
 
-    /**
-     * Initializes the phone number login activity, sets up UI components,
-     * validates the phone number input, and initiates the OTP sending process.
-     *
-     * @param savedInstanceState The saved instance state for the activity.
-     */
+    private ActivityLoginPhoneNumberBinding binding; // View Binding
+    private PreferenceManager preferenceManager; // Shared preferences manager
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_login_phone_number);
 
-        countryCodePicker = findViewById(R.id.login_countrycode);
-        phoneInput = findViewById(R.id.login_mobile_number);
-        sendOtpBtn = findViewById(R.id.send_otp_btn);
-        progressBar = findViewById(R.id.login_progress_bar);
+        // Initialize View Binding
+        binding = ActivityLoginPhoneNumberBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        progressBar.setVisibility(View.GONE);
+        // Initialize Shared Preference Manager
+        preferenceManager = PreferenceManager.getInstance(getApplicationContext());
 
         // Set default country to US
-        countryCodePicker.setDefaultCountryUsingNameCode("US");
-        countryCodePicker.setCountryForNameCode("US"); // Ensure it reflects correctly
+        binding.loginCountrycode.setDefaultCountryUsingNameCode("US");
+        binding.loginCountrycode.setCountryForNameCode("US"); // Ensure it reflects correctly
 
-        countryCodePicker.registerCarrierNumberEditText(phoneInput);
-        sendOtpBtn.setOnClickListener((v) -> {
-            if (!countryCodePicker.isValidFullNumber()) {
-                phoneInput.setError("Invalid Number");
+        // Set up "Send OTP" button click listener
+        binding.sendOtpBtn.setOnClickListener(v -> {
+            // Retrieve the phone number and country code
+            String countryCode = binding.loginCountrycode.getSelectedCountryCodeWithPlus();
+            String mobileNumber = binding.loginMobileNumber.getText().toString().trim();
+
+            if (mobileNumber.isEmpty() || mobileNumber.length() < 10) {
+                AndroidUtil.showToast(getApplicationContext(), "Please enter a valid mobile number");
                 return;
             }
+
+            // Create the full phone number
+            String phoneNumber = countryCode + mobileNumber;
+
+            // Save the phone number in SharedPreferences
+            preferenceManager.putString(Constants.KEY_PHONE_NUMBER, phoneNumber);
+
+            // Navigate to LoginOtpActivity
             Intent intent = new Intent(LoginPhoneNumberActivity.this, LoginOtpActivity.class);
-            intent.putExtra("phone", countryCodePicker.getFullNumberWithPlus());
+            intent.putExtra(Constants.KEY_PHONE_NUMBER, phoneNumber);
             startActivity(intent);
         });
     }

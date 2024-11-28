@@ -1,79 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--activity_search_user-->
-<RelativeLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/my_primary"
     tools:context=".activities.SearchUserActivity">
 
-  <RelativeLayout
-      android:id="@+id/toolbar"
-      android:layout_width="match_parent"
+  <ImageButton
+      android:id="@+id/back_btn"
+      android:layout_width="50dp"
+      android:layout_height="50dp"
+      android:layout_centerVertical="true"
+      android:background="?attr/selectableItemBackgroundBorderless"
+      android:src="@drawable/ic_back"
+      app:tint="@color/white"
+      android:scaleType="fitXY"
+      app:layout_constraintLeft_toLeftOf="parent"
+      app:layout_constraintTop_toTopOf="parent"/>
+
+  <TextView
+      android:layout_width="0dp"
       android:layout_height="wrap_content"
-      android:background="@color/my_primary"
-      android:padding="10dp">
+      android:layout_centerVertical="true"
+      android:layout_toEndOf="@id/back_btn"
+      android:text="@string/search_users"
+      android:textColor="@color/white"
+      android:textSize="25sp"
+      android:textStyle="bold"
+      android:gravity="center"
+      app:layout_constraintBottom_toBottomOf="@+id/back_btn"
+      app:layout_constraintLeft_toRightOf="@id/back_btn"
+      app:layout_constraintRight_toRightOf="parent"
+      app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_marginStart="10dp"
-        android:layout_toEndOf="@id/back_btn"
-        android:text="@string/search_users"
-        android:textColor="@color/white"
-        android:textSize="22sp"
-        android:textStyle="bold"/>
-
-    <ImageButton
-        android:id="@+id/back_btn"
-        android:layout_width="34dp"
-        android:layout_height="34dp"
-        android:layout_centerVertical="true"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:src="@drawable/ic_back"
-        app:tint="@color/white"/>
-
-  </RelativeLayout>
-
-  <RelativeLayout
-    android:id="@+id/search_user_layout"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_below="@id/toolbar"
-    android:layout_margin="10dp">
+  <androidx.recyclerview.widget.RecyclerView
+      android:layout_marginTop="20dp"
+      android:layout_marginBottom="20dp"
+      android:id="@+id/search_user_recycler_view"
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:background="@drawable/bg_content_bottom"
+      app:layout_constraintTop_toBottomOf="@id/back_btn"
+      app:layout_constraintBottom_toTopOf="@id/search_username_input"
+      android:padding="10dp"/>
 
   <EditText
       android:id="@+id/search_username_input"
-      android:layout_width="match_parent"
+      android:layout_width="0dp"
       android:layout_height="wrap_content"
-      android:layout_margin="10dp"
+      android:layout_margin="25dp"
       android:layout_toStartOf="@id/search_user_btn"
-      android:background="@drawable/shape_rectangle"
       android:elevation="4dp"
+      android:textSize="25sp"
       android:hint="@string/username"
-      android:padding="10dp"/>
+      android:background="@drawable/bg_field_input"
+      android:textColorHint="@color/light_gray"
+      android:paddingVertical="10dp"
+      android:paddingHorizontal="20dp"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintLeft_toLeftOf="parent"
+      app:layout_constraintRight_toLeftOf="@id/search_user_btn"/>
+
 
   <ImageButton
       android:id="@+id/search_user_btn"
-      android:layout_width="40dp"
-      android:layout_height="40dp"
-      android:layout_alignParentEnd="true"
-      android:layout_centerVertical="true"
-      android:layout_margin="10dp"
+      android:layout_width="50dp"
+      android:layout_height="50dp"
       android:background="?attr/selectableItemBackgroundBorderless"
-      android:padding="4dp"
+      android:scaleType="fitXY"
       android:src="@drawable/ic_search"
-      app:tint="@color/my_primary"/>
+      app:tint="@color/white"
+      app:layout_constraintTop_toTopOf="@id/search_username_input"
+      app:layout_constraintRight_toRightOf="parent"/>
 
-  </RelativeLayout>
-
-  <androidx.recyclerview.widget.RecyclerView
-      android:id="@+id/search_user_recycler_view"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_below="@id/search_user_layout"
-      android:padding="10dp"/>
-
-  </RelativeLayout>
+  </androidx.constraintlayout.widget.ConstraintLayout>

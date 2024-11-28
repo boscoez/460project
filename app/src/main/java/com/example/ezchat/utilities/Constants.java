@@ -19,6 +19,7 @@ public class Constants {
     public static final String KEY_PHONE_NUMBER = "phoneNumber";
     public static final String KEY_USERNAME = "username";
     public static final String KEY_PROFILE_PIC_BITMAP = "profilePicBitmap"; // Bitmap image
+    public static final String KEY_LAST_MESSAGE_SENDER_ID = "lastMessageSenderId";
     public static final String KEY_FCM_TOKEN = "fcmToken";
     public static final String KEY_CREATED_TIMESTAMP = "createdTimestamp";
     public static final String KEY_PASSWORD = "password"; // Key for password field

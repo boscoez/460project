@@ -4,18 +4,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.ezchat.NewChatActivity;
-import com.example.ezchat.R;
+import com.example.ezchat.activities.NewChatActivity;
 import com.example.ezchat.databinding.SearchUserRecyclerRowBinding;
 import com.example.ezchat.models.UserModel;
 import com.example.ezchat.utilities.AndroidUtil;
-import com.example.ezchat.utilities.Constants;
 import com.example.ezchat.utilities.FirebaseUtil;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;

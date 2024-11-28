@@ -1,4 +1,4 @@
-package com.example.ezchat;
+package com.example.ezchat.utilities;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;

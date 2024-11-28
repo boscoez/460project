@@ -12,7 +12,7 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_marginEnd="10dp"
-        android:background="@drawable/shape_circle"
+        android:background="@drawable/bg_circle"
         android:scaleType="centerCrop"
         app:riv_border_color="@color/black"
         app:riv_border_width="2dp"

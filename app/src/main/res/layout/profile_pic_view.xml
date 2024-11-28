@@ -7,7 +7,7 @@
     <ImageView
         android:layout_width="52dp"
         android:layout_height="52dp"
-        android:background="@drawable/shape_circle"
+        android:background="@drawable/bg_circle"
         android:src="@drawable/ic_person"
         android:padding="4dp"
         app:tint="@color/light_gray"
