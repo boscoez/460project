@@ -80,6 +80,7 @@ public class NewChatRoomActivity extends AppCompatActivity {
                             userList.add(user);
                         }
                     }
+                    System.out.println(userList);
                     userAdapter.notifyDataSetChanged();
                 })
                 .addOnFailureListener(e -> Toast.makeText(this, "Failed to fetch users", Toast.LENGTH_SHORT).show());
@@ -152,7 +153,6 @@ public class NewChatRoomActivity extends AppCompatActivity {
      * Adapter for displaying users in a RecyclerView for chat room creation.
      */
     public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
-
         private final List<UserModel> userList;
         private final UserSelectionListener selectionListener;
 

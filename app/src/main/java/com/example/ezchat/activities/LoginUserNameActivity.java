@@ -136,6 +136,8 @@ public class LoginUserNameActivity extends AppCompatActivity {
                     binding.loginUsername.setEnabled(false);
                     binding.loginPassword.setVisibility(View.GONE);
                     binding.loginConfirmedPassword.setVisibility(View.GONE);
+                    binding.textSignIn.setVisibility(View.GONE);
+                    binding.createAccountTitle.setVisibility(View.GONE);
                     binding.loginCodeBtn.setText("Sign In");
                 }
             } else {
