@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.ezchat.activities.NewChatActivity;
+import com.example.ezchat.activities.NewChatRoomActivity;
 import com.example.ezchat.databinding.SearchUserRecyclerRowBinding;
 import com.example.ezchat.models.UserModel;
 import com.example.ezchat.utilities.AndroidUtil;
@@ -58,7 +58,7 @@ public class SearchUserRecyclerAdapter extends FirestoreRecyclerAdapter<UserMode
 
         // Set the click listener to open the new chat activity when a user is clicked
         holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(context, NewChatActivity.class);
+            Intent intent = new Intent(context, NewChatRoomActivity.class);
             AndroidUtil.passUserModelAsIntent(intent, model);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);

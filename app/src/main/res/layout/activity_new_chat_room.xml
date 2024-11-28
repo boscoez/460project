@@ -9,7 +9,7 @@ This is where you select the user(s) you want to chat with:
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/my_primary"
-    tools:context=".activities.NewChatActivity">
+    tools:context=".activities.NewChatRoomActivity">
 
     <!-- Title for the New Chat Screen -->
     <TextView

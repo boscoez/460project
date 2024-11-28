@@ -16,7 +16,7 @@
             android:name=".activities.ChatRoomActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.NewChatActivity"
+            android:name=".activities.NewChatRoomActivity"
             android:exported="false" /> <!-- Activity Declarations -->
         <activity
             android:name=".activities.SearchUserActivity"

@@ -12,7 +12,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.ezchat.activities.NewChatActivity;
+import com.example.ezchat.activities.NewChatRoomActivity;
 import com.example.ezchat.databinding.FragmentChatRoomsBinding;
 import com.example.ezchat.databinding.FragmentChatRoomsItemBinding;
 import com.example.ezchat.models.ChatroomModel;
@@ -73,7 +73,7 @@ public class ChatRoomsFragment extends Fragment {
 
         // Set up Floating Action Button (FAB) to start a new chat
         binding.fabNewChat.setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), NewChatActivity.class);
+            Intent intent = new Intent(getActivity(), NewChatRoomActivity.class);
             startActivity(intent);
         });
 
