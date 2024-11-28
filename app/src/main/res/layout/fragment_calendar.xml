@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginTop="56sp"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/calendar_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:gravity="center"
+        android:text="Task Calendar"
+        android:textColor="@color/my_primary"
+        android:textSize="40sp"
+        android:textStyle="bold" />
+
+    <!-- Enlarged CalendarView -->
+    <CalendarView
+        android:id="@+id/calendar_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/CustomCalendarStyle" />
+
+    <!-- Header for Tasks -->
+    <TextView
+        android:id="@+id/task_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="Tasks for Selected Date"
+        android:textColor="@color/black"
+        android:gravity="center"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <!-- RecyclerView for Task List -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/task_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scrollbars="vertical" />
+
+    <!-- Add Task Button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/add_task_btn"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_gravity="end"
+        android:hapticFeedbackEnabled="true"
+        android:padding="10dp"
+        android:src="@drawable/icon_add_task"
+        app:maxImageSize="60dp" />
+</LinearLayout>
