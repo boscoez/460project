@@ -1,108 +1,175 @@
 package com.example.ezchat.activities;
 
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.widget.EditText;
-import android.widget.ImageButton;
+import android.view.LayoutInflater;
+import android.view.ViewGroup;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ezchat.R;
-import com.example.ezchat.adapters.SearchUserRecyclerAdapter;
+import com.example.ezchat.databinding.ActivityNewChatMemberBinding;
+import com.example.ezchat.databinding.ActivitySearchUserBinding;
 import com.example.ezchat.models.UserModel;
-import com.example.ezchat.utilities.Constants;
-import com.example.ezchat.utilities.FirebaseUtil;
-import com.firebase.ui.firestore.FirestoreRecyclerOptions;
-import com.google.firebase.firestore.Query;
+import com.example.ezchat.utilities.AndroidUtil;
+import com.example.ezchat.utilities.Utilities;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Activity for searching users by their username. Displays a search bar and a RecyclerView
- * for showing matching user profiles fetched from Firebase Firestore.
+ * Activity for searching users by username or phone number.
  */
 public class SearchUserActivity extends AppCompatActivity {
-    // UI Components
-    EditText searchInput; // Input field for entering the username to search
-    ImageButton searchButton; // Button to trigger the search
-    ImageButton backButton; // Button to navigate back to the previous activity
-    RecyclerView recyclerView; // RecyclerView to display the search results
-    SearchUserRecyclerAdapter adapter; // Adapter for managing search results
-    /**
-     * Initializes the search user activity, sets up UI components, and adds listeners for
-     * the back and search buttons.
-     * @param savedInstanceState The saved instance state for the activity.
-     */
+
+    private ActivitySearchUserBinding binding; // View binding
+    private FirebaseFirestore db; // Firestore instance
+    private SearchUserRecyclerAdapter adapter; // Adapter for RecyclerView
+    private final List<UserModel> userList = new ArrayList<>(); // List to hold users
+    private String currentUserId; // ID of the currently logged-in user
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_search_user);
-        // Initialize UI components
-        searchInput = findViewById(R.id.search_username_input);
-        searchButton = findViewById(R.id.search_user_btn);
-        backButton = findViewById(R.id.back_btn);
-        recyclerView = findViewById(R.id.search_user_recycler_view);
-        // Automatically focus on the search input field
-        searchInput.requestFocus();
-        // Listener for the back button to navigate back
-        backButton.setOnClickListener(v -> onBackPressed());
-        // Listener for the search button to validate input and trigger search
-        searchButton.setOnClickListener(v -> {
-            String searchTerm = searchInput.getText().toString();
-            // Validate search term
-            if (searchTerm.isEmpty() || searchTerm.length() < 3) {
-                searchInput.setError("Invalid Username"); // Show error if invalid
-                return;
+
+        // Initialize View Binding
+        binding = ActivitySearchUserBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        // Initialize Firestore
+        db = FirebaseFirestore.getInstance();
+
+        // Retrieve the current user's ID
+        currentUserId = getCurrentUserId();
+
+        // Set up RecyclerView
+        binding.searchUserRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new SearchUserRecyclerAdapter(userList);
+        binding.searchUserRecyclerView.setAdapter(adapter);
+
+        // Set up the search button
+        binding.searchUserBtn.setOnClickListener(v -> {
+            String query = binding.searchUsernameInput.getText().toString().trim();
+            if (!query.isEmpty()) {
+                searchUsers(query);
+            } else {
+                Toast.makeText(this, "Enter a username or phone number to search.", Toast.LENGTH_SHORT).show();
             }
-            // Set up the RecyclerView for displaying search results
-            setupSearchRecyclerView(searchTerm);
         });
+
+        // Back button listener
+        binding.backBtn.setOnClickListener(v -> onBackPressed());
     }
+
     /**
-     * Configures the RecyclerView to display search results for users whose usernames
-     * match the search term.
-     * @param searchTerm The search term to filter usernames.
+     * Searches for users in Firestore based on username or phone number.
+     *
+     * @param query The search query entered by the user.
      */
-    void setupSearchRecyclerView(String searchTerm) {
-        // Query Firestore for usernames matching the search term
-        Query query = FirebaseUtil.allUserCollectionReference()
-                .whereGreaterThanOrEqualTo(Constants.KEY_USERNAME, searchTerm);
-        // Set up FirestoreRecyclerOptions with the query
-        FirestoreRecyclerOptions<UserModel> options = new FirestoreRecyclerOptions.Builder<UserModel>()
-                .setQuery(query, UserModel.class)
-                .build();
-        // Initialize the adapter with options and bind it to the RecyclerView
-        adapter = new SearchUserRecyclerAdapter(options, getApplicationContext());
-        recyclerView.setLayoutManager(new LinearLayoutManager(this)); // Set layout manager
-        recyclerView.setAdapter(adapter); // Attach adapter to RecyclerView
-        adapter.startListening(); // Start listening for Firestore updates
+    private void searchUsers(String query) {
+        String lowerQuery = query.toLowerCase().replaceAll("\\s", ""); // Normalize query
+
+        db.collection(UserModel.FIELD_COLLECTION_NAME)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    userList.clear();
+                    for (DocumentSnapshot document : querySnapshot.getDocuments()) {
+                        UserModel user = document.toObject(UserModel.class);
+
+                        if (user != null &&
+                                (user.username.toLowerCase().contains(lowerQuery) ||
+                                        user.phone.replaceAll("\\s", "").toLowerCase().contains(lowerQuery)) &&
+                                !user.userId.equals(currentUserId)) {
+                            userList.add(user);
+                        }
+                    }
+
+                    adapter.notifyDataSetChanged();
+
+                    if (userList.isEmpty()) {
+                        Toast.makeText(this, "No matching users found.", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> Toast.makeText(this, "Error fetching users: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
+
     /**
-     * Starts the adapter listening when the activity is started.
+     * Retrieves the current user's ID.
+     *
+     * @return The ID of the current user.
      */
-    @Override
-    protected void onStart() {
-        super.onStart();
-        if (adapter != null) {
-            adapter.startListening();
+    private String getCurrentUserId() {
+        // Replace with your preferred method of retrieving the user's ID
+        return getSharedPreferences("APP_PREFS", MODE_PRIVATE).getString(UserModel.FIELD_USER_ID, "");
+    }
+
+    /**
+     * Adapter for displaying search results in a RecyclerView.
+     */
+    public static class SearchUserRecyclerAdapter extends RecyclerView.Adapter<SearchUserRecyclerAdapter.UserViewHolder> {
+
+        private final List<UserModel> userList;
+
+        public SearchUserRecyclerAdapter(List<UserModel> userList) {
+            this.userList = userList;
         }
-    }
-    /**
-     * Stops the adapter listening when the activity is stopped.
-     */
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (adapter != null) {
-            adapter.stopListening();
+
+        @NonNull
+        @Override
+        public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            ActivityNewChatMemberBinding binding = ActivityNewChatMemberBinding.inflate(
+                    LayoutInflater.from(parent.getContext()), parent, false);
+            return new UserViewHolder(binding);
         }
-    }
-    /**
-     * Resumes the adapter listening when the activity is resumed.
-     */
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (adapter != null) {
-            adapter.startListening();
+
+        @Override
+        public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
+            UserModel user = userList.get(position);
+            holder.bind(user);
+        }
+
+        @Override
+        public int getItemCount() {
+            return userList.size();
+        }
+
+        public static class UserViewHolder extends RecyclerView.ViewHolder {
+
+            private final ActivityNewChatMemberBinding binding;
+
+            public UserViewHolder(ActivityNewChatMemberBinding binding) {
+                super(binding.getRoot());
+                this.binding = binding;
+            }
+
+            public void bind(UserModel user) {
+                binding.userNameText.setText(user.username);
+                binding.userPhoneText.setText(user.phone);
+
+                // Load profile picture if available, otherwise set a placeholder
+                if (user.profilePic != null && !user.profilePic.isEmpty()) {
+                    Bitmap bitmap = Utilities.getBitmapFromEncodedString(user.profilePic);
+                    binding.userProfileImage.setImageBitmap(bitmap);
+                } else {
+                    binding.userProfileImage.setImageResource(R.drawable.ic_person); // Placeholder
+                }
+
+                // Set item click listener
+                itemView.setOnClickListener(v -> {
+                    Context context = itemView.getContext();
+                    Intent intent = new Intent(context, NewChatRoomActivity.class);
+                    intent.putExtra(UserModel.FIELD_USER_ID, user.userId);
+                    context.startActivity(intent);
+                });
+            }
         }
     }
 }

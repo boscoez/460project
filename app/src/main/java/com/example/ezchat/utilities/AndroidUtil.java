@@ -35,10 +35,10 @@ public class AndroidUtil {
      */
     public static void passUserModelAsIntent(Intent intent, UserModel model) {
         // Attach user details to the intent.
-        intent.putExtra("username", model.getUsername());
-        intent.putExtra("phone", model.getPhone());
-        intent.putExtra("userId", model.getUserId());
-        intent.putExtra("fcmToken", model.getFcmToken());
+        intent.putExtra(UserModel.FIELD_USERNAME, model.username);
+        intent.putExtra(UserModel.FIELD_PHONE, model.phone);
+        intent.putExtra(UserModel.FIELD_USER_ID, model.userId);
+        intent.putExtra(UserModel.FIELD_FCM_TOKEN, model.fcmToken);
     }
     /**
      * Extracts user information from an Intent and converts it to a UserModel.
@@ -48,10 +48,10 @@ public class AndroidUtil {
     public static UserModel getUserModelFromIntent(Intent intent) {
         UserModel userModel = new UserModel();
         // Extract user details from the intent.
-        userModel.setUsername(intent.getStringExtra("username"));
-        userModel.setPhone(intent.getStringExtra("phone"));
-        userModel.setUserId(intent.getStringExtra("userId"));
-        userModel.setFcmToken(intent.getStringExtra("fcmToken"));
+        userModel.username = intent.getStringExtra(UserModel.FIELD_USERNAME);
+        userModel.phone = intent.getStringExtra(UserModel.FIELD_PHONE);
+        userModel.userId = intent.getStringExtra(UserModel.FIELD_USER_ID);
+        userModel.fcmToken = intent.getStringExtra(UserModel.FIELD_FCM_TOKEN);
         return userModel;
     }
     /**

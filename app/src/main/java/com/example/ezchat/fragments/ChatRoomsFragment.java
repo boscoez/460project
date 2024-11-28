@@ -18,7 +18,7 @@ import com.example.ezchat.databinding.FragmentChatRoomsItemBinding;
 import com.example.ezchat.models.ChatroomModel;
 import com.example.ezchat.models.UserModel;
 import com.example.ezchat.utilities.AndroidUtil;
-import com.example.ezchat.utilities.Constants;
+import com.example.ezchat.utilities.PreferenceManager;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -90,9 +90,9 @@ public class ChatRoomsFragment extends Fragment {
             return;
         }
 
-        db.collection(Constants.KEY_COLLECTION_CHAT)
-                .whereArrayContains(Constants.KEY_USER_IDS, currentUserId)
-                .orderBy(Constants.KEY_LAST_MESSAGE_TIMESTAMP, Query.Direction.DESCENDING)
+        db.collection(ChatroomModel.FIELD_COLLECTION_NAME)
+                .whereArrayContains(ChatroomModel.FIELD_LAST_MESSAGE_TIMESTAMP, currentUserId)
+                .orderBy(ChatroomModel.FIELD_LAST_MESSAGE_TIMESTAMP, Query.Direction.DESCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     chatRoomList.clear();
@@ -133,8 +133,8 @@ public class ChatRoomsFragment extends Fragment {
     private String getCurrentUserIdFromPreferences() {
         Context context = getContext();
         if (context != null) {
-            return context.getSharedPreferences(Constants.KEY_PREFERENCE_NAME, Context.MODE_PRIVATE)
-                    .getString(Constants.KEY_USER_ID, null);
+            return context.getSharedPreferences(PreferenceManager.KEY_PREFERENCE_NAME, Context.MODE_PRIVATE)
+                    .getString(UserModel.FIELD_USER_ID, null);
         }
         return null;
     }
@@ -212,7 +212,7 @@ public class ChatRoomsFragment extends Fragment {
              */
             public void bind(ChatroomModel chatRoom) {
                 // Identify the other user in the chat room
-                String otherUserId = chatRoom.getUserIds()
+                String otherUserId = chatRoom.userIds
                         .stream()
                         .filter(id -> !id.equals(currentUserId))
                         .findFirst()
@@ -220,7 +220,7 @@ public class ChatRoomsFragment extends Fragment {
 
                 if (otherUserId != null) {
                     // Fetch the other user's details from Firestore
-                    db.collection(Constants.KEY_COLLECTION_USERS)
+                    db.collection(UserModel.FIELD_COLLECTION_NAME)
                             .document(otherUserId)
                             .get()
                             .addOnSuccessListener(documentSnapshot -> {
@@ -228,11 +228,11 @@ public class ChatRoomsFragment extends Fragment {
                                     UserModel user = documentSnapshot.toObject(UserModel.class);
                                     if (user != null) {
                                         // Populate UI with the other user's data
-                                        binding.textViewUserName.setText(user.getUsername());
-                                        binding.textViewPhone.setText(user.getPhone());
+                                        binding.textViewUserName.setText(user.username);
+                                        binding.textViewPhone.setText(user.phone);
                                         AndroidUtil.setProfilePicFromBase64(
                                                 binding.imageViewProfilePic.getContext(),
-                                                user.getProfilePic(),
+                                                user.profilePic,
                                                 binding.imageViewProfilePic
                                         );
                                     }
@@ -240,8 +240,8 @@ public class ChatRoomsFragment extends Fragment {
                             });
 
                     // Set the last message and timestamp
-                    binding.textViewLastMessage.setText(chatRoom.getLastMessage());
-                    binding.textViewTimestamp.setText(chatRoom.getLastMessageTimestamp().toDate().toString());
+                    binding.textViewLastMessage.setText(chatRoom.lastMessage);
+                    binding.textViewTimestamp.setText(chatRoom.lastMessageTimestamp.toDate().toString());
 
                     // Navigate to the chat room on item click
                     itemView.setOnClickListener(v -> {

@@ -6,8 +6,8 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ezchat.databinding.ActivityLoginPhoneNumberBinding;
+import com.example.ezchat.models.UserModel;
 import com.example.ezchat.utilities.AndroidUtil;
-import com.example.ezchat.utilities.Constants;
 import com.example.ezchat.utilities.PreferenceManager;
 
 /**
@@ -49,11 +49,11 @@ public class LoginPhoneNumberActivity extends AppCompatActivity {
             String phoneNumber = countryCode + mobileNumber;
 
             // Save the phone number in SharedPreferences
-            preferenceManager.putString(Constants.KEY_PHONE_NUMBER, phoneNumber);
+            preferenceManager.putString(UserModel.FIELD_PHONE, phoneNumber);
 
             // Navigate to LoginOtpActivity
             Intent intent = new Intent(LoginPhoneNumberActivity.this, LoginOtpActivity.class);
-            intent.putExtra(Constants.KEY_PHONE_NUMBER, phoneNumber);
+            intent.putExtra(UserModel.FIELD_PHONE, phoneNumber);
             startActivity(intent);
         });
     }

@@ -1,8 +1,7 @@
-
 package com.example.ezchat.models;
 
 import com.google.firebase.Timestamp;
-import com.google.firebase.Timestamp;
+
 import java.util.List;
 
 /**
@@ -11,13 +10,25 @@ import java.util.List;
  * the user is part of.
  */
 public class UserModel {
-    private String phone;              // User's phone number
-    private String username;           // User's username
-    private Timestamp createdTimestamp; // Timestamp indicating when the user account was created
-    private String userId;             // Unique identifier for the user
-    private String fcmToken;           // Firebase Cloud Messaging token for notifications
-    private String profilePic;         // Base64-encoded profile picture (bitmap format)
-    private List<String> chatRooms;    // List of chat room IDs the user is involved in
+
+    // Firestore collection and field constants
+    public static final String FIELD_COLLECTION_NAME = "users";
+    public static final String FIELD_PHONE = "phone";
+    public static final String FIELD_USERNAME = "username";
+    public static final String FIELD_CREATED_TIMESTAMP = "createdTimestamp";
+    public static final String FIELD_USER_ID = "userId";
+    public static final String FIELD_FCM_TOKEN = "fcmToken";
+    public static final String FIELD_PROFILE_PIC = "profilePic";
+    public static final String FIELD_CHAT_ROOMS = "chatRooms";
+
+    // Public fields for direct Firestore access
+    public String phone;              // User's phone number
+    public String username;           // User's username
+    public Timestamp createdTimestamp; // Timestamp indicating when the user account was created
+    public String userId;             // Unique identifier for the user
+    public String fcmToken;           // Firebase Cloud Messaging token for notifications
+    public String profilePic;         // Base64-encoded profile picture (bitmap format)
+    public List<String> chatRooms;    // List of chat room IDs the user is involved in
 
     /**
      * Default constructor for UserModel.
@@ -28,6 +39,7 @@ public class UserModel {
 
     /**
      * Parameterized constructor to initialize the user model with essential fields.
+     *
      * @param phone            The user's phone number.
      * @param username         The user's username.
      * @param createdTimestamp The timestamp indicating when the user account was created.
@@ -46,115 +58,45 @@ public class UserModel {
         this.chatRooms = chatRooms;
     }
 
+    // Utility Functions
+
     /**
-     * Gets the user's phone number.
-     * @return The phone number.
+     * Validates if the required fields for a user are present.
+     *
+     * @return True if all required fields are non-null, false otherwise.
      */
-    public String getPhone() {
-        return phone;
+    public boolean isValid() {
+        return phone != null && !phone.isEmpty() &&
+                username != null && !username.isEmpty() &&
+                userId != null && !userId.isEmpty();
     }
 
     /**
-     * Sets the user's phone number.
-     * @param phone The phone number to set.
+     * Updates the FCM token for the user.
+     *
+     * @param fcmToken The new FCM token.
      */
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    /**
-     * Gets the user's username.
-     * @return The username.
-     */
-    public String getUsername() {
-        return username;
-    }
-
-    /**
-     * Sets the user's username.
-     * @param username The username to set.
-     */
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    /**
-     * Gets the timestamp indicating when the user account was created.
-     * @return The creation timestamp.
-     */
-    public Timestamp getCreatedTimestamp() {
-        return createdTimestamp;
-    }
-
-    /**
-     * Sets the timestamp indicating when the user account was created.
-     * @param createdTimestamp The creation timestamp to set.
-     */
-    public void setCreatedTimestamp(Timestamp createdTimestamp) {
-        this.createdTimestamp = createdTimestamp;
-    }
-
-    /**
-     * Gets the user's unique identifier.
-     * @return The user ID.
-     */
-    public String getUserId() {
-        return userId;
-    }
-
-    /**
-     * Sets the user's unique identifier.
-     * @param userId The user ID to set.
-     */
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    /**
-     * Gets the Firebase Cloud Messaging (FCM) token.
-     * @return The FCM token.
-     */
-    public String getFcmToken() {
-        return fcmToken;
-    }
-
-    /**
-     * Sets the Firebase Cloud Messaging (FCM) token.
-     * @param fcmToken The FCM token to set.
-     */
-    public void setFcmToken(String fcmToken) {
+    public void updateFcmToken(String fcmToken) {
         this.fcmToken = fcmToken;
     }
 
     /**
-     * Gets the Base64-encoded profile picture (bitmap format).
-     * @return The Base64-encoded profile picture.
+     * Adds a chat room ID to the user's chat rooms list.
+     *
+     * @param chatRoomId The chat room ID to add.
      */
-    public String getProfilePic() {
-        return profilePic;
+    public void addChatRoom(String chatRoomId) {
+        if (!chatRooms.contains(chatRoomId)) {
+            chatRooms.add(chatRoomId);
+        }
     }
 
     /**
-     * Sets the Base64-encoded profile picture (bitmap format).
-     * @param profilePic The profile picture to set.
+     * Removes a chat room ID from the user's chat rooms list.
+     *
+     * @param chatRoomId The chat room ID to remove.
      */
-    public void setProfilePic(String profilePic) {
-        this.profilePic = profilePic;
-    }
-
-    /**
-     * Gets the list of chat room IDs the user is part of.
-     * @return The list of chat room IDs.
-     */
-    public List<String> getChatRooms() {
-        return chatRooms;
-    }
-
-    /**
-     * Sets the list of chat room IDs the user is part of.
-     * @param chatRooms The chat rooms to set.
-     */
-    public void setChatRooms(List<String> chatRooms) {
-        this.chatRooms = chatRooms;
+    public void removeChatRoom(String chatRoomId) {
+        chatRooms.remove(chatRoomId);
     }
 }

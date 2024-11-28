@@ -2,6 +2,7 @@ package com.example.ezchat.utilities;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Base64;
 
 import java.io.ByteArrayOutputStream;
 
@@ -15,6 +16,16 @@ public class Utilities {
      */
     public static boolean isValidEmail(String email) {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
+    }
+
+    /**
+     * Decodes a Base64-encoded string into a Bitmap image.
+     * @param encodedImage The Base64-encoded image string.
+     * @return A Bitmap representation of the decoded image.
+     */
+    public static Bitmap getBitmapFromEncodedString(String encodedImage) {
+        byte[] bytes = Base64.decode(encodedImage, Base64.DEFAULT);
+        return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
     }
 
     /**

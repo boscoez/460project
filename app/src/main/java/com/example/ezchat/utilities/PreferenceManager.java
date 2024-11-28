@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
  *
  */
 public class PreferenceManager {
+    public static final String KEY_PREFERENCE_NAME = "chatAppPreferences";
 
     private static PreferenceManager instance;
     private final SharedPreferences sharedPreferences;
@@ -18,7 +19,7 @@ public class PreferenceManager {
      * @param context The context used to access SharedPreferences.
      */
     private PreferenceManager(Context context) {
-        sharedPreferences = context.getSharedPreferences(Constants.KEY_PREFERENCE_NAME, Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(KEY_PREFERENCE_NAME, Context.MODE_PRIVATE);
     }
 
     /**

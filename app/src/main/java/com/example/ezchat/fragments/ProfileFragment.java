@@ -15,10 +15,11 @@ import androidx.fragment.app.Fragment;
 
 import com.example.ezchat.activities.SplashActivity;
 import com.example.ezchat.databinding.FragmentProfileBinding;
+import com.example.ezchat.models.ChatroomModel;
 import com.example.ezchat.models.UserModel;
 import com.example.ezchat.utilities.AndroidUtil;
-import com.example.ezchat.utilities.Constants;
 import com.example.ezchat.utilities.FirebaseUtil;
+import com.example.ezchat.utilities.PreferenceManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -46,7 +47,7 @@ public class ProfileFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         // Initialize SharedPreferences
-        preferences = requireContext().getSharedPreferences(Constants.KEY_PREFERENCE_NAME, Context.MODE_PRIVATE);
+        preferences = requireContext().getSharedPreferences(PreferenceManager.KEY_PREFERENCE_NAME, Context.MODE_PRIVATE);
     }
 
     /**
@@ -86,15 +87,15 @@ public class ProfileFragment extends Fragment {
         }
 
         setInProgress(true); // Show progress bar
-        currentUserModel.setUsername(newUsername);
+        currentUserModel.username = newUsername;
 
         String userId = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
         FirebaseFirestore.getInstance()
-                .collection(Constants.KEY_COLLECTION_USERS)
+                .collection(UserModel.FIELD_COLLECTION_NAME)
                 .document(userId)
                 .update(
-                        Constants.KEY_USERNAME, newUsername,
-                        Constants.KEY_PROFILE_PIC_BITMAP, currentUserModel.getProfilePic()
+                        UserModel.FIELD_USERNAME, newUsername,
+                        UserModel.FIELD_PROFILE_PIC, currentUserModel.profilePic
                 )
                 .addOnSuccessListener(aVoid -> {
                     setInProgress(false); // Hide progress bar
@@ -135,9 +136,9 @@ public class ProfileFragment extends Fragment {
                 currentUserModel = task.getResult().toObject(UserModel.class);
                 if (currentUserModel != null) {
                     // Populate UI fields
-                    binding.profileUsername.setText(currentUserModel.getUsername());
-                    binding.profilePhone.setText(currentUserModel.getPhone());
-                    AndroidUtil.setProfilePicFromBase64(getContext(), currentUserModel.getProfilePic(), binding.profileImageView);
+                    binding.profileUsername.setText(currentUserModel.username);
+                    binding.profilePhone.setText(currentUserModel.phone);
+                    AndroidUtil.setProfilePicFromBase64(getContext(), currentUserModel.profilePic, binding.profileImageView);
                 }
             } else {
                 Toast.makeText(getContext(), "Failed to fetch user data", Toast.LENGTH_SHORT).show();

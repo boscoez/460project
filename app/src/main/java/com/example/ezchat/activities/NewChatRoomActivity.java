@@ -15,15 +15,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.ezchat.R;
 import com.example.ezchat.databinding.ActivityNewChatMemberBinding;
 import com.example.ezchat.databinding.ActivityNewChatRoomBinding;
+import com.example.ezchat.models.ChatroomModel;
 import com.example.ezchat.models.UserModel;
-import com.example.ezchat.utilities.Constants;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Activity for creating a new chat room by selecting users from a list.
@@ -56,7 +54,7 @@ public class NewChatRoomActivity extends AppCompatActivity {
         // Set up the Start Chat button
         binding.startChatButton.setOnClickListener(v -> {
             if (!selectedUsers.isEmpty()) {
-                createChatRoom(selectedUsers);
+                navigateToChatRoom();
             } else {
                 Toast.makeText(this, "Please select at least one user", Toast.LENGTH_SHORT).show();
             }
@@ -70,50 +68,39 @@ public class NewChatRoomActivity extends AppCompatActivity {
      * Fetches all users from Firestore and populates the RecyclerView.
      */
     private void fetchUsers() {
-        db.collection(Constants.KEY_COLLECTION_USERS)
+        db.collection(UserModel.FIELD_COLLECTION_NAME)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     userList.clear();
+                    if (queryDocumentSnapshots.isEmpty()) {
+                        Toast.makeText(this, "No users found", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     for (DocumentSnapshot document : queryDocumentSnapshots) {
                         UserModel user = document.toObject(UserModel.class);
-                        if (user != null && !user.getPhone().equals(getCurrentUserId())) { // Exclude current user
+                        if (user != null && !user.phone.equals(getCurrentUserId())) { // Exclude current user
                             userList.add(user);
                         }
                     }
-                    System.out.println(userList);
+                    if (userList.isEmpty()) {
+                        Toast.makeText(this, "No other users available", Toast.LENGTH_SHORT).show();
+                    }
                     userAdapter.notifyDataSetChanged();
                 })
-                .addOnFailureListener(e -> Toast.makeText(this, "Failed to fetch users", Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Failed to fetch users", Toast.LENGTH_SHORT).show();
+                });
     }
 
     /**
-     * Creates a new chat room with the selected users and adds it to Firestore.
-     *
-     * @param selectedUsers List of selected user IDs.
+     * Navigates to the chat room after selecting users.
      */
-    private void createChatRoom(List<String> selectedUsers) {
-        String chatRoomId = db.collection(Constants.KEY_COLLECTION_CHAT).document().getId(); // Generate unique ID
+    private void navigateToChatRoom() {
         String creatorId = getCurrentUserId(); // Current user ID from preferences
-
-        // Create chat room data
-        Map<String, Object> chatRoomData = new HashMap<>();
-        chatRoomData.put(Constants.KEY_CHATROOM_ID, chatRoomId);
-        chatRoomData.put(Constants.KEY_USER_IDS, selectedUsers);
-        chatRoomData.put(Constants.KEY_CREATOR_ID, creatorId);
-        chatRoomData.put(Constants.KEY_LAST_MESSAGE, ""); // Initially empty
-        chatRoomData.put(Constants.KEY_LAST_MESSAGE_TIMESTAMP, System.currentTimeMillis());
-        chatRoomData.put(Constants.KEY_LAST_MESSAGE_SENDER_ID, null);
-
-        // Add chat room to Firestore
-        db.collection(Constants.KEY_COLLECTION_CHAT)
-                .document(chatRoomId)
-                .set(chatRoomData)
-                .addOnSuccessListener(aVoid -> {
-                    Intent intent = new Intent(this, ChatRoomActivity.class);
-                    intent.putExtra(Constants.KEY_CHATROOM_ID, chatRoomId);
-                    startActivity(intent);
-                })
-                .addOnFailureListener(e -> Toast.makeText(this, "Failed to create chat room", Toast.LENGTH_SHORT).show());
+        Intent intent = new Intent(this, ChatRoomActivity.class);
+        intent.putExtra(ChatroomModel.FIELD_CREATOR_ID, creatorId);
+        intent.putStringArrayListExtra(ChatroomModel.FIELD_USER_IDS, new ArrayList<>(selectedUsers));
+        startActivity(intent);
     }
 
     /**
@@ -122,8 +109,8 @@ public class NewChatRoomActivity extends AppCompatActivity {
      * @return The current user's ID, or an empty string if not found.
      */
     private String getCurrentUserId() {
-        return getSharedPreferences(Constants.KEY_PREFERENCE_NAME, Context.MODE_PRIVATE)
-                .getString(Constants.KEY_USER_ID, "");
+        return getSharedPreferences(UserModel.FIELD_COLLECTION_NAME, Context.MODE_PRIVATE)
+                .getString(UserModel.FIELD_USER_ID, "");
     }
 
     /**
@@ -153,6 +140,7 @@ public class NewChatRoomActivity extends AppCompatActivity {
      * Adapter for displaying users in a RecyclerView for chat room creation.
      */
     public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
+
         private final List<UserModel> userList;
         private final UserSelectionListener selectionListener;
 
@@ -208,13 +196,18 @@ public class NewChatRoomActivity extends AppCompatActivity {
              * @param user The user to display.
              */
             public void bind(UserModel user) {
-                binding.userNameText.setText(user.getUsername());
-                binding.userPhoneText.setText(user.getPhone());
-                binding.userProfileImage.setImageResource(R.drawable.ic_person); // Placeholder image
+                binding.userNameText.setText(user.username);
+                binding.userPhoneText.setText(user.phone);
+
+                if (user.profilePic != null && !user.profilePic.isEmpty()) {
+                    // Load the profile picture using a library like Glide or Picasso
+                } else {
+                    binding.userProfileImage.setImageResource(R.drawable.ic_person); // Placeholder image
+                }
 
                 // Handle checkbox state changes
                 binding.userCheckBox.setOnCheckedChangeListener((buttonView, isChecked) ->
-                        selectionListener.onUserSelectionChanged(isChecked, user.getPhone()));
+                        selectionListener.onUserSelectionChanged(isChecked, user.phone));
             }
         }
     }

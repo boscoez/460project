@@ -7,35 +7,24 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.ezchat.R;
 import com.example.ezchat.databinding.ActivityLoginUserNameBinding;
 import com.example.ezchat.models.UserModel;
-import com.example.ezchat.utilities.Constants;
 import com.example.ezchat.utilities.FirebaseUtil;
 import com.example.ezchat.utilities.PreferenceManager;
 import com.example.ezchat.utilities.Utilities;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.Timestamp;
 import com.google.firebase.messaging.FirebaseMessaging;
 
-import org.jetbrains.annotations.Nullable;
-
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Objects;
 /**
  * LoginUserNameActivity handles the process of signing in existing users
  * or signing up new users, with the option to select a profile picture.
@@ -64,7 +53,7 @@ public class LoginUserNameActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         // Retrieve the phone number from intent
-        phoneNumber = getIntent().getStringExtra(Constants.KEY_PHONE_NUMBER);
+        phoneNumber = getIntent().getStringExtra(UserModel.FIELD_PHONE);
 
         // Check if the user already exists in Firestore
         checkIfUserExists();
@@ -132,7 +121,7 @@ public class LoginUserNameActivity extends AppCompatActivity {
                 userModel = task.getResult().toObject(UserModel.class);
                 if (userModel != null) {
                     // User exists, pre-fill username and hide sign-up fields
-                    binding.loginUsername.setText(userModel.getUsername());
+                    binding.loginUsername.setText(userModel.username);
                     binding.loginUsername.setEnabled(false);
                     binding.loginPassword.setVisibility(View.GONE);
                     binding.loginConfirmedPassword.setVisibility(View.GONE);
@@ -154,27 +143,27 @@ public class LoginUserNameActivity extends AppCompatActivity {
         setInProgress(true);
 
         // Save user details to preferences
-        preferenceManager.putString(Constants.KEY_PHONE_NUMBER, userModel.getPhone());
-        preferenceManager.putString(Constants.KEY_USERNAME, userModel.getUsername());
-        preferenceManager.putString(Constants.KEY_USER_ID, userModel.getUserId());
+        preferenceManager.putString(UserModel.FIELD_PHONE, userModel.phone);
+        preferenceManager.putString(UserModel.FIELD_USERNAME, userModel.username);
+        preferenceManager.putString(UserModel.FIELD_USER_ID, userModel.username);
 
         // Navigate to MainActivity
         Intent intent = new Intent(LoginUserNameActivity.this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
 
-        Toast.makeText(this, "Welcome back, " + userModel.getUsername() + "!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Welcome back, " + userModel.username + "!", Toast.LENGTH_SHORT).show();
     }
 
     /**
      * Validates input and signs up a new user by saving their data in Firestore.
      */
     private void signUpNewUser() {
+        // Validate username and password fields
         String username = binding.loginUsername.getText().toString().trim();
         String password = binding.loginPassword.getText().toString().trim();
         String confirmPassword = binding.loginConfirmedPassword.getText().toString().trim();
 
-        // Validate input fields
         if (username.isEmpty() || username.length() < 3) {
             binding.loginUsername.setError("Username must be at least 3 characters.");
             return;
@@ -188,24 +177,26 @@ public class LoginUserNameActivity extends AppCompatActivity {
             return;
         }
 
-        // Fetch FCM token and create the user
         setInProgress(true);
+
+        // Fetch FCM token
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 String fcmToken = task.getResult();
+                String userId = FirebaseUtil.currentUserId();
 
-                // Create new user model
-                userModel = new UserModel(
+                // Create a new user model
+                UserModel userModel = new UserModel(
                         phoneNumber,
                         username,
                         Timestamp.now(),
-                        FirebaseUtil.currentUserId(),
+                        userId,
                         fcmToken,
-                        encodedImage, // Base64 profile picture or empty string
-                        new ArrayList<>()
+                        encodedImage, // Profile picture in Base64 format
+                        new ArrayList<>() // No chat rooms initially
                 );
 
-                // Save user in Firestore
+                // Save the user to Firestore
                 saveUserToFirestore(userModel);
             } else {
                 setInProgress(false);
@@ -220,24 +211,37 @@ public class LoginUserNameActivity extends AppCompatActivity {
      * @param userModel The user model to save.
      */
     private void saveUserToFirestore(UserModel userModel) {
+        // Save the user to Firestore using the UID as the document ID
         FirebaseUtil.currentUserDetails().set(userModel).addOnCompleteListener(task -> {
             setInProgress(false);
             if (task.isSuccessful()) {
-                // Save user details to preferences
-                preferenceManager.putString(Constants.KEY_PHONE_NUMBER, userModel.getPhone());
-                preferenceManager.putString(Constants.KEY_USERNAME, userModel.getUsername());
-                preferenceManager.putString(Constants.KEY_USER_ID, userModel.getUserId());
+                // Save user details locally in SharedPreferences
+                saveUserToPreferences(userModel);
 
                 // Navigate to MainActivity
-                Intent intent = new Intent(LoginUserNameActivity.this, MainActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
+                navigateToMainActivity();
 
-                Toast.makeText(this, "Welcome, " + userModel.getUsername() + "!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Welcome, " + userModel.username + "!", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(this, "Failed to save user data.", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void saveUserToPreferences(UserModel userModel) {
+        preferenceManager.putString(UserModel.FIELD_PHONE, userModel.phone);
+        preferenceManager.putString(UserModel.FIELD_USERNAME, userModel.username);
+        preferenceManager.putString(UserModel.FIELD_USER_ID, userModel.userId);
+        preferenceManager.putString(UserModel.FIELD_FCM_TOKEN, userModel.fcmToken);
+        if (userModel.profilePic != null) {
+            preferenceManager.putString(UserModel.FIELD_PROFILE_PIC, userModel.profilePic);
+        }
+    }
+
+    private void navigateToMainActivity() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
 
     /**

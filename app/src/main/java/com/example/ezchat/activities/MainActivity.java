@@ -10,8 +10,9 @@ import com.example.ezchat.R;
 import com.example.ezchat.databinding.ActivityMainBinding;
 import com.example.ezchat.fragments.ChatRoomsFragment;
 import com.example.ezchat.fragments.ProfileFragment;
-import com.example.ezchat.utilities.Constants;
+import com.example.ezchat.models.UserModel;
 import com.example.ezchat.utilities.FirebaseUtil;
+import com.example.ezchat.utilities.PreferenceManager;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 /**
@@ -40,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         // Initialize SharedPreferences
-        preferences = getSharedPreferences(Constants.KEY_PREFERENCE_NAME, MODE_PRIVATE);
+        preferences = getSharedPreferences(PreferenceManager.KEY_PREFERENCE_NAME, MODE_PRIVATE);
 
         // Initialize fragments
         chatRoomFragment = new ChatRoomsFragment();
@@ -81,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
             if (task.isSuccessful()) {
                 String token = task.getResult();
                 saveTokenToPreferences(token); // Save token locally
-                FirebaseUtil.currentUserDetails().update(Constants.KEY_FCM_TOKEN, token); // Update token in Firebase
+                FirebaseUtil.currentUserDetails().update(UserModel.FIELD_FCM_TOKEN, token); // Update token in Firebase
             }
         });
     }
@@ -92,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
      * @param token The FCM token to be saved.
      */
     private void saveTokenToPreferences(String token) {
-        preferences.edit().putString(Constants.KEY_FCM_TOKEN, token).apply();
+        preferences.edit().putString(UserModel.FIELD_FCM_TOKEN, token).apply();
     }
 
     /**

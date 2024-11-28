@@ -8,8 +8,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ezchat.databinding.ActivityLoginOtpBinding;
+import com.example.ezchat.models.UserModel;
 import com.example.ezchat.utilities.AndroidUtil;
-import com.example.ezchat.utilities.Constants;
 import com.example.ezchat.utilities.PreferenceManager;
 import com.google.firebase.FirebaseException;
 import com.google.firebase.auth.FirebaseAuth;
@@ -49,7 +49,7 @@ public class LoginOtpActivity extends AppCompatActivity {
         preferenceManager = PreferenceManager.getInstance(getApplicationContext());
 
         // Retrieve the phone number from the intent or SharedPreferences
-        phoneNum = getIntent().getStringExtra(Constants.KEY_PHONE_NUMBER);
+        phoneNum = getIntent().getStringExtra(UserModel.FIELD_PHONE);
 
         // Send OTP to the phone number
         sendOtp(phoneNum, false);
@@ -142,7 +142,7 @@ public class LoginOtpActivity extends AppCompatActivity {
             if (task.isSuccessful()) {
                 // Navigate to the next activity
                 Intent intent = new Intent(LoginOtpActivity.this, LoginUserNameActivity.class);
-                intent.putExtra(Constants.KEY_PHONE_NUMBER, phoneNum);
+                intent.putExtra(UserModel.FIELD_PHONE, phoneNum);
                 startActivity(intent);
             } else {
                 AndroidUtil.showToast(getApplicationContext(), "Code verification failed!");
