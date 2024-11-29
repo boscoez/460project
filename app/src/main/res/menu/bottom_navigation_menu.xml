@@ -12,4 +12,9 @@
         android:title="CHATS"
         android:scaleType="fitXY"
         />
+    <item
+        android:id="@+id/menu_calendar"
+        android:icon="@drawable/ic_calendar"
+        android:title="CALENDER"
+        android:scaleType="fitXY"/>
 </menu>

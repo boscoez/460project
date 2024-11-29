@@ -48,6 +48,7 @@ dependencies {
     implementation(libs.imagepicker)
     implementation(libs.media3.common)
     implementation(libs.roundedimageview)
+    implementation(libs.recyclerview)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

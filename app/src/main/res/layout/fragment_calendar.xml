@@ -24,8 +24,7 @@
     <CalendarView
         android:id="@+id/calendar_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/CustomCalendarStyle" />
+        android:layout_height="wrap_content" />
 
     <!-- Header for Tasks -->
     <TextView
@@ -54,7 +53,6 @@
         android:layout_height="70dp"
         android:layout_gravity="end"
         android:hapticFeedbackEnabled="true"
-        android:padding="10dp"
-        android:src="@drawable/icon_add_task"
+        android:src="@drawable/ic_add"
         app:maxImageSize="60dp" />
 </LinearLayout>

@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ezchat.R;
 import com.example.ezchat.databinding.ActivityMainBinding;
+import com.example.ezchat.fragments.CalendarFragment;
 import com.example.ezchat.fragments.ChatRoomsFragment;
 import com.example.ezchat.fragments.ProfileFragment;
 import com.example.ezchat.models.UserModel;
@@ -25,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;  // View binding for activity_main.xml
     private ChatRoomsFragment chatRoomFragment; // Fragment for chat rooms
     private ProfileFragment profileFragment;    // Fragment for user profile
+    private CalendarFragment calendarFragment;
 
     /**
      * Called when the activity is first created.
@@ -46,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
         // Initialize fragments
         chatRoomFragment = new ChatRoomsFragment();
         profileFragment = new ProfileFragment();
+        calendarFragment = new CalendarFragment();
 
         // Set up search button click listener
         binding.mainSearchBtn.setOnClickListener(v -> {
@@ -62,6 +65,8 @@ public class MainActivity extends AppCompatActivity {
                 // Navigate to ProfileFragment
                 getSupportFragmentManager().beginTransaction()
                         .replace(binding.mainFrameLayout.getId(), profileFragment).commit();
+            } else if (item.getItemId() == R.id.menu_calendar) {  // Handle Calendar menu item
+                getSupportFragmentManager().beginTransaction().replace(R.id.main_frame_layout, calendarFragment).commit();
             }
             return true;
         });
