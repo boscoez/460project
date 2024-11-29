@@ -13,8 +13,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ezchat.R;
-import com.example.ezchat.databinding.ActivityNewChatMemberBinding;
 import com.example.ezchat.databinding.ActivityNewChatRoomBinding;
+import com.example.ezchat.databinding.ActivityNewChatRoomRecyclerItemBinding;
 import com.example.ezchat.models.ChatroomModel;
 import com.example.ezchat.models.UserModel;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -28,10 +28,10 @@ import java.util.List;
  */
 public class NewChatRoomActivity extends AppCompatActivity {
 
-    private ActivityNewChatRoomBinding binding; // View Binding instance
-    private FirebaseFirestore db; // Firestore database instance
     private final List<UserModel> userList = new ArrayList<>(); // List of all users
     private final List<String> selectedUsers = new ArrayList<>(); // List of selected user IDs
+    private ActivityNewChatRoomBinding binding; // View Binding instance
+    private FirebaseFirestore db; // Firestore database instance
     private UserAdapter userAdapter; // RecyclerView Adapter
 
     @Override
@@ -137,6 +137,14 @@ public class NewChatRoomActivity extends AppCompatActivity {
     }
 
     /**
+     * Functional interface for handling user selection changes.
+     */
+    @FunctionalInterface
+    public interface UserSelectionListener {
+        void onUserSelectionChanged(boolean isSelected, String userPhone);
+    }
+
+    /**
      * Adapter for displaying users in a RecyclerView for chat room creation.
      */
     public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
@@ -158,7 +166,7 @@ public class NewChatRoomActivity extends AppCompatActivity {
         @NonNull
         @Override
         public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            ActivityNewChatMemberBinding itemBinding = ActivityNewChatMemberBinding.inflate(
+            ActivityNewChatRoomRecyclerItemBinding itemBinding = ActivityNewChatRoomRecyclerItemBinding.inflate(
                     LayoutInflater.from(parent.getContext()), parent, false);
             return new UserViewHolder(itemBinding);
         }
@@ -178,14 +186,14 @@ public class NewChatRoomActivity extends AppCompatActivity {
          */
         public class UserViewHolder extends RecyclerView.ViewHolder {
 
-            private final ActivityNewChatMemberBinding binding;
+            private final ActivityNewChatRoomRecyclerItemBinding binding;
 
             /**
              * Constructor for UserViewHolder.
              *
              * @param binding The binding for the chat member item layout.
              */
-            public UserViewHolder(@NonNull ActivityNewChatMemberBinding binding) {
+            public UserViewHolder(@NonNull ActivityNewChatRoomRecyclerItemBinding binding) {
                 super(binding.getRoot());
                 this.binding = binding;
             }
@@ -210,13 +218,5 @@ public class NewChatRoomActivity extends AppCompatActivity {
                         selectionListener.onUserSelectionChanged(isChecked, user.phone));
             }
         }
-    }
-
-    /**
-     * Functional interface for handling user selection changes.
-     */
-    @FunctionalInterface
-    public interface UserSelectionListener {
-        void onUserSelectionChanged(boolean isSelected, String userPhone);
     }
 }

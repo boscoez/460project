@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.ezchat.databinding.ActivityChatMessageBinding;
+import com.example.ezchat.databinding.ActivityChatRoomRecyclerItemBinding;
 import com.google.firebase.Timestamp;
 
 import java.util.List;
@@ -104,7 +104,7 @@ public class MessageModel {
         @Override
         public MessageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-            ActivityChatMessageBinding binding = ActivityChatMessageBinding.inflate(inflater, parent, false);
+            ActivityChatRoomRecyclerItemBinding binding = ActivityChatRoomRecyclerItemBinding.inflate(inflater, parent, false);
             return new MessageViewHolder(binding);
         }
 
@@ -124,14 +124,14 @@ public class MessageModel {
          */
         public class MessageViewHolder extends RecyclerView.ViewHolder {
 
-            private final ActivityChatMessageBinding binding;
+            private final ActivityChatRoomRecyclerItemBinding binding;
 
             /**
              * Constructs a new MessageViewHolder.
              *
              * @param binding The binding for the chat message item layout.
              */
-            public MessageViewHolder(@NonNull ActivityChatMessageBinding binding) {
+            public MessageViewHolder(@NonNull ActivityChatRoomRecyclerItemBinding binding) {
                 super(binding.getRoot());
                 this.binding = binding;
             }

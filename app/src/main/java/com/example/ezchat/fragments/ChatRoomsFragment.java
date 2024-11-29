@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ezchat.activities.NewChatRoomActivity;
 import com.example.ezchat.databinding.FragmentChatRoomsBinding;
-import com.example.ezchat.databinding.FragmentChatRoomsItemBinding;
+import com.example.ezchat.databinding.FragmentChatRoomsRecyclerItemBinding;
 import com.example.ezchat.models.ChatroomModel;
 import com.example.ezchat.models.UserModel;
 import com.example.ezchat.utilities.AndroidUtil;
@@ -174,7 +174,7 @@ public class ChatRoomsFragment extends Fragment {
         @Override
         public ChatRoomViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-            FragmentChatRoomsItemBinding itemBinding = FragmentChatRoomsItemBinding.inflate(inflater, parent, false);
+            FragmentChatRoomsRecyclerItemBinding itemBinding = FragmentChatRoomsRecyclerItemBinding.inflate(inflater, parent, false);
             return new ChatRoomViewHolder(itemBinding);
         }
 
@@ -193,14 +193,14 @@ public class ChatRoomsFragment extends Fragment {
          */
         public class ChatRoomViewHolder extends RecyclerView.ViewHolder {
 
-            private final FragmentChatRoomsItemBinding binding; // View binding for each item
+            private final FragmentChatRoomsRecyclerItemBinding binding; // View binding for each item
 
             /**
              * Constructor for ChatRoomViewHolder.
              *
              * @param binding The binding for the chat room item layout.
              */
-            public ChatRoomViewHolder(@NonNull FragmentChatRoomsItemBinding binding) {
+            public ChatRoomViewHolder(@NonNull FragmentChatRoomsRecyclerItemBinding binding) {
                 super(binding.getRoot());
                 this.binding = binding;
             }

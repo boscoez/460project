@@ -1,117 +1,151 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginTop="70dp"
-    android:background="@drawable/bg_content_top"
-    android:gravity="center"
-    android:orientation="vertical"
-    android:padding="10dp"
+    android:background="@color/my_primary"
     tools:context=".fragments.ProfileFragment">
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_content_bottom">
 
-    <!-- FrameLayout containing the profile image and "Add Image" text -->
-    <FrameLayout
-        android:id="@+id/layoutImage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp">
-
-        <!-- RoundedImageView for the user's profile picture -->
-        <com.makeramen.roundedimageview.RoundedImageView
-            android:id="@+id/profile_image_view"
-            android:layout_width="171dp"
-            android:layout_height="171dp"
-            android:background="@drawable/bg_circle"
-            android:scaleType="centerCrop"
-            android:layout_margin="40dp"
-            app:riv_oval="true" />
-
-        <!-- TextView prompting the user to add an image -->
+        <!-- Title for the Chat Room Screen -->
         <TextView
-            android:id="@+id/textAddImage"
-            android:layout_width="wrap_content"
+            android:id="@+id/titleText"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="Add Image"
-            android:textColor="@color/light_gray"
-            android:textSize="25sp" />
-    </FrameLayout>
-
-    <EditText
-        android:id="@+id/profile_username"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginTop="20dp"
-        android:background="@drawable/bg_rectangle"
-        android:hint="Username"
-        android:imeOptions="actionDone"
-        android:importantForAutofill="no"
-        android:inputType="textCapWords"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:textAlignment="gravity"
-        android:textColor="@color/my_primary"
-        android:textSize="25sp" />
-
-    <EditText
-        android:id="@+id/profile_phone"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginTop="20dp"
-        android:background="@drawable/bg_rectangle"
-        android:enabled="false"
-        android:hint="Phone"
-        android:imeOptions="actionDone"
-        android:importantForAutofill="no"
-        android:inputType="phone"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:textAlignment="gravity"
-        android:textColor="@color/my_primary"
-        android:textSize="25sp" />
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:animateLayoutChanges="true"
-        android:orientation="vertical">
-
-        <!-- MaterialButton for signing up -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/profile_update_btn"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:backgroundTint="@color/my_primary"
-            android:text="UPDATE PROFILE"
-            android:textColor="@color/white"
+            android:text="Profile"
+            android:textAlignment="center"
+            android:textColor="@color/black"
             android:textSize="25sp"
             android:textStyle="bold"
-            app:cornerRadius="8dp" />
+            app:layout_constraintBottom_toBottomOf="@+id/logout_btn"
+            app:layout_constraintEnd_toStartOf="@+id/logout_btn"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/logout_btn" />
 
-        <!-- ProgressBar displayed during sign-up process -->
-        <ProgressBar
-            android:id="@+id/profile_progress_bar"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:layout_gravity="center"
-            android:visibility="invisible" />
-    </FrameLayout>
+        <!-- Floating Action Button (FAB) to start a new chat -->
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/logout_btn"
+            android:layout_width="53dp"
+            android:layout_height="53dp"
+            android:layout_margin="16dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Start a new chat"
+            android:src="@drawable/ic_power"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/my_primary" />
 
-    <TextView
-        android:id="@+id/logout_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="20dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:text="LogOut"
-        android:textAlignment="center"
-        android:textColor="@color/light_gray"
-        android:textSize="30sp"
-        android:textStyle="bold" />
-</LinearLayout>
+        <TextView
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:background="@color/my_primary"
+            app:layout_constraintTop_toBottomOf="@id/logout_btn" />
+
+        <!-- FrameLayout containing the profile image and "Add Image" text -->
+        <FrameLayout
+            android:id="@+id/layoutImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/divider">
+
+            <!-- RoundedImageView for the user's profile picture -->
+            <com.makeramen.roundedimageview.RoundedImageView
+                android:id="@+id/profile_image_view"
+                android:layout_width="171dp"
+                android:layout_height="171dp"
+                android:layout_margin="40dp"
+                android:background="@drawable/bg_circle"
+                android:scaleType="centerCrop"
+                app:riv_oval="true" />
+
+            <!-- TextView prompting the user to add an image -->
+            <TextView
+                android:id="@+id/textAddImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Add Image"
+                android:textColor="@color/light_gray"
+                android:textSize="25sp" />
+        </FrameLayout>
+
+
+        <EditText
+            android:id="@+id/profile_username"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_margin="20dp"
+            android:background="@drawable/bg_rectangle"
+            android:hint="Username"
+            android:imeOptions="actionDone"
+            android:importantForAutofill="no"
+            android:inputType="textCapWords"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:textAlignment="gravity"
+            android:textColor="@color/my_primary"
+            android:textSize="25sp"
+            app:layout_constraintTop_toBottomOf="@id/layoutImage" />
+
+        <EditText
+            android:id="@+id/profile_phone"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_margin="20dp"
+            android:background="@drawable/bg_rectangle"
+            android:enabled="false"
+            android:hint="Phone"
+            android:imeOptions="actionDone"
+            android:importantForAutofill="no"
+            android:inputType="phone"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:textAlignment="gravity"
+            android:textColor="@color/my_primary"
+            android:textSize="25sp"
+            app:layout_constraintTop_toBottomOf="@id/profile_username" />
+
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:orientation="vertical"
+            app:layout_constraintTop_toBottomOf="@id/profile_phone">
+
+            <!-- MaterialButton for signing up -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/profile_update_btn"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_margin="20dp"
+                android:backgroundTint="@color/my_primary"
+                android:text="UPDATE PROFILE"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:cornerRadius="8dp" />
+
+            <!-- ProgressBar displayed during sign-up process -->
+            <ProgressBar
+                android:id="@+id/profile_progress_bar"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_gravity="center"
+                android:visibility="invisible" />
+        </FrameLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

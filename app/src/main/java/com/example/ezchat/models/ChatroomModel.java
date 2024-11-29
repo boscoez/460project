@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.ezchat.databinding.FragmentChatRoomsItemBinding;
+import com.example.ezchat.databinding.FragmentChatRoomsRecyclerItemBinding;
 import com.google.firebase.Timestamp;
 
 import java.util.List;
@@ -111,7 +111,7 @@ public class ChatroomModel {
         @Override
         public ChatRoomViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-            FragmentChatRoomsItemBinding binding = FragmentChatRoomsItemBinding.inflate(inflater, parent, false);
+            FragmentChatRoomsRecyclerItemBinding binding = FragmentChatRoomsRecyclerItemBinding.inflate(inflater, parent, false);
             return new ChatRoomViewHolder(binding);
         }
 
@@ -126,18 +126,25 @@ public class ChatroomModel {
         }
 
         /**
+         * Listener interface for handling chat room click events.
+         */
+        public interface OnChatRoomClickListener {
+            void onChatRoomClick(String chatRoomId);
+        }
+
+        /**
          * ViewHolder class for individual chat room items.
          */
         public class ChatRoomViewHolder extends RecyclerView.ViewHolder {
 
-            private final FragmentChatRoomsItemBinding binding;
+            private final FragmentChatRoomsRecyclerItemBinding binding;
 
             /**
              * Constructs a new ChatRoomViewHolder.
              *
              * @param binding The binding for the chat room item layout.
              */
-            public ChatRoomViewHolder(@NonNull FragmentChatRoomsItemBinding binding) {
+            public ChatRoomViewHolder(@NonNull FragmentChatRoomsRecyclerItemBinding binding) {
                 super(binding.getRoot());
                 this.binding = binding;
             }
@@ -167,13 +174,6 @@ public class ChatroomModel {
                 java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM d, h:mm a");
                 return sdf.format(timestamp.toDate());
             }
-        }
-
-        /**
-         * Listener interface for handling chat room click events.
-         */
-        public interface OnChatRoomClickListener {
-            void onChatRoomClick(String chatRoomId);
         }
     }
 }

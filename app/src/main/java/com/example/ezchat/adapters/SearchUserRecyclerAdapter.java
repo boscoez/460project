@@ -11,13 +11,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ezchat.R;
 import com.example.ezchat.activities.NewChatRoomActivity;
-import com.example.ezchat.databinding.SearchUserRecyclerRowBinding;
+import com.example.ezchat.databinding.ActivitySearchUserItemBinding;
 import com.example.ezchat.models.UserModel;
 import com.example.ezchat.utilities.AndroidUtil;
 import com.example.ezchat.utilities.FirebaseUtil;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,7 +80,7 @@ public class SearchUserRecyclerAdapter extends RecyclerView.Adapter<SearchUserRe
     @NonNull
     @Override
     public UserModelViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        SearchUserRecyclerRowBinding binding = SearchUserRecyclerRowBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
+        ActivitySearchUserItemBinding binding = ActivitySearchUserItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
         return new UserModelViewHolder(binding);
     }
 
@@ -123,9 +122,9 @@ public class SearchUserRecyclerAdapter extends RecyclerView.Adapter<SearchUserRe
      * ViewHolder class for displaying a single user's details in the RecyclerView.
      */
     public class UserModelViewHolder extends RecyclerView.ViewHolder {
-        private final SearchUserRecyclerRowBinding binding;
+        private final ActivitySearchUserItemBinding binding;
 
-        public UserModelViewHolder(SearchUserRecyclerRowBinding binding) {
+        public UserModelViewHolder(ActivitySearchUserItemBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
         }

@@ -13,14 +13,14 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
+        android:gravity="center"
         android:text="@string/app_name"
         android:textColor="@color/off_white"
         android:textSize="25sp"
         android:textStyle="bold"
-        android:gravity="center"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintRight_toLeftOf="@id/main_search_btn"/>
+        app:layout_constraintRight_toLeftOf="@id/main_search_btn"
+        app:layout_constraintTop_toTopOf="parent"/>
 
 
     <ImageButton
@@ -31,19 +31,20 @@
         android:layout_centerVertical="true"
         android:layout_margin="10dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:src="@drawable/ic_search"
-        app:tint="@color/white"
+        android:hapticFeedbackEnabled="true"
         android:scaleType="fitXY"
+        android:src="@drawable/ic_search"
+        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintRight_toRightOf="parent"/>
+        app:tint="@color/white"/>
 
     <FrameLayout
         android:id="@+id/main_frame_layout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="@drawable/bg_content_bottom"
-        app:layout_constraintTop_toBottomOf="@id/main_search_btn"
-        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"/>
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        app:layout_constraintTop_toBottomOf="@id/main_search_btn"/>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
@@ -51,12 +52,12 @@
         android:layout_height="75dp"
         android:layout_gravity="bottom"
         android:background="@color/my_primary"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:itemHorizontalTranslationEnabled="false"
         app:itemIconSize="43sp"
         app:itemIconTint="@color/white"
         app:itemTextColor="@color/white"
         app:labelVisibilityMode="labeled"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:menu="@menu/bottom_navigation_menu" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

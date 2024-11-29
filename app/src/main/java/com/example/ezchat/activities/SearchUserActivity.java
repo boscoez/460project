@@ -14,10 +14,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ezchat.R;
-import com.example.ezchat.databinding.ActivityNewChatMemberBinding;
+import com.example.ezchat.databinding.ActivityNewChatRoomRecyclerItemBinding;
 import com.example.ezchat.databinding.ActivitySearchUserBinding;
 import com.example.ezchat.models.UserModel;
-import com.example.ezchat.utilities.AndroidUtil;
 import com.example.ezchat.utilities.Utilities;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -30,10 +29,10 @@ import java.util.List;
  */
 public class SearchUserActivity extends AppCompatActivity {
 
+    private final List<UserModel> userList = new ArrayList<>(); // List to hold users
     private ActivitySearchUserBinding binding; // View binding
     private FirebaseFirestore db; // Firestore instance
     private SearchUserRecyclerAdapter adapter; // Adapter for RecyclerView
-    private final List<UserModel> userList = new ArrayList<>(); // List to hold users
     private String currentUserId; // ID of the currently logged-in user
 
     @Override
@@ -125,7 +124,7 @@ public class SearchUserActivity extends AppCompatActivity {
         @NonNull
         @Override
         public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            ActivityNewChatMemberBinding binding = ActivityNewChatMemberBinding.inflate(
+            ActivityNewChatRoomRecyclerItemBinding binding = ActivityNewChatRoomRecyclerItemBinding.inflate(
                     LayoutInflater.from(parent.getContext()), parent, false);
             return new UserViewHolder(binding);
         }
@@ -143,9 +142,9 @@ public class SearchUserActivity extends AppCompatActivity {
 
         public static class UserViewHolder extends RecyclerView.ViewHolder {
 
-            private final ActivityNewChatMemberBinding binding;
+            private final ActivityNewChatRoomRecyclerItemBinding binding;
 
-            public UserViewHolder(ActivityNewChatMemberBinding binding) {
+            public UserViewHolder(ActivityNewChatRoomRecyclerItemBinding binding) {
                 super(binding.getRoot());
                 this.binding = binding;
             }
