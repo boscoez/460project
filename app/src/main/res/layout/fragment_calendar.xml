@@ -63,7 +63,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:gravity="center"
-            android:text="Selected Date"
+            android:text="Tasks for Selected Date"
             android:textColor="@color/black"
             android:textSize="20sp"
             android:textStyle="bold"

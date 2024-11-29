@@ -59,7 +59,7 @@ public class CalendarFragment extends Fragment {
         binding.taskRecyclerView.setAdapter(taskAdapter);
 
         // Set initial header text
-        binding.taskHeader.setText("Tasks for " + selectedDate);
+        binding.taskHeader.setText(String.format("Tasks for %s", selectedDate));
 
         // Load tasks for the current date
         loadTasksFromFirestore();
@@ -67,7 +67,7 @@ public class CalendarFragment extends Fragment {
         // Set calendar date change listener
         binding.calendarView.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
             selectedDate = String.format(Locale.getDefault(), "%d-%02d-%02d", year, month + 1, dayOfMonth);
-            binding.taskHeader.setText(selectedDate);
+            binding.taskHeader.setText(String.format("Tasks for %s", selectedDate));
             loadTasksFromFirestore();
         });
 

@@ -1,82 +1,68 @@
 package com.example.ezchat.models;
 
 import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.ViewGroup;
+import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.core.util.Consumer;
 
-import com.example.ezchat.databinding.FragmentChatRoomsRecyclerItemBinding;
+import com.example.ezchat.models.MessageModel;
 import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
- * The ChatroomModel class represents a chat room in the application.
- * It includes details about participants, the creator, metadata, and the last message.
+ * The ChatroomModel class handles database operations and represents a chat room in the app.
+ * It includes methods for creating, deleting, fetching, and updating chat rooms and their messages.
  */
 public class ChatroomModel {
 
-    /**
-     * Firebase Firestore key constants for the ChatroomModel fields.
-     */
-    public static  final String FIELD_COLLECTION_NAME = "chatroom";
+    // Firestore keys
+    public static final String FIELD_COLLECTION_NAME = "chatrooms";
     public static final String FIELD_CHATROOM_ID = "chatroomId";
     public static final String FIELD_USER_IDS = "userIds";
     public static final String FIELD_CREATOR_ID = "creatorId";
     public static final String FIELD_LAST_MESSAGE = "lastMessage";
     public static final String FIELD_LAST_MESSAGE_TIMESTAMP = "lastMessageTimestamp";
     public static final String FIELD_LAST_MESSAGE_SENDER_ID = "lastMessageSenderId";
+    private static final String MESSAGES_COLLECTION = "messages";
 
-    /**
-     * The unique identifier for the chat room.
-     */
     public String chatroomId;
-
-    /**
-     * The list of user IDs participating in the chat room.
-     */
     public List<String> userIds;
-
-    /**
-     * The ID of the user who created the chat room.
-     */
     public String creatorId;
-
-    /**
-     * The content of the last message in the chat room.
-     */
     public String lastMessage;
-
-    /**
-     * The timestamp of the last message in the chat room.
-     */
     public Timestamp lastMessageTimestamp;
-
-    /**
-     * The ID of the user who sent the last message.
-     */
     public String lastMessageSenderId;
 
+    // Firestore instance
+    private final FirebaseFirestore firestore;
+
     /**
-     * Default constructor required for Firebase Firestore to deserialize data.
+     * Default constructor for ChatroomModel.
+     * Initializes the Firestore instance.
      */
     public ChatroomModel() {
+        firestore = FirebaseFirestore.getInstance();
     }
 
     /**
-     * Constructs a new ChatroomModel with the specified fields.
+     * Parameterized constructor for ChatroomModel.
      *
-     * @param chatroomId           The unique identifier for the chat room.
-     * @param userIds              The list of user IDs in the chat room.
-     * @param creatorId            The ID of the user who created the chat room.
+     * @param chatroomId           The ID of the chat room.
+     * @param userIds              List of user IDs in the chat room.
+     * @param creatorId            The ID of the creator of the chat room.
      * @param lastMessage          The content of the last message.
      * @param lastMessageTimestamp The timestamp of the last message.
      * @param lastMessageSenderId  The ID of the user who sent the last message.
      */
     public ChatroomModel(String chatroomId, List<String> userIds, String creatorId, String lastMessage,
                          Timestamp lastMessageTimestamp, String lastMessageSenderId) {
+        this();
         this.chatroomId = chatroomId;
         this.userIds = userIds;
         this.creatorId = creatorId;
@@ -86,94 +72,207 @@ public class ChatroomModel {
     }
 
     /**
-     * Adapter class for displaying chat rooms in a RecyclerView.
+     * Deletes a chat room and its messages if the current user is the creator.
+     *
+     * @param chatRoomId    The ID of the chat room to delete.
+     * @param currentUserId The ID of the user attempting to delete the chat room.
+     * @param context       Context for displaying Toast messages.
+     * @param onComplete    Callback to indicate success or failure.
      */
-    public static class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ChatRoomViewHolder> {
+    public void deleteChatRoom(String chatRoomId, String currentUserId, Context context, Consumer<Boolean> onComplete) {
+        firestore.collection(FIELD_COLLECTION_NAME)
+                .document(chatRoomId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String creatorId = documentSnapshot.getString(FIELD_CREATOR_ID);
 
-        private final List<ChatroomModel> chatRoomList; // List of chat rooms to display
-        private final Context context; // Context for accessing resources
-        private final OnChatRoomClickListener listener; // Listener for handling chat room clicks
+                        if (currentUserId.equals(creatorId)) {
+                            deleteChatRoomAndMessages(chatRoomId, context, onComplete);
+                        } else {
+                            onComplete.accept(false);
+                            Toast.makeText(context, "Only the creator can delete this chat room.", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        onComplete.accept(false);
+                        Toast.makeText(context, "Chat room not found.", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    onComplete.accept(false);
+                    Toast.makeText(context, "Failed to fetch chat room details: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
 
-        /**
-         * Constructs a new ChatRoomAdapter.
-         *
-         * @param context       The context of the activity or fragment.
-         * @param chatRoomList  List of chat rooms to display in the RecyclerView.
-         * @param listener      Listener for handling chat room click events.
-         */
-        public ChatRoomAdapter(Context context, List<ChatroomModel> chatRoomList, OnChatRoomClickListener listener) {
-            this.context = context;
-            this.chatRoomList = chatRoomList;
-            this.listener = listener;
-        }
+    /**
+     * Deletes a chat room document and its messages sub-collection.
+     *
+     * @param chatRoomId The ID of the chat room to delete.
+     * @param context    Context for displaying Toast messages.
+     * @param onComplete Callback to indicate success or failure.
+     */
+    private void deleteChatRoomAndMessages(String chatRoomId, Context context, Consumer<Boolean> onComplete) {
+        CollectionReference messagesRef = firestore.collection(FIELD_COLLECTION_NAME)
+                .document(chatRoomId)
+                .collection(MESSAGES_COLLECTION);
 
-        @NonNull
-        @Override
-        public ChatRoomViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-            FragmentChatRoomsRecyclerItemBinding binding = FragmentChatRoomsRecyclerItemBinding.inflate(inflater, parent, false);
-            return new ChatRoomViewHolder(binding);
-        }
+        messagesRef.get()
+                .addOnSuccessListener(querySnapshot -> {
+                    for (DocumentSnapshot messageDoc : querySnapshot.getDocuments()) {
+                        messageDoc.getReference().delete();
+                    }
 
-        @Override
-        public void onBindViewHolder(@NonNull ChatRoomViewHolder holder, int position) {
-            holder.bind(chatRoomList.get(position));
-        }
+                    firestore.collection(FIELD_COLLECTION_NAME)
+                            .document(chatRoomId)
+                            .delete()
+                            .addOnSuccessListener(aVoid -> onComplete.accept(true))
+                            .addOnFailureListener(e -> {
+                                onComplete.accept(false);
+                                Toast.makeText(context, "Failed to delete chat room: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    onComplete.accept(false);
+                    Toast.makeText(context, "Failed to delete messages: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
 
-        @Override
-        public int getItemCount() {
-            return chatRoomList.size();
-        }
+    /**
+     * Creates a new chat room in Firestore.
+     *
+     * @param chatRoomId The ID of the chat room.
+     * @param userIds    List of user IDs in the chat room.
+     * @param creatorId  The ID of the creator of the chat room.
+     * @param onComplete Callback for success or failure.
+     */
+    public void createChatRoom(String chatRoomId, List<String> userIds, String creatorId, Consumer<Boolean> onComplete) {
+        ChatroomModel chatRoom = new ChatroomModel(chatRoomId, userIds, creatorId, null, null, null);
 
-        /**
-         * Listener interface for handling chat room click events.
-         */
-        public interface OnChatRoomClickListener {
-            void onChatRoomClick(String chatRoomId);
-        }
+        firestore.collection(FIELD_COLLECTION_NAME)
+                .document(chatRoomId)
+                .set(chatRoom)
+                .addOnSuccessListener(aVoid -> onComplete.accept(true))
+                .addOnFailureListener(e -> onComplete.accept(false));
+    }
 
-        /**
-         * ViewHolder class for individual chat room items.
-         */
-        public class ChatRoomViewHolder extends RecyclerView.ViewHolder {
+    /**
+     * Fetches the details of a chat room from Firestore.
+     *
+     * @param chatRoomId The ID of the chat room to fetch.
+     * @param context    Context for displaying Toast messages.
+     * @param onComplete A callback to handle the fetched ChatroomModel or null if not found.
+     */
+    public void fetchChatRoomDetails(String chatRoomId, Context context, Consumer<ChatroomModel> onComplete) {
+        firestore.collection(FIELD_COLLECTION_NAME)
+                .document(chatRoomId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        ChatroomModel chatRoom = documentSnapshot.toObject(ChatroomModel.class);
+                        onComplete.accept(chatRoom);
+                    } else {
+                        onComplete.accept(null);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    onComplete.accept(null);
+                    Toast.makeText(context, "Failed to fetch chat room details: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
 
-            private final FragmentChatRoomsRecyclerItemBinding binding;
+    /**
+     * Fetches all messages for a chat room.
+     *
+     * @param chatRoomId The ID of the chat room.
+     * @param onResult   Callback to return the messages or null in case of failure.
+     */
+    public void fetchMessages(String chatRoomId, Consumer<QuerySnapshot> onResult) {
+        firestore.collection(FIELD_COLLECTION_NAME)
+                .document(chatRoomId)
+                .collection(MESSAGES_COLLECTION)
+                .orderBy(MessageModel.FIELD_TIMESTAMP, Query.Direction.ASCENDING)
+                .get()
+                .addOnSuccessListener(onResult::accept)
+                .addOnFailureListener(e -> onResult.accept(null));
+    }
 
-            /**
-             * Constructs a new ChatRoomViewHolder.
-             *
-             * @param binding The binding for the chat room item layout.
-             */
-            public ChatRoomViewHolder(@NonNull FragmentChatRoomsRecyclerItemBinding binding) {
-                super(binding.getRoot());
-                this.binding = binding;
-            }
+    /**
+     * Deletes a chat room if there are no messages.
+     *
+     * @param chatRoomId The ID of the chat room.
+     * @param context    Context for displaying Toast messages.
+     * @param onComplete Callback for success or failure.
+     */
+    public void deleteEmptyChatRoom(String chatRoomId, Context context, Consumer<Boolean> onComplete) {
+        firestore.collection(FIELD_COLLECTION_NAME)
+                .document(chatRoomId)
+                .collection(MESSAGES_COLLECTION)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    if (querySnapshot.isEmpty()) {
+                        firestore.collection(FIELD_COLLECTION_NAME)
+                                .document(chatRoomId)
+                                .delete()
+                                .addOnSuccessListener(aVoid -> onComplete.accept(true))
+                                .addOnFailureListener(e -> {
+                                    onComplete.accept(false);
+                                    Toast.makeText(context, "Failed to delete chat room: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                });
+                    } else {
+                        onComplete.accept(false);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    onComplete.accept(false);
+                    Toast.makeText(context, "Failed to check messages: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
 
-            /**
-             * Binds the chat room data to the view.
-             *
-             * @param chatRoom The chat room data to display.
-             */
-            public void bind(ChatroomModel chatRoom) {
-                binding.textViewUserName.setText(chatRoom.lastMessageSenderId); // Placeholder, fetch actual user data
-                binding.textViewLastMessage.setText(chatRoom.lastMessage);
-                binding.textViewTimestamp.setText(formatTimestamp(chatRoom.lastMessageTimestamp));
+    /**
+     * Adds a message to the chatroom's messages collection and updates the chatroom metadata.
+     *
+     * @param chatRoomId  The ID of the chat room.
+     * @param senderId    The ID of the user sending the message.
+     * @param messageText The content of the message.
+     * @param onComplete  Callback for success or failure.
+     */
+    public void addMessageToChatRoom(String chatRoomId, String senderId, String messageText, Consumer<Boolean> onComplete) {
+        CollectionReference messagesRef = firestore.collection(FIELD_COLLECTION_NAME)
+                .document(chatRoomId)
+                .collection(MESSAGES_COLLECTION);
 
-                // Click listener to handle navigation or actions
-                binding.getRoot().setOnClickListener(v -> listener.onChatRoomClick(chatRoom.chatroomId));
-            }
+        String messageId = messagesRef.document().getId();
+        MessageModel message = new MessageModel(
+                senderId,
+                null,
+                messageText,
+                Timestamp.now(),
+                "sent"
+        );
 
-            /**
-             * Formats the timestamp into a user-friendly string.
-             *
-             * @param timestamp The timestamp to format.
-             * @return A formatted timestamp string.
-             */
-            private String formatTimestamp(Timestamp timestamp) {
-                if (timestamp == null) return "";
-                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM d, h:mm a");
-                return sdf.format(timestamp.toDate());
-            }
-        }
+        messagesRef.document(messageId)
+                .set(message)
+                .addOnSuccessListener(aVoid -> updateChatRoomMetadata(chatRoomId, message, onComplete))
+                .addOnFailureListener(e -> onComplete.accept(false));
+    }
+
+    /**
+     * Updates the metadata of the chat room (e.g., last message, timestamp, sender ID).
+     *
+     * @param chatRoomId The ID of the chat room.
+     * @param message    The message to use for updating metadata.
+     * @param onComplete Callback for success or failure.
+     */
+    private void updateChatRoomMetadata(String chatRoomId, MessageModel message, Consumer<Boolean> onComplete) {
+        HashMap<String, Object> metadata = new HashMap<>();
+        metadata.put(FIELD_LAST_MESSAGE, message.message);
+        metadata.put(FIELD_LAST_MESSAGE_TIMESTAMP, message.timestamp);
+        metadata.put(FIELD_LAST_MESSAGE_SENDER_ID, message.senderId);
+
+        firestore.collection(FIELD_COLLECTION_NAME)
+                .document(chatRoomId)
+                .update(metadata)
+                .addOnSuccessListener(aVoid -> onComplete.accept(true))
+                .addOnFailureListener(e -> onComplete.accept(false));
     }
 }

@@ -6,74 +6,58 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.ezchat.activities.ChatRoomActivity;
 import com.example.ezchat.activities.NewChatRoomActivity;
 import com.example.ezchat.databinding.FragmentChatRoomsBinding;
 import com.example.ezchat.databinding.FragmentChatRoomsRecyclerItemBinding;
 import com.example.ezchat.models.ChatroomModel;
-import com.example.ezchat.models.UserModel;
-import com.example.ezchat.utilities.AndroidUtil;
-import com.example.ezchat.utilities.PreferenceManager;
-import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
- * A Fragment that displays all chat rooms the current user is part of.
- * Allows the user to view, select, and create new chat rooms.
+ * ChatFragment displays all chat rooms the current user is part of.
+ * Clicking a chat room navigates to the ChatRoomActivity.
  */
 public class ChatRoomsFragment extends Fragment {
 
-    private FragmentChatRoomsBinding binding; // View binding
+    private FragmentChatRoomsBinding binding;
+    private List<ChatroomModel> chatRoomList; // List of chat rooms for the current user
+    private ChatRoomAdapter chatRoomAdapter; // Adapter for the RecyclerView
     private FirebaseFirestore db; // Firestore instance
-    private ChatRoomAdapter chatRoomAdapter; // Adapter for chat rooms
-    private List<ChatroomModel> chatRoomList; // List of chat rooms
-    private String currentUserId; // Local user's ID from SharedPreferences
+    private String currentUserId; // ID of the current user
 
-    /**
-     * Default constructor for ChatRoomsFragment.
-     */
-    public ChatRoomsFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Called to create and return the fragment's view hierarchy.
-     *
-     * @param inflater  The LayoutInflater used to inflate the layout.
-     * @param container The parent ViewGroup for the fragment's UI.
-     * @param savedInstanceState The saved instance state, if available.
-     * @return The root view of the fragment.
-     */
+    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Initialize View Binding
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentChatRoomsBinding.inflate(inflater, container, false);
 
-        // Initialize Firestore and user data
+        // Initialize Firestore, user ID, and chat room list
         db = FirebaseFirestore.getInstance();
+        currentUserId = FirebaseAuth.getInstance().getUid();
         chatRoomList = new ArrayList<>();
-        currentUserId = getCurrentUserIdFromPreferences();
 
-        // Set up RecyclerView with ChatRoomAdapter
-        chatRoomAdapter = new ChatRoomAdapter(chatRoomList, db, currentUserId);
-        binding.chatRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.chatRecyclerView.setAdapter(chatRoomAdapter);
+        // Set up RecyclerView
+        setupRecyclerView();
 
-        // Fetch chat rooms
+        // Fetch chat rooms for the current user
         fetchChatRooms();
 
-        // Set up Floating Action Button (FAB) to start a new chat
+        // Set up FAB to create a new chat
         binding.fabNewChat.setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), NewChatRoomActivity.class);
+            Intent intent = new Intent(getContext(), NewChatRoomActivity.class);
             startActivity(intent);
         });
 
@@ -81,124 +65,109 @@ public class ChatRoomsFragment extends Fragment {
     }
 
     /**
-     * Fetches all chat rooms the current user is part of from Firestore.
-     * Updates the UI to show the chat rooms or a "No chats started" message if none exist.
+     * Sets up the RecyclerView to display chat rooms.
+     */
+    private void setupRecyclerView() {
+        chatRoomAdapter = new ChatRoomAdapter(chatRoomList, chatRoomId -> {
+            // Navigate to ChatRoomActivity on item click
+            Intent intent = new Intent(getContext(), ChatRoomActivity.class);
+            intent.putExtra(ChatroomModel.FIELD_CHATROOM_ID, chatRoomId);
+            startActivity(intent);
+        });
+
+        binding.chatRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.chatRecyclerView.setAdapter(chatRoomAdapter);
+    }
+
+    /**
+     * Fetches all chat rooms the current user is involved in.
      */
     private void fetchChatRooms() {
-        if (currentUserId == null || currentUserId.isEmpty()) {
-            showNoChatsMessage(true);
+        if (currentUserId == null) {
+            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
             return;
         }
 
         db.collection(ChatroomModel.FIELD_COLLECTION_NAME)
-                .whereArrayContains(ChatroomModel.FIELD_LAST_MESSAGE_TIMESTAMP, currentUserId)
-                .orderBy(ChatroomModel.FIELD_LAST_MESSAGE_TIMESTAMP, Query.Direction.DESCENDING)
+                .whereArrayContains(ChatroomModel.FIELD_USER_IDS, currentUserId)
                 .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
+                .addOnSuccessListener(querySnapshot -> {
                     chatRoomList.clear();
-                    if (queryDocumentSnapshots.isEmpty()) {
-                        showNoChatsMessage(true);
-                    } else {
-                        showNoChatsMessage(false);
-                        for (DocumentSnapshot document : queryDocumentSnapshots) {
-                            ChatroomModel chatroom = document.toObject(ChatroomModel.class);
-                            if (chatroom != null) {
-                                chatRoomList.add(chatroom);
-                            }
+                    if (!querySnapshot.isEmpty()) {
+                        for (com.google.firebase.firestore.DocumentSnapshot document : querySnapshot.getDocuments()) {
+                            ChatroomModel chatRoom = document.toObject(ChatroomModel.class);
+                            chatRoomList.add(chatRoom);
                         }
                         chatRoomAdapter.notifyDataSetChanged();
+                        binding.noChatsMessage.setVisibility(chatRoomList.isEmpty() ? View.VISIBLE : View.GONE);
+                    } else {
+                        binding.noChatsMessage.setVisibility(View.VISIBLE);
                     }
                 })
-                .addOnFailureListener(e -> {
-                    e.printStackTrace();
-                    showNoChatsMessage(true);
-                });
+                .addOnFailureListener(e -> Toast.makeText(getContext(), "Failed to fetch chat rooms", Toast.LENGTH_SHORT).show());
     }
 
-    /**
-     * Displays or hides the "No chats started" message based on the presence of chat rooms.
-     *
-     * @param show True to display the message, false to hide it.
-     */
-    private void showNoChatsMessage(boolean show) {
-        binding.noChatsMessage.setVisibility(show ? View.VISIBLE : View.GONE);
-        //binding.chatRecyclerView.setVisibility(show ? View.GONE : View.VISIBLE);
-    }
-
-    /**
-     * Retrieves the current user's ID from SharedPreferences.
-     *
-     * @return The current user's ID, or null if not found.
-     */
-    private String getCurrentUserIdFromPreferences() {
-        Context context = getContext();
-        if (context != null) {
-            return context.getSharedPreferences(PreferenceManager.KEY_PREFERENCE_NAME, Context.MODE_PRIVATE)
-                    .getString(UserModel.FIELD_USER_ID, null);
-        }
-        return null;
-    }
-
-    /**
-     * Cleans up resources when the fragment's view is destroyed.
-     */
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        binding = null; // Release binding reference to avoid memory leaks
+        binding = null;
     }
 
     /**
-     * Adapter class to handle displaying chat rooms in the RecyclerView.
+     * Adapter for displaying chat rooms in a RecyclerView.
      */
-    public static class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ChatRoomViewHolder> {
+    private static class ChatRoomAdapter extends androidx.recyclerview.widget.RecyclerView.Adapter<ChatRoomAdapter.ChatRoomViewHolder> {
 
-        private final List<ChatroomModel> chatRooms; // List of chat rooms
-        private final FirebaseFirestore db; // Firestore instance
-        private final String currentUserId; // ID of the current user
+        private final List<ChatroomModel> chatRoomList;
+        private final OnChatRoomClickListener listener;
 
         /**
-         * Constructor for ChatRoomAdapter.
+         * Constructs the ChatRoomAdapter.
          *
-         * @param chatRooms    The list of chat rooms to display.
-         * @param db           The Firestore database instance.
-         * @param currentUserId The current user's ID.
+         * @param chatRoomList List of chat rooms to display.
+         * @param listener     Listener for handling chat room clicks.
          */
-        public ChatRoomAdapter(List<ChatroomModel> chatRooms, FirebaseFirestore db, String currentUserId) {
-            this.chatRooms = chatRooms;
-            this.db = db;
-            this.currentUserId = currentUserId;
+        public ChatRoomAdapter(List<ChatroomModel> chatRoomList, OnChatRoomClickListener listener) {
+            this.chatRoomList = chatRoomList;
+            this.listener = listener;
         }
 
         @NonNull
         @Override
         public ChatRoomViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-            FragmentChatRoomsRecyclerItemBinding itemBinding = FragmentChatRoomsRecyclerItemBinding.inflate(inflater, parent, false);
-            return new ChatRoomViewHolder(itemBinding);
+            FragmentChatRoomsRecyclerItemBinding binding = FragmentChatRoomsRecyclerItemBinding.inflate(
+                    LayoutInflater.from(parent.getContext()), parent, false);
+            return new ChatRoomViewHolder(binding);
         }
 
         @Override
         public void onBindViewHolder(@NonNull ChatRoomViewHolder holder, int position) {
-            holder.bind(chatRooms.get(position));
+            holder.bind(chatRoomList.get(position), listener);
         }
 
         @Override
         public int getItemCount() {
-            return chatRooms.size();
+            return chatRoomList.size();
         }
 
         /**
-         * ViewHolder class for displaying individual chat rooms.
+         * Listener interface for handling chat room click events.
          */
-        public class ChatRoomViewHolder extends RecyclerView.ViewHolder {
+        public interface OnChatRoomClickListener {
+            void onChatRoomClick(String chatRoomId);
+        }
 
-            private final FragmentChatRoomsRecyclerItemBinding binding; // View binding for each item
+        /**
+         * ViewHolder for displaying a single chat room.
+         */
+        public static class ChatRoomViewHolder extends androidx.recyclerview.widget.RecyclerView.ViewHolder {
+
+            private final FragmentChatRoomsRecyclerItemBinding binding;
 
             /**
-             * Constructor for ChatRoomViewHolder.
+             * Constructs the ChatRoomViewHolder.
              *
-             * @param binding The binding for the chat room item layout.
+             * @param binding Binding for the RecyclerView item.
              */
             public ChatRoomViewHolder(@NonNull FragmentChatRoomsRecyclerItemBinding binding) {
                 super(binding.getRoot());
@@ -206,48 +175,30 @@ public class ChatRoomsFragment extends Fragment {
             }
 
             /**
-             * Binds a chat room to the ViewHolder and populates UI elements with data.
+             * Binds the chat room data to the view.
              *
-             * @param chatRoom The chat room to bind to the ViewHolder.
+             * @param chatRoom ChatroomModel instance to bind.
+             * @param listener Listener for chat room clicks.
              */
-            public void bind(ChatroomModel chatRoom) {
-                // Identify the other user in the chat room
-                String otherUserId = chatRoom.userIds
-                        .stream()
-                        .filter(id -> !id.equals(currentUserId))
-                        .findFirst()
-                        .orElse(null);
+            public void bind(ChatroomModel chatRoom, OnChatRoomClickListener listener) {
+                binding.textViewUserName.setText(chatRoom.lastMessageSenderId); // Placeholder for sender's name
+                binding.textViewLastMessage.setText(chatRoom.lastMessage);
+                binding.textViewTimestamp.setText(formatTimestamp(chatRoom.lastMessageTimestamp));
 
-                if (otherUserId != null) {
-                    // Fetch the other user's details from Firestore
-                    db.collection(UserModel.FIELD_COLLECTION_NAME)
-                            .document(otherUserId)
-                            .get()
-                            .addOnSuccessListener(documentSnapshot -> {
-                                if (documentSnapshot.exists()) {
-                                    UserModel user = documentSnapshot.toObject(UserModel.class);
-                                    if (user != null) {
-                                        // Populate UI with the other user's data
-                                        binding.textViewUserName.setText(user.username);
-                                        binding.textViewPhone.setText(user.phone);
-                                        AndroidUtil.setProfilePicFromBase64(
-                                                binding.imageViewProfilePic.getContext(),
-                                                user.profilePic,
-                                                binding.imageViewProfilePic
-                                        );
-                                    }
-                                }
-                            });
+                // Click listener to navigate to the chat room
+                binding.getRoot().setOnClickListener(v -> listener.onChatRoomClick(chatRoom.chatroomId));
+            }
 
-                    // Set the last message and timestamp
-                    binding.textViewLastMessage.setText(chatRoom.lastMessage);
-                    binding.textViewTimestamp.setText(chatRoom.lastMessageTimestamp.toDate().toString());
-
-                    // Navigate to the chat room on item click
-                    itemView.setOnClickListener(v -> {
-                        // Handle navigation to ChatRoomActivity or similar
-                    });
-                }
+            /**
+             * Formats a Firestore timestamp into a readable string.
+             *
+             * @param timestamp Firestore timestamp to format.
+             * @return Formatted timestamp string.
+             */
+            private String formatTimestamp(com.google.firebase.Timestamp timestamp) {
+                if (timestamp == null) return "";
+                SimpleDateFormat sdf = new SimpleDateFormat("MMM d, h:mm a", Locale.getDefault());
+                return sdf.format(new Date(timestamp.toDate().getTime()));
             }
         }
     }

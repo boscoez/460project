@@ -1,5 +1,6 @@
 package com.example.ezchat.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -21,14 +22,15 @@ import java.util.List;
 
 /**
  * ChatRoomActivity manages the chat interface, allowing users to send and view messages
- * within a chat room. It supports message updates in real-time using Firebase Firestore.
+ * within a chat room. It supports real-time updates using Firebase Firestore.
  */
 public class ChatRoomActivity extends AppCompatActivity {
 
     private ActivityChatRoomBinding binding;
-    private String chatRoomId; // ID of the chat room
-    private String currentUserId; // ID of the current user
+    private String chatRoomId; // The ID of the chat room
+    private String currentUserId; // The ID of the current user
     private FirebaseFirestore db; // Firestore instance
+    private ChatroomModel chatRoomModel; // Chatroom model for handling operations
     private List<MessageModel> messageList; // List of messages in the chat
     private MessageModel.MessageAdapter messageAdapter; // Adapter for the message RecyclerView
     private boolean isCreator; // Indicates if the current user is the creator of the chat room
@@ -43,8 +45,15 @@ public class ChatRoomActivity extends AppCompatActivity {
 
         // Initialize Firestore and user/chat data
         db = FirebaseFirestore.getInstance();
-        currentUserId = getCurrentUserId();
+        chatRoomModel = new ChatroomModel();
+        currentUserId = getCurrentUserId(); // Retrieve the current user ID
         chatRoomId = getIntent().getStringExtra(ChatroomModel.FIELD_CHATROOM_ID);
+
+        if (chatRoomId == null || currentUserId == null) {
+            Toast.makeText(this, "Invalid chat room or user details", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
         // Initialize the RecyclerView
         setupRecyclerView();
@@ -71,22 +80,15 @@ public class ChatRoomActivity extends AppCompatActivity {
      * Loads chat room details to determine if the user is the creator.
      */
     private void loadChatRoomDetails() {
-        db.collection(ChatroomModel.FIELD_COLLECTION_NAME)
-                .document(chatRoomId)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        ChatroomModel chatRoom = documentSnapshot.toObject(ChatroomModel.class);
-                        if (chatRoom != null) {
-                            isCreator = chatRoom.creatorId.equals(currentUserId);
-                            binding.deleteChatButton.setVisibility(isCreator ? View.VISIBLE : View.GONE);
-                        }
-                    } else {
-                        Toast.makeText(this, "Chat room not found", Toast.LENGTH_SHORT).show();
-                        finish();
-                    }
-                })
-                .addOnFailureListener(e -> Toast.makeText(this, "Error loading chat room", Toast.LENGTH_SHORT).show());
+        chatRoomModel.fetchChatRoomDetails(chatRoomId, this, chatRoom -> {
+            if (chatRoom != null) {
+                isCreator = chatRoom.creatorId.equals(currentUserId);
+                binding.deleteChatButton.setVisibility(isCreator ? View.VISIBLE : View.GONE);
+            } else {
+                Toast.makeText(this, "Chat room not found", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        });
     }
 
     /**
@@ -127,6 +129,8 @@ public class ChatRoomActivity extends AppCompatActivity {
             if (!TextUtils.isEmpty(messageText)) {
                 sendMessage(messageText);
                 binding.inputMessage.setText("");
+            } else {
+                Toast.makeText(this, "Message cannot be empty", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -139,53 +143,35 @@ public class ChatRoomActivity extends AppCompatActivity {
      * @param messageText The text of the message to send.
      */
     private void sendMessage(String messageText) {
-        MessageModel message = new MessageModel(
-                currentUserId,
-                null, // Receiver ID is null for group messages
-                messageText,
-                com.google.firebase.Timestamp.now(),
-                MessageModel.FIELD_STATUS
-        );
-
-        db.collection(ChatroomModel.FIELD_COLLECTION_NAME)
-                .document(chatRoomId)
-                .collection(MessageModel.FIELD_COLLECTION_NAME)
-                .add(message)
-                .addOnSuccessListener(documentReference -> {
-                    // Update the last message and timestamp in the chat room
-                    db.collection(ChatroomModel.FIELD_COLLECTION_NAME)
-                            .document(chatRoomId)
-                            .update(
-                                    ChatroomModel.FIELD_LAST_MESSAGE, message.message,
-                                    ChatroomModel.FIELD_LAST_MESSAGE_TIMESTAMP, message.timestamp,
-                                    ChatroomModel.FIELD_LAST_MESSAGE_SENDER_ID, message.senderId
-                            );
-                })
-                .addOnFailureListener(e -> Toast.makeText(this, "Failed to send message", Toast.LENGTH_SHORT).show());
+        chatRoomModel.addMessageToChatRoom(chatRoomId, currentUserId, messageText, success -> {
+            if (!success) {
+                Toast.makeText(this, "Failed to send message", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     /**
      * Deletes the chat room if the user is the creator.
      */
     private void deleteChatRoom() {
-        db.collection(ChatroomModel.FIELD_COLLECTION_NAME)
-                .document(chatRoomId)
-                .delete()
-                .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(this, "Chat room deleted", Toast.LENGTH_SHORT).show();
-                    finish();
-                })
-                .addOnFailureListener(e -> Toast.makeText(this, "Failed to delete chat room", Toast.LENGTH_SHORT).show());
+        chatRoomModel.deleteChatRoom(chatRoomId, currentUserId, this, success -> {
+            if (success) {
+                Toast.makeText(this, "Chat room deleted", Toast.LENGTH_SHORT).show();
+                finish();
+            } else {
+                Toast.makeText(this, "Failed to delete chat room", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     /**
      * Retrieves the current user ID (e.g., from shared preferences or authentication).
      *
-     * @return The current user's ID.
+     * @return The current user's ID, or null if unavailable.
      */
     private String getCurrentUserId() {
-        // Implement your logic to retrieve the current user's ID
-        return "currentUserId"; // Placeholder value
+        // Implement logic to fetch the current user ID (e.g., from SharedPreferences)
+        return "currentUserId"; // Replace with actual implementation
     }
 
     @Override
