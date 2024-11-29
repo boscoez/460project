@@ -163,8 +163,9 @@ public class CalendarFragment extends Fragment {
 
     /**
      * Saves tasks to Firestore for the specified date.
+     * If the tasks list is empty, the Firestore document for that date is deleted.
      *
-     * @param date  The date for which the tasks should be saved.
+     * @param date  The date for which the tasks should be saved or deleted.
      * @param tasks The list of tasks to save.
      */
     private void saveTasksToFirestore(String date, List<String> tasks) {
@@ -173,15 +174,35 @@ public class CalendarFragment extends Fragment {
             return;
         }
 
-        firestore.collection(USERS_COLLECTION)
-                .document(currentUserId)
-                .collection(TASKS_COLLECTION)
-                .document(date)
-                .set(new HashMap<String, Object>() {{
-                    put("tasks", tasks);
-                }})
-                .addOnSuccessListener(aVoid -> Toast.makeText(requireContext(), "Task saved successfully!", Toast.LENGTH_SHORT).show())
-                .addOnFailureListener(e -> Toast.makeText(requireContext(), "Failed to save task: " + e.getMessage(), Toast.LENGTH_LONG).show());
+        if (tasks.isEmpty()) {
+            // Delete the document if the tasks list is empty
+            firestore.collection(USERS_COLLECTION)
+                    .document(currentUserId)
+                    .collection(TASKS_COLLECTION)
+                    .document(date)
+                    .delete()
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(requireContext(), "No tasks left for this date. Date removed from Firestore.", Toast.LENGTH_SHORT).show();
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(requireContext(), "Failed to remove date from Firestore: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    });
+        } else {
+            // Save the tasks list to Firestore
+            firestore.collection(USERS_COLLECTION)
+                    .document(currentUserId)
+                    .collection(TASKS_COLLECTION)
+                    .document(date)
+                    .set(new HashMap<String, Object>() {{
+                        put("tasks", tasks);
+                    }})
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(requireContext(), "Task saved successfully!", Toast.LENGTH_SHORT).show();
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(requireContext(), "Failed to save task: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    });
+        }
     }
 
     /**
@@ -217,11 +238,15 @@ public class CalendarFragment extends Fragment {
             builder.setPositiveButton("Save", (dialog, which) -> {
                 String updatedTask = taskInput.getText().toString().trim();
                 if (!updatedTask.isEmpty()) {
-                    // Update the task in the list and Firestore
+                    // Update the task in the list
                     List<String> tasks = tasksByDate.get(selectedDate);
                     tasks.set(taskPosition, updatedTask);
                     tasksByDate.put(selectedDate, tasks);
+
+                    // Update the RecyclerView
                     taskAdapter.updateTasks(tasks);
+
+                    // Persist the changes to Firestore
                     saveTasksToFirestore(selectedDate, tasks);
                     Toast.makeText(requireContext(), "Task updated successfully!", Toast.LENGTH_SHORT).show();
                 } else {
@@ -253,9 +278,15 @@ public class CalendarFragment extends Fragment {
 
             // Delete button
             holder.deleteButton.setOnClickListener(v -> {
+                // Remove the task locally
                 tasks.remove(position);
                 notifyItemRemoved(position);
+
+                // Update Firestore
                 saveTasksToFirestore(selectedDate, tasks);
+
+                // Notify the user
+                Toast.makeText(requireContext(), "Task deleted successfully!", Toast.LENGTH_SHORT).show();
             });
         }
 
