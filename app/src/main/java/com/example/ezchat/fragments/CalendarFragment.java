@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.ezchat.R;
 import com.example.ezchat.databinding.FragmentCalendarBinding;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
@@ -27,11 +26,15 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+
+/**
+ * A fragment for managing a user's tasks by date. Tasks can be added, edited, and deleted, with data stored in Firestore.
+ */
 public class CalendarFragment extends Fragment {
 
     private FragmentCalendarBinding binding; // View Binding
     private FirebaseFirestore firestore;
-    private String currentUserId; // Stores the current user's ID
+    private String currentUserPhone; // Stores the current user's phone number
     private HashMap<String, List<String>> tasksByDate; // Stores tasks mapped to their dates
     private TaskAdapter taskAdapter; // Adapter for RecyclerView
     private String selectedDate; // Tracks the currently selected date
@@ -45,9 +48,9 @@ public class CalendarFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentCalendarBinding.inflate(inflater, container, false);
 
-        // Initialize Firestore and get the current user ID
+        // Initialize Firestore and get the current user's phone number
         firestore = FirebaseFirestore.getInstance();
-        currentUserId = getCurrentUserId();
+        currentUserPhone = getCurrentUserPhone();
 
         // Initialize task storage
         tasksByDate = new HashMap<>();
@@ -84,13 +87,14 @@ public class CalendarFragment extends Fragment {
     }
 
     /**
-     * Fetches the current user's ID.
+     * Fetches the current user's phone number.
      *
-     * @return The current user's ID or null if the user is not logged in.
+     * @return The current user's phone number or null if not logged in.
      */
-    private String getCurrentUserId() {
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        return currentUser != null ? currentUser.getUid() : null;
+    private String getCurrentUserPhone() {
+        return FirebaseAuth.getInstance().getCurrentUser() != null
+                ? FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber()
+                : null;
     }
 
     /**
@@ -106,13 +110,13 @@ public class CalendarFragment extends Fragment {
      * Loads tasks from Firestore for the selected date.
      */
     private void loadTasksFromFirestore() {
-        if (currentUserId == null) {
+        if (currentUserPhone == null) {
             Toast.makeText(requireContext(), "User not logged in.", Toast.LENGTH_SHORT).show();
             return;
         }
 
         firestore.collection(USERS_COLLECTION)
-                .document(currentUserId)
+                .document(currentUserPhone)
                 .collection(TASKS_COLLECTION)
                 .document(selectedDate)
                 .get()
@@ -136,12 +140,10 @@ public class CalendarFragment extends Fragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Add Task");
 
-        // Create a custom input field
         final EditText taskInput = new EditText(requireContext());
         taskInput.setHint("Enter task details");
         builder.setView(taskInput);
 
-        // Handle Add button
         builder.setPositiveButton("Add", (dialog, which) -> {
             String newTask = taskInput.getText().toString().trim();
             if (!newTask.isEmpty()) {
@@ -155,7 +157,6 @@ public class CalendarFragment extends Fragment {
             }
         });
 
-        // Handle Cancel button
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
 
         builder.show();
@@ -163,45 +164,34 @@ public class CalendarFragment extends Fragment {
 
     /**
      * Saves tasks to Firestore for the specified date.
-     * If the tasks list is empty, the Firestore document for that date is deleted.
      *
      * @param date  The date for which the tasks should be saved or deleted.
      * @param tasks The list of tasks to save.
      */
     private void saveTasksToFirestore(String date, List<String> tasks) {
-        if (currentUserId == null) {
+        if (currentUserPhone == null) {
             Toast.makeText(requireContext(), "User not logged in.", Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (tasks.isEmpty()) {
-            // Delete the document if the tasks list is empty
             firestore.collection(USERS_COLLECTION)
-                    .document(currentUserId)
+                    .document(currentUserPhone)
                     .collection(TASKS_COLLECTION)
                     .document(date)
                     .delete()
-                    .addOnSuccessListener(aVoid -> {
-                        Toast.makeText(requireContext(), "No tasks left for this date. Date removed from Firestore.", Toast.LENGTH_SHORT).show();
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(requireContext(), "Failed to remove date from Firestore: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                    });
+                    .addOnSuccessListener(aVoid -> Toast.makeText(requireContext(), "No tasks left for this date. Date removed from Firestore.", Toast.LENGTH_SHORT).show())
+                    .addOnFailureListener(e -> Toast.makeText(requireContext(), "Failed to remove date from Firestore: " + e.getMessage(), Toast.LENGTH_LONG).show());
         } else {
-            // Save the tasks list to Firestore
             firestore.collection(USERS_COLLECTION)
-                    .document(currentUserId)
+                    .document(currentUserPhone)
                     .collection(TASKS_COLLECTION)
                     .document(date)
                     .set(new HashMap<String, Object>() {{
                         put("tasks", tasks);
                     }})
-                    .addOnSuccessListener(aVoid -> {
-                        Toast.makeText(requireContext(), "Task saved successfully!", Toast.LENGTH_SHORT).show();
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(requireContext(), "Failed to save task: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                    });
+                    .addOnSuccessListener(aVoid -> Toast.makeText(requireContext(), "Task saved successfully!", Toast.LENGTH_SHORT).show())
+                    .addOnFailureListener(e -> Toast.makeText(requireContext(), "Failed to save task: " + e.getMessage(), Toast.LENGTH_LONG).show());
         }
     }
 
@@ -216,51 +206,6 @@ public class CalendarFragment extends Fragment {
             this.tasks = tasks;
         }
 
-        /**
-         * Displays a dialog to edit a task at the specified position.
-         *
-         * @param taskPosition The position of the task in the list to be edited.
-         */
-        private void showEditTaskDialog(int taskPosition) {
-            // Create the AlertDialog
-            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-            builder.setTitle("Edit Task");
-
-            // Pre-fill the task input field with the selected task's details
-            final EditText taskInput = new EditText(requireContext());
-            String existingTask = tasksByDate.get(selectedDate).get(taskPosition);
-            taskInput.setText(existingTask);
-            taskInput.setHint("Edit task details");
-            taskInput.setSelection(existingTask.length()); // Place cursor at the end of the text
-            builder.setView(taskInput);
-
-            // Handle Save button
-            builder.setPositiveButton("Save", (dialog, which) -> {
-                String updatedTask = taskInput.getText().toString().trim();
-                if (!updatedTask.isEmpty()) {
-                    // Update the task in the list
-                    List<String> tasks = tasksByDate.get(selectedDate);
-                    tasks.set(taskPosition, updatedTask);
-                    tasksByDate.put(selectedDate, tasks);
-
-                    // Update the RecyclerView
-                    taskAdapter.updateTasks(tasks);
-
-                    // Persist the changes to Firestore
-                    saveTasksToFirestore(selectedDate, tasks);
-                    Toast.makeText(requireContext(), "Task updated successfully!", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(requireContext(), "Task details cannot be empty!", Toast.LENGTH_SHORT).show();
-                }
-            });
-
-            // Handle Cancel button
-            builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
-
-            // Show the dialog
-            builder.show();
-        }
-
         @NonNull
         @Override
         public TaskViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -269,23 +214,15 @@ public class CalendarFragment extends Fragment {
         }
 
         @Override
-        public void onBindViewHolder(@NonNull TaskAdapter.TaskViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
             String task = tasks.get(position);
             holder.taskTextView.setText(task);
 
-            // Edit button
             holder.editButton.setOnClickListener(v -> showEditTaskDialog(position));
-
-            // Delete button
             holder.deleteButton.setOnClickListener(v -> {
-                // Remove the task locally
                 tasks.remove(position);
                 notifyItemRemoved(position);
-
-                // Update Firestore
                 saveTasksToFirestore(selectedDate, tasks);
-
-                // Notify the user
                 Toast.makeText(requireContext(), "Task deleted successfully!", Toast.LENGTH_SHORT).show();
             });
         }
@@ -302,8 +239,7 @@ public class CalendarFragment extends Fragment {
 
         class TaskViewHolder extends RecyclerView.ViewHolder {
             TextView taskTextView;
-            View editButton;
-            View deleteButton;
+            View editButton, deleteButton;
 
             TaskViewHolder(@NonNull View itemView) {
                 super(itemView);
@@ -311,6 +247,31 @@ public class CalendarFragment extends Fragment {
                 editButton = itemView.findViewById(R.id.edit_button);
                 deleteButton = itemView.findViewById(R.id.delete_button);
             }
+        }
+
+        private void showEditTaskDialog(int taskPosition) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+            builder.setTitle("Edit Task");
+
+            final EditText taskInput = new EditText(requireContext());
+            String existingTask = tasks.get(taskPosition);
+            taskInput.setText(existingTask);
+            builder.setView(taskInput);
+
+            builder.setPositiveButton("Save", (dialog, which) -> {
+                String updatedTask = taskInput.getText().toString().trim();
+                if (!updatedTask.isEmpty()) {
+                    tasks.set(taskPosition, updatedTask);
+                    notifyItemChanged(taskPosition);
+                    saveTasksToFirestore(selectedDate, tasks);
+                } else {
+                    Toast.makeText(requireContext(), "Task details cannot be empty!", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+
+            builder.show();
         }
     }
 }

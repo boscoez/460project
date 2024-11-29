@@ -14,30 +14,28 @@ import com.google.firebase.Timestamp;
 import java.util.List;
 
 /**
- * The MessageModel class represents a single message exchanged between users in a chat room.
+ * Represents a single message exchanged between users in a chat room.
  * It includes details such as sender, receiver, message content, timestamp, and message status.
  */
 public class MessageModel {
 
-    /**
-     * Firebase Firestore key constants for the MessageModel fields.
-     */
+    // Firestore field constants for MessageModel
     public static final String FIELD_COLLECTION_NAME = "messages";
-    public static final String FIELD_SENDER_ID = "senderId";
-    public static final String FIELD_RECEIVER_ID = "receiverId";
+    public static final String FIELD_SENDER_PHONE = "senderPhone";
+    public static final String FIELD_RECEIVER_PHONE = "receiverPhone";
     public static final String FIELD_MESSAGE = "message";
     public static final String FIELD_TIMESTAMP = "timestamp";
     public static final String FIELD_STATUS = "status";
 
     /**
-     * The ID of the user who sent the message.
+     * The phone number of the user who sent the message.
      */
-    public String senderId;
+    public String senderPhone;
 
     /**
-     * The ID of the user who received the message.
+     * The phone number of the user who received the message.
      */
-    public String receiverId;
+    public String receiverPhone;
 
     /**
      * The content of the message.
@@ -61,18 +59,18 @@ public class MessageModel {
     }
 
     /**
-     * Constructs a new MessageModel with the specified sender ID, receiver ID, message content,
-     * timestamp, and status.
+     * Constructs a new MessageModel with the specified sender phone, receiver phone,
+     * message content, timestamp, and status.
      *
-     * @param senderId   The ID of the user who sent the message.
-     * @param receiverId The ID of the user who received the message.
-     * @param message    The content of the message.
-     * @param timestamp  The timestamp when the message was sent.
-     * @param status     The status of the message (e.g., sent, delivered, read).
+     * @param senderPhone   The phone number of the user who sent the message.
+     * @param receiverPhone The phone number of the user who received the message.
+     * @param message       The content of the message.
+     * @param timestamp     The timestamp when the message was sent.
+     * @param status        The status of the message (e.g., sent, delivered, read).
      */
-    public MessageModel(String senderId, String receiverId, String message, Timestamp timestamp, String status) {
-        this.senderId = senderId;
-        this.receiverId = receiverId;
+    public MessageModel(String senderPhone, String receiverPhone, String message, Timestamp timestamp, String status) {
+        this.senderPhone = senderPhone;
+        this.receiverPhone = receiverPhone;
         this.message = message;
         this.timestamp = timestamp;
         this.status = status;
@@ -84,20 +82,20 @@ public class MessageModel {
     public static class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
 
         private final List<MessageModel> messageList; // List of messages to display
-        private final String currentUserId; // The ID of the currently logged-in user
+        private final String currentUserPhone; // The phone number of the currently logged-in user
         private final Context context; // Context for accessing resources
 
         /**
          * Constructs a new MessageAdapter.
          *
-         * @param context       The context of the activity or fragment.
-         * @param messageList   List of messages to display in the RecyclerView.
-         * @param currentUserId The ID of the currently logged-in user.
+         * @param context           The context of the activity or fragment.
+         * @param messageList       List of messages to display in the RecyclerView.
+         * @param currentUserPhone  The phone number of the currently logged-in user.
          */
-        public MessageAdapter(Context context, List<MessageModel> messageList, String currentUserId) {
+        public MessageAdapter(Context context, List<MessageModel> messageList, String currentUserPhone) {
             this.context = context;
             this.messageList = messageList;
-            this.currentUserId = currentUserId;
+            this.currentUserPhone = currentUserPhone;
         }
 
         @NonNull
@@ -142,7 +140,7 @@ public class MessageModel {
              * @param message The message to display.
              */
             public void bind(MessageModel message) {
-                boolean isSentByCurrentUser = message.senderId.equals(currentUserId);
+                boolean isSentByCurrentUser = message.senderPhone.equals(currentUserPhone);
 
                 if (isSentByCurrentUser) {
                     // Sent message layout

@@ -26,6 +26,7 @@ import java.util.List;
 
 /**
  * Activity for searching users by username or phone number.
+ * Users can select a contact to start a new chat room.
  */
 public class SearchUserActivity extends AppCompatActivity {
 
@@ -33,7 +34,7 @@ public class SearchUserActivity extends AppCompatActivity {
     private ActivitySearchUserBinding binding; // View binding
     private FirebaseFirestore db; // Firestore instance
     private SearchUserRecyclerAdapter adapter; // Adapter for RecyclerView
-    private String currentUserId; // ID of the currently logged-in user
+    private String currentUserPhone; // Phone number of the current user
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,8 +47,8 @@ public class SearchUserActivity extends AppCompatActivity {
         // Initialize Firestore
         db = FirebaseFirestore.getInstance();
 
-        // Retrieve the current user's ID
-        currentUserId = getCurrentUserId();
+        // Retrieve the current user's phone number
+        currentUserPhone = getCurrentUserPhone();
 
         // Set up RecyclerView
         binding.searchUserRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -86,7 +87,7 @@ public class SearchUserActivity extends AppCompatActivity {
                         if (user != null &&
                                 (user.username.toLowerCase().contains(lowerQuery) ||
                                         user.phone.replaceAll("\\s", "").toLowerCase().contains(lowerQuery)) &&
-                                !user.userId.equals(currentUserId)) {
+                                !user.phone.equals(currentUserPhone)) {
                             userList.add(user);
                         }
                     }
@@ -101,13 +102,13 @@ public class SearchUserActivity extends AppCompatActivity {
     }
 
     /**
-     * Retrieves the current user's ID.
+     * Retrieves the current user's phone number from SharedPreferences.
      *
-     * @return The ID of the current user.
+     * @return The phone number of the current user.
      */
-    private String getCurrentUserId() {
-        // Replace with your preferred method of retrieving the user's ID
-        return getSharedPreferences("APP_PREFS", MODE_PRIVATE).getString(UserModel.FIELD_USER_ID, "");
+    private String getCurrentUserPhone() {
+        // Replace with your preferred method of retrieving the user's phone number
+        return getSharedPreferences("APP_PREFS", MODE_PRIVATE).getString(UserModel.FIELD_PHONE, "");
     }
 
     /**
@@ -149,6 +150,11 @@ public class SearchUserActivity extends AppCompatActivity {
                 this.binding = binding;
             }
 
+            /**
+             * Binds the user data to the UI elements in the view holder.
+             *
+             * @param user The user to bind.
+             */
             public void bind(UserModel user) {
                 binding.userNameText.setText(user.username);
                 binding.userPhoneText.setText(user.phone);
@@ -165,7 +171,8 @@ public class SearchUserActivity extends AppCompatActivity {
                 itemView.setOnClickListener(v -> {
                     Context context = itemView.getContext();
                     Intent intent = new Intent(context, NewChatRoomActivity.class);
-                    intent.putExtra(UserModel.FIELD_USER_ID, user.userId);
+                    intent.putExtra(UserModel.FIELD_PHONE, user.phone);
+                    intent.putExtra(UserModel.FIELD_USERNAME, user.username);
                     context.startActivity(intent);
                 });
             }

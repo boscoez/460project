@@ -13,8 +13,6 @@ import com.example.ezchat.R;
 import com.example.ezchat.activities.NewChatRoomActivity;
 import com.example.ezchat.databinding.ActivitySearchUserItemBinding;
 import com.example.ezchat.models.UserModel;
-import com.example.ezchat.utilities.AndroidUtil;
-import com.example.ezchat.utilities.FirebaseUtil;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -27,21 +25,22 @@ import java.util.List;
  */
 public class SearchUserRecyclerAdapter extends RecyclerView.Adapter<SearchUserRecyclerAdapter.UserModelViewHolder> {
 
-    private final Context context;
-    private final FirebaseFirestore db;
-    private final List<UserModel> userList;
-    private String currentUserId;
+    private final Context context; // Context for adapter
+    private final FirebaseFirestore db; // Firestore instance
+    private final List<UserModel> userList; // List of users matching the search
+    private final String currentUserPhone; // Current user's phone number
 
     /**
      * Constructor for initializing the adapter.
      *
      * @param context The context in which the adapter is used, typically an Activity or Fragment.
+     * @param currentUserPhone The phone number of the currently logged-in user.
      */
-    public SearchUserRecyclerAdapter(Context context) {
+    public SearchUserRecyclerAdapter(Context context, String currentUserPhone) {
         this.context = context;
         this.db = FirebaseFirestore.getInstance();
         this.userList = new ArrayList<>();
-        this.currentUserId = FirebaseUtil.currentUserId();
+        this.currentUserPhone = currentUserPhone;
     }
 
     /**
@@ -54,26 +53,28 @@ public class SearchUserRecyclerAdapter extends RecyclerView.Adapter<SearchUserRe
 
         // Firestore query: search username and phone
         db.collection(UserModel.FIELD_COLLECTION_NAME)
-                .orderBy(UserModel.FIELD_USERNAME) // Sorting for better UX
-                .startAt(lowerQuery) // Match start of fields
-                .endAt(lowerQuery + "\uf8ff") // End matching
+                .orderBy(UserModel.FIELD_USERNAME)
+                .startAt(lowerQuery)
+                .endAt(lowerQuery + "\uf8ff")
                 .get()
                 .addOnSuccessListener(snapshots -> {
                     userList.clear();
                     for (DocumentSnapshot document : snapshots.getDocuments()) {
                         UserModel user = document.toObject(UserModel.class);
 
-                        // Include user if username or phone matches the query
+                        // Include user if username or phone matches the query and exclude the current user
                         if (user != null && (user.username.toLowerCase().contains(lowerQuery)
                                 || user.phone.toLowerCase().contains(lowerQuery))
-                                && !user.userId.equals(currentUserId)) {
+                                && !user.phone.equals(currentUserPhone)) {
                             userList.add(user);
                         }
                     }
                     notifyDataSetChanged();
                 })
                 .addOnFailureListener(e -> {
-                    AndroidUtil.showToast(context, "Failed to search users: " + e.getMessage());
+                    // Log and notify error
+                    e.printStackTrace();
+                    notifyError("Failed to search users: " + e.getMessage());
                 });
     }
 
@@ -88,27 +89,22 @@ public class SearchUserRecyclerAdapter extends RecyclerView.Adapter<SearchUserRe
     public void onBindViewHolder(@NonNull UserModelViewHolder holder, int position) {
         UserModel model = userList.get(position);
 
-        // Set username, append "(Me)" if the user is the current user
-        holder.binding.textViewUsername.setText(
-                model.username + (model.userId.equals(currentUserId) ? " (Me)" : "")
-        );
+        // Set the user's name
+        holder.binding.textViewUsername.setText(model.username);
 
-        // Fetch and set the user's profile picture
-        FirebaseUtil.getOtherProfilePicStorageRef(model.userId).getDownloadUrl()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful() && task.getResult() != null) {
-                        Uri uri = task.getResult();
-                        AndroidUtil.setProfilePic(context, uri, holder.binding.profilePic);
-                    } else {
-                        holder.binding.profilePic.setImageResource(R.drawable.ic_person); // Placeholder
-                    }
-                });
+        // Set the profile picture or placeholder
+        if (model.profilePic != null && !model.profilePic.isEmpty()) {
+            Uri uri = Uri.parse(model.profilePic);
+            holder.binding.profilePic.setImageURI(uri);
+        } else {
+            holder.binding.profilePic.setImageResource(R.drawable.ic_person);
+        }
 
         // Set up click listener to open the NewChatRoomActivity
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, NewChatRoomActivity.class);
-            AndroidUtil.passUserModelAsIntent(intent, model);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra(UserModel.FIELD_PHONE, model.phone); // Pass phone as identifier
+            intent.putExtra(UserModel.FIELD_USERNAME, model.username); // Pass username
             context.startActivity(intent);
         });
     }
@@ -119,9 +115,18 @@ public class SearchUserRecyclerAdapter extends RecyclerView.Adapter<SearchUserRe
     }
 
     /**
+     * Displays a toast for errors during Firestore operations.
+     *
+     * @param message The error message to display.
+     */
+    private void notifyError(String message) {
+        android.widget.Toast.makeText(context, message, android.widget.Toast.LENGTH_SHORT).show();
+    }
+
+    /**
      * ViewHolder class for displaying a single user's details in the RecyclerView.
      */
-    public class UserModelViewHolder extends RecyclerView.ViewHolder {
+    public static class UserModelViewHolder extends RecyclerView.ViewHolder {
         private final ActivitySearchUserItemBinding binding;
 
         public UserModelViewHolder(ActivitySearchUserItemBinding binding) {

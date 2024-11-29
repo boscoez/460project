@@ -142,14 +142,13 @@ public class LoginOtpActivity extends AppCompatActivity {
             if (task.isSuccessful()) {
                 // Navigate to the next activity
                 Intent intent = new Intent(LoginOtpActivity.this, LoginUserNameActivity.class);
-                intent.putExtra(UserModel.FIELD_PHONE, phoneNum);
+                intent.putExtra(UserModel.FIELD_PHONE, phoneNum); // Pass the phone number
                 startActivity(intent);
             } else {
                 AndroidUtil.showToast(getApplicationContext(), "Code verification failed!");
             }
         });
     }
-
     /**
      * Starts a timer for the "Resend OTP" button, making it clickable again after the timeout period.
      */

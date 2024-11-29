@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
                 // Navigate to ProfileFragment
                 getSupportFragmentManager().beginTransaction()
                         .replace(binding.mainFrameLayout.getId(), profileFragment).commit();
-            } else if (item.getItemId() == R.id.menu_calendar) {  // Handle Calendar menu item
+            } else if (item.getItemId() == R.id.menu_calendar) {
                 getSupportFragmentManager().beginTransaction().replace(R.id.main_frame_layout, calendarFragment).commit();
             }
             return true;

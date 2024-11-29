@@ -37,8 +37,9 @@ public class AndroidUtil {
         // Attach user details to the intent.
         intent.putExtra(UserModel.FIELD_USERNAME, model.username);
         intent.putExtra(UserModel.FIELD_PHONE, model.phone);
-        intent.putExtra(UserModel.FIELD_USER_ID, model.userId);
+        intent.putExtra(UserModel.FIELD_CREATED_TIMESTAMP, model.createdTimestamp);
         intent.putExtra(UserModel.FIELD_FCM_TOKEN, model.fcmToken);
+
     }
     /**
      * Extracts user information from an Intent and converts it to a UserModel.
@@ -50,7 +51,6 @@ public class AndroidUtil {
         // Extract user details from the intent.
         userModel.username = intent.getStringExtra(UserModel.FIELD_USERNAME);
         userModel.phone = intent.getStringExtra(UserModel.FIELD_PHONE);
-        userModel.userId = intent.getStringExtra(UserModel.FIELD_USER_ID);
         userModel.fcmToken = intent.getStringExtra(UserModel.FIELD_FCM_TOKEN);
         return userModel;
     }

@@ -1,5 +1,6 @@
 package com.example.ezchat.utilities;
 
+import com.example.ezchat.models.UserModel;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
@@ -76,6 +77,27 @@ public class FirebaseUtil {
     public static StorageReference  getOtherProfilePicStorageRef(String otherUserId){
         return FirebaseStorage.getInstance().getReference().child("profile_pic")
                 .child(otherUserId);
+    }
+
+    /**
+     * Gets a reference to the Firestore user document for the given phone number.
+     *
+     * @param phone The phone number of the user.
+     * @return A DocumentReference to the user document.
+     */
+    public static DocumentReference getUserDetailsByPhone(String phone) {
+        return FirebaseFirestore.getInstance().collection(UserModel.FIELD_COLLECTION_NAME).document(phone);
+    }
+
+    /**
+     * Gets a reference to the current user's Firestore document.
+     * This assumes the phone number is stored in preferences.
+     *
+     * @param phone The phone number of the current user.
+     * @return A DocumentReference for the current user.
+     */
+    public static DocumentReference currentUserDetails(String phone) {
+        return getUserDetailsByPhone(phone);
     }
 
 }
