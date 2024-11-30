@@ -170,7 +170,7 @@ public class SearchUserActivity extends AppCompatActivity {
                 // Set item click listener
                 itemView.setOnClickListener(v -> {
                     Context context = itemView.getContext();
-                    Intent intent = new Intent(context, NewChatRoomActivity.class);
+                    Intent intent = new Intent(context, ChatCreatorActivity.class);
                     intent.putExtra(UserModel.FIELD_PHONE, user.phone);
                     intent.putExtra(UserModel.FIELD_USERNAME, user.username);
                     context.startActivity(intent);

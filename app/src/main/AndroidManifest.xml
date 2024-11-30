@@ -13,10 +13,10 @@
         android:theme="@style/Theme.EZChat"
         tools:targetApi="31">
         <activity
-            android:name=".activities.ChatRoomActivity"
+            android:name=".activities.ChatActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.NewChatRoomActivity"
+            android:name=".activities.ChatCreatorActivity"
             android:exported="false" /> <!-- Activity Declarations -->
         <activity
             android:name=".activities.SearchUserActivity"

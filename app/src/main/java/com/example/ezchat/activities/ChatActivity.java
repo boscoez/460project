@@ -30,7 +30,7 @@ import java.util.Locale;
  * Manages the chat interface for users to send and view messages within a chat room.
  * Automatically creates a new chat room if one doesn't exist.
  */
-public class ChatRoomActivity extends AppCompatActivity {
+public class ChatActivity extends AppCompatActivity {
 
     private ActivityChatRoomBinding binding; // View binding for activity layout
     private String chatRoomId; // ID of the chat room

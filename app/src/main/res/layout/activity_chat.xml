@@ -8,7 +8,7 @@
     android:animateLayoutChanges="true"
     android:padding="10dp"
     android:background="@color/my_primary"
-    tools:context=".activities.ChatRoomActivity">
+    tools:context=".activities.ChatActivity">
 
     <!-- Back Button to Return to the Previous Screen -->
     <ImageButton

@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * Activity for selecting users to start a chat room.
  */
-public class NewChatRoomActivity extends AppCompatActivity {
+public class ChatCreatorActivity extends AppCompatActivity {
 
     private ActivityNewChatRoomBinding binding;
     private FirebaseFirestore db;
@@ -99,7 +99,7 @@ public class NewChatRoomActivity extends AppCompatActivity {
     }
 
     /**
-     * Navigates to the ChatRoomActivity, passing a `ChatroomModel` object.
+     * Navigates to the ChatActivity, passing a `ChatroomModel` object.
      */
     private void navigateToChatRoom() {
         // Add the current user's phone to the list of selected phones
@@ -112,8 +112,8 @@ public class NewChatRoomActivity extends AppCompatActivity {
         chatRoom.phoneNumbers = new ArrayList<>(selectedPhones);
         chatRoom.creatorPhone = currentUserPhone;
 
-        // Navigate to ChatRoomActivity with the ChatroomModel object
-        Intent intent = new Intent(this, ChatRoomActivity.class);
+        // Navigate to ChatActivity with the ChatroomModel object
+        Intent intent = new Intent(this, ChatActivity.class);
         intent.putExtra("chatRoom", chatRoom); // Pass ChatroomModel as a Serializable object
         startActivity(intent);
         finish(); // Close this activity to avoid duplicates

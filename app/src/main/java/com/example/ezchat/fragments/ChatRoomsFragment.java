@@ -14,8 +14,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.ezchat.activities.ChatRoomActivity;
-import com.example.ezchat.activities.NewChatRoomActivity;
+import com.example.ezchat.activities.ChatActivity;
+import com.example.ezchat.activities.ChatCreatorActivity;
 import com.example.ezchat.databinding.FragmentChatRoomsBinding;
 import com.example.ezchat.databinding.FragmentChatRoomsRecyclerItemBinding;
 import com.example.ezchat.models.ChatroomModel;
@@ -168,7 +168,7 @@ public class ChatRoomsFragment extends Fragment {
      * Navigates to the New Chat Room activity.
      */
     private void navigateToNewChatRoom() {
-        Intent intent = new Intent(requireContext(), NewChatRoomActivity.class);
+        Intent intent = new Intent(requireContext(), ChatCreatorActivity.class);
         startActivity(intent);
     }
 
@@ -223,7 +223,7 @@ public class ChatRoomsFragment extends Fragment {
                 itemBinding.textViewTimestamp.setText(formatTimestamp(chatRoom.lastMessageTimestamp));
 
                 itemBinding.getRoot().setOnClickListener(v -> {
-                    Intent intent = new Intent(requireContext(), ChatRoomActivity.class);
+                    Intent intent = new Intent(requireContext(), ChatActivity.class);
                     intent.putExtra("chatRoom", chatRoom); // Pass the full ChatroomModel object
                     startActivity(intent);
                 });

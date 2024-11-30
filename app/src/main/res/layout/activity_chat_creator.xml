@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/my_primary"
-    tools:context=".activities.NewChatRoomActivity">
+    tools:context=".activities.ChatCreatorActivity">
 
     <!-- Title for the New Chat Screen -->
     <TextView

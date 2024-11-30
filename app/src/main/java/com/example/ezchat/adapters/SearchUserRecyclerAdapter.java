@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ezchat.R;
-import com.example.ezchat.activities.NewChatRoomActivity;
+import com.example.ezchat.activities.ChatCreatorActivity;
 import com.example.ezchat.databinding.ActivitySearchUserItemBinding;
 import com.example.ezchat.models.UserModel;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -100,9 +100,9 @@ public class SearchUserRecyclerAdapter extends RecyclerView.Adapter<SearchUserRe
             holder.binding.profilePic.setImageResource(R.drawable.ic_person);
         }
 
-        // Set up click listener to open the NewChatRoomActivity
+        // Set up click listener to open the ChatCreatorActivity
         holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(context, NewChatRoomActivity.class);
+            Intent intent = new Intent(context, ChatCreatorActivity.class);
             intent.putExtra(UserModel.FIELD_PHONE, model.phone); // Pass phone as identifier
             intent.putExtra(UserModel.FIELD_USERNAME, model.username); // Pass username
             context.startActivity(intent);
