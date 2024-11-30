@@ -30,7 +30,6 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.HashMap;
 
 /**
  * A fragment that allows users to view and update their profile information.
@@ -60,7 +59,7 @@ public class ProfileFragment extends Fragment {
         getUserData();
 
         // Set up the update profile button click listener
-        binding.profileUpdateBtn.setOnClickListener(v -> updateBtnClick());
+        binding.profileUpdateBtn.setOnClickListener(v -> updateProfile());
 
         // Set up the logout button click listener
         binding.logoutBtn.setOnClickListener(v -> logoutUser());
@@ -115,37 +114,32 @@ public class ProfileFragment extends Fragment {
             return;
         }
 
-        firestore.collection(UserModel.FIELD_COLLECTION_NAME)
-                .document(phoneNumber) // Use phone number as the document ID
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    setInProgress(false);
-                    if (documentSnapshot.exists()) {
-                        currentUserModel = documentSnapshot.toObject(UserModel.class);
-                        if (currentUserModel != null) {
-                            binding.profileUsername.setText(currentUserModel.username);
-                            binding.profilePhone.setText(currentUserModel.phone);
+        currentUserModel = new UserModel();
+        currentUserModel.fetchUser(firestore, phoneNumber, user -> {
+            setInProgress(false);
+            if (user != null) {
+                currentUserModel = user;
+                binding.profileUsername.setText(user.username);
+                binding.profilePhone.setText(user.phone);
 
-                            if (currentUserModel.profilePic != null && !currentUserModel.profilePic.isEmpty()) {
-                                Bitmap bitmap = decodeImage(currentUserModel.profilePic);
-                                binding.profileImageView.setImageBitmap(bitmap);
-                                binding.textAddImage.setVisibility(View.GONE);
-                            }
-                        }
-                    } else {
-                        Toast.makeText(requireContext(), "User data not found.", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    setInProgress(false);
-                    Toast.makeText(requireContext(), "Failed to fetch user data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+                if (user.profilePic != null && !user.profilePic.isEmpty()) {
+                    Bitmap bitmap = decodeImage(user.profilePic);
+                    binding.profileImageView.setImageBitmap(bitmap);
+                    binding.textAddImage.setVisibility(View.GONE);
+                }
+            } else {
+                Toast.makeText(requireContext(), "User data not found.", Toast.LENGTH_SHORT).show();
+            }
+        }, error -> {
+            setInProgress(false);
+            Toast.makeText(requireContext(), "Failed to fetch user data: " + error, Toast.LENGTH_SHORT).show();
+        });
     }
 
     /**
      * Updates the user's profile with the new username and profile picture.
      */
-    private void updateBtnClick() {
+    private void updateProfile() {
         String newUsername = binding.profileUsername.getText().toString().trim();
 
         if (newUsername.isEmpty() || newUsername.length() < 3) {
@@ -160,59 +154,33 @@ public class ProfileFragment extends Fragment {
             currentUserModel.profilePic = encodedImage;
         }
 
-        String phoneNumber = preferenceManager.getString(UserModel.FIELD_PHONE);
-
-        if (phoneNumber == null) {
+        currentUserModel.updateUser(firestore, success -> {
             setInProgress(false);
-            Toast.makeText(getContext(), "Failed to update profile: No phone number.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        firestore.collection(UserModel.FIELD_COLLECTION_NAME)
-                .document(phoneNumber)
-                .update(
-                        UserModel.FIELD_USERNAME, newUsername,
-                        UserModel.FIELD_PROFILE_PIC, currentUserModel.profilePic
-                )
-                .addOnSuccessListener(aVoid -> {
-                    setInProgress(false);
-                    Toast.makeText(getContext(), "Profile updated successfully", Toast.LENGTH_SHORT).show();
-                })
-                .addOnFailureListener(e -> {
-                    setInProgress(false);
-                    Toast.makeText(getContext(), "Failed to update profile: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+            if (success) {
+                Toast.makeText(getContext(), "Profile updated successfully", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getContext(), "Failed to update profile.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     /**
      * Logs out the user by clearing their FCM token and preferences.
      */
     private void logoutUser() {
-        String phoneNumber = preferenceManager.getString(UserModel.FIELD_PHONE);
+        setInProgress(true);
+        currentUserModel.logoutUser(firestore, () -> {
+            setInProgress(false);
+            preferenceManager.clear();
+            FirebaseAuth.getInstance().signOut();
 
-        if (phoneNumber == null) {
-            Toast.makeText(getContext(), "Failed to log out: No phone number.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        HashMap<String, Object> updates = new HashMap<>();
-        updates.put(UserModel.FIELD_FCM_TOKEN, null);
-
-        firestore.collection(UserModel.FIELD_COLLECTION_NAME)
-                .document(phoneNumber)
-                .update(updates)
-                .addOnSuccessListener(aVoid -> {
-                    FirebaseMessaging.getInstance().deleteToken()
-                            .addOnCompleteListener(task -> {
-                                preferenceManager.clear();
-                                FirebaseAuth.getInstance().signOut();
-
-                                Intent intent = new Intent(getContext(), SplashActivity.class);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                startActivity(intent);
-                            });
-                })
-                .addOnFailureListener(e -> Toast.makeText(getContext(), "Failed to log out: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+            Intent intent = new Intent(getContext(), SplashActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        }, error -> {
+            setInProgress(false);
+            Toast.makeText(getContext(), "Failed to log out: " + error, Toast.LENGTH_SHORT).show();
+        });
     }
 
     /**

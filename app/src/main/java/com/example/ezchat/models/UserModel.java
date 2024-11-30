@@ -3,19 +3,23 @@ package com.example.ezchat.models;
 import android.content.Context;
 import android.widget.Toast;
 
+import androidx.core.util.Consumer;
+
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * Represents a user in the application, containing profile information,
  * contact details, metadata such as creation timestamp, FCM token, and the chat rooms
- * the user is part of.
+ * the user is part of. All user-related database actions are implemented here.
  */
-public class UserModel {
+public class UserModel implements Serializable {
 
     // Firestore collection and field constants
     public static final String FIELD_COLLECTION_NAME = "users";
@@ -26,31 +30,26 @@ public class UserModel {
     public static final String FIELD_PROFILE_PIC = "profilePic";
     public static final String FIELD_CHAT_ROOMS = "chatRooms";
 
-    // Public fields for direct Firestore access
+    // Public fields for user data
     public String phone;
     public String username;
-    public com.google.firebase.Timestamp createdTimestamp;
+    public Timestamp createdTimestamp;
     public String fcmToken;
     public String profilePic;
     public List<String> chatRooms;
 
-    private final FirebaseFirestore db; // Firestore instance
-
     /**
      * Default constructor for UserModel.
-     * Required for Firebase Firestore to deserialize user data.
      */
     public UserModel() {
-        this.db = FirebaseFirestore.getInstance();
         this.chatRooms = new ArrayList<>();
     }
 
     /**
      * Parameterized constructor to initialize the user model with essential fields.
      */
-    public UserModel(String phone, String username, com.google.firebase.Timestamp createdTimestamp,
+    public UserModel(String phone, String username, Timestamp createdTimestamp,
                      String fcmToken, String profilePic, List<String> chatRooms) {
-        this();
         this.phone = phone;
         this.username = username;
         this.createdTimestamp = createdTimestamp;
@@ -90,15 +89,15 @@ public class UserModel {
     }
 
     /**
-     * Fetches the current user's chat rooms from Firestore using their phone number.
+     * Fetches the current user's chat rooms from Firestore.
      *
-     * @param currentPhone The phone number of the current user.
-     * @param onComplete   Callback for success (with a list of chat room IDs).
-     * @param onFailure    Callback for failure (with error message).
+     * @param firestore   The Firestore instance to use.
+     * @param onComplete  Callback for success (with a list of chat room IDs).
+     * @param onFailure   Callback for failure (with error message).
      */
-    public void fetchChatRooms(String currentPhone, Consumer<List<String>> onComplete, Consumer<String> onFailure) {
-        db.collection(FIELD_COLLECTION_NAME)
-                .document(currentPhone)
+    public void fetchChatRooms(FirebaseFirestore firestore, Consumer<List<String>> onComplete, Consumer<String> onFailure) {
+        firestore.collection(FIELD_COLLECTION_NAME)
+                .document(phone)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
@@ -116,30 +115,90 @@ public class UserModel {
     }
 
     /**
+     * Sends a message to a chat room.
+     *
+     * @param firestore      The Firestore instance to use.
+     * @param chatRoomId     The ID of the chat room.
+     * @param recipientPhone The phone number of the recipient.
+     * @param messageText    The message text to send.
+     * @param onComplete     Callback for success or failure.
+     */
+    public void sendMessage(FirebaseFirestore firestore, String chatRoomId, String recipientPhone, String messageText, Consumer<Boolean> onComplete) {
+        // Create a new message
+        MessageModel message = new MessageModel(
+                phone, // Sender is the current user
+                recipientPhone,
+                messageText,
+                Timestamp.now(),
+                "sent"
+        );
+
+        // Add the message to the Firestore subcollection
+        firestore.collection(ChatroomModel.FIELD_COLLECTION_NAME)
+                .document(chatRoomId)
+                .collection("messages")
+                .add(message)
+                .addOnSuccessListener(aVoid -> {
+                    // Update chat room metadata
+                    updateChatRoomMetadata(firestore, chatRoomId, message, onComplete);
+                })
+                .addOnFailureListener(e -> onComplete.accept(false));
+    }
+
+    /**
+     * Updates the chat room metadata with the last message details.
+     *
+     * @param firestore  The Firestore instance to use.
+     * @param chatRoomId The ID of the chat room.
+     * @param message    The message details to update.
+     * @param onComplete Callback for success or failure.
+     */
+    private void updateChatRoomMetadata(FirebaseFirestore firestore, String chatRoomId, MessageModel message, Consumer<Boolean> onComplete) {
+        firestore.collection(ChatroomModel.FIELD_COLLECTION_NAME)
+                .document(chatRoomId)
+                .update(
+                        ChatroomModel.FIELD_LAST_MESSAGE, message.message,
+                        ChatroomModel.FIELD_LAST_MESSAGE_TIMESTAMP, message.timestamp,
+                        ChatroomModel.FIELD_LAST_MESSAGE_SENDER_PHONE, message.senderPhone
+                )
+                .addOnSuccessListener(aVoid -> onComplete.accept(true))
+                .addOnFailureListener(e -> onComplete.accept(false));
+    }
+
+    /**
+     * Updates the user's chat room list in Firestore.
+     *
+     * @param firestore  The Firestore instance to use.
+     * @param onComplete Callback for success or failure.
+     */
+    public void updateChatRooms(FirebaseFirestore firestore, Consumer<Boolean> onComplete) {
+        firestore.collection(FIELD_COLLECTION_NAME)
+                .document(phone)
+                .update(FIELD_CHAT_ROOMS, this.chatRooms)
+                .addOnSuccessListener(aVoid -> onComplete.accept(true))
+                .addOnFailureListener(e -> onComplete.accept(false));
+    }
+
+    /**
      * Deletes a chat room if the current user is the creator.
      *
+     * @param firestore     The Firestore instance to use.
      * @param chatRoomId    The ID of the chat room to delete.
-     * @param currentPhone  The phone number of the current user.
      * @param context       The context for showing Toast messages.
      * @param onComplete    Callback for success or failure.
      */
-    public void deleteChatRoom(String chatRoomId, String currentPhone, Context context, Consumer<Boolean> onComplete) {
-        db.collection(ChatroomModel.FIELD_COLLECTION_NAME)
+    public void deleteChatRoom(FirebaseFirestore firestore, String chatRoomId, Context context, Consumer<Boolean> onComplete) {
+        firestore.collection(ChatroomModel.FIELD_COLLECTION_NAME)
                 .document(chatRoomId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         ChatroomModel chatRoom = documentSnapshot.toObject(ChatroomModel.class);
-                        if (chatRoom != null) {
-                            if (chatRoom.creatorPhone.equals(currentPhone)) {
-                                deleteChatRoomAndMessages(chatRoomId, onComplete);
-                            } else {
-                                onComplete.accept(false);
-                                Toast.makeText(context, "You are not the creator of this chat room.", Toast.LENGTH_SHORT).show();
-                            }
+                        if (chatRoom != null && phone.equals(chatRoom.creatorPhone)) {
+                            deleteChatRoomAndMessages(firestore, chatRoomId, onComplete);
                         } else {
                             onComplete.accept(false);
-                            Toast.makeText(context, "Chat room details could not be retrieved.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context, "You are not the creator of this chat room.", Toast.LENGTH_SHORT).show();
                         }
                     } else {
                         onComplete.accept(false);
@@ -153,21 +212,18 @@ public class UserModel {
     }
 
     /**
-     * Deletes the chat room document and its associated messages.
-     *
-     * @param chatRoomId The ID of the chat room to delete.
-     * @param onComplete Callback for success or failure.
+     * Deletes the chat room and its messages.
      */
-    private void deleteChatRoomAndMessages(String chatRoomId, Consumer<Boolean> onComplete) {
-        db.collection(ChatroomModel.FIELD_COLLECTION_NAME)
+    private void deleteChatRoomAndMessages(FirebaseFirestore firestore, String chatRoomId, Consumer<Boolean> onComplete) {
+        firestore.collection(ChatroomModel.FIELD_COLLECTION_NAME)
                 .document(chatRoomId)
-                .collection(ChatroomModel.FIELD_COLLECTION_NAME)
+                .collection("messages")
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
                     for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
                         doc.getReference().delete();
                     }
-                    db.collection(ChatroomModel.FIELD_COLLECTION_NAME)
+                    firestore.collection(ChatroomModel.FIELD_COLLECTION_NAME)
                             .document(chatRoomId)
                             .delete()
                             .addOnSuccessListener(aVoid -> onComplete.accept(true))
@@ -176,17 +232,74 @@ public class UserModel {
                 .addOnFailureListener(e -> onComplete.accept(false));
     }
 
+
+
     /**
-     * Updates the user's chat room list in Firestore.
+     * Fetches the user data from Firestore by their phone number.
      *
-     * @param currentPhone The phone number of the current user.
-     * @param onComplete   Callback for success or failure.
+     * @param firestore Firestore instance to use.
+     * @param phone     The phone number of the user to fetch.
+     * @param onSuccess Callback for successful fetch with the user object.
+     * @param onFailure Callback for failure with the error message.
      */
-    public void updateChatRooms(String currentPhone, Consumer<Boolean> onComplete) {
-        db.collection(FIELD_COLLECTION_NAME)
-                .document(currentPhone)
-                .update(FIELD_CHAT_ROOMS, this.chatRooms)
+    public void fetchUser(FirebaseFirestore firestore, String phone, Consumer<UserModel> onSuccess, Consumer<String> onFailure) {
+        firestore.collection(FIELD_COLLECTION_NAME)
+                .document(phone)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        UserModel user = documentSnapshot.toObject(UserModel.class);
+                        onSuccess.accept(user);
+                    } else {
+                        onSuccess.accept(null); // User not found
+                    }
+                })
+                .addOnFailureListener(e -> onFailure.accept(e.getMessage()));
+    }
+
+    /**
+     * Updates the user's data in Firestore.
+     *
+     * @param firestore  Firestore instance to use.
+     * @param onComplete Callback for success or failure.
+     */
+    public void updateUser(FirebaseFirestore firestore, Consumer<Boolean> onComplete) {
+        if (phone == null || phone.isEmpty()) {
+            onComplete.accept(false); // Fail if phone number is missing
+            return;
+        }
+
+        HashMap<String, Object> updates = new HashMap<>();
+        updates.put(FIELD_USERNAME, username);
+        updates.put(FIELD_PROFILE_PIC, profilePic);
+
+        firestore.collection(FIELD_COLLECTION_NAME)
+                .document(phone)
+                .update(updates)
                 .addOnSuccessListener(aVoid -> onComplete.accept(true))
                 .addOnFailureListener(e -> onComplete.accept(false));
+    }
+
+    /**
+     * Logs out the user by clearing their FCM token in Firestore.
+     *
+     * @param firestore  Firestore instance to use.
+     * @param onSuccess  Callback for successful logout.
+     * @param onFailure  Callback for failure with the error message.
+     */
+    public void logoutUser(FirebaseFirestore firestore, Runnable onSuccess, Consumer<String> onFailure) {
+        if (phone == null || phone.isEmpty()) {
+            onFailure.accept("Phone number is missing.");
+            return;
+        }
+
+        HashMap<String, Object> updates = new HashMap<>();
+        updates.put(FIELD_FCM_TOKEN, null); // Clear the FCM token
+
+        firestore.collection(FIELD_COLLECTION_NAME)
+                .document(phone)
+                .update(updates)
+                .addOnSuccessListener(aVoid -> onSuccess.run())
+                .addOnFailureListener(e -> onFailure.accept(e.getMessage()));
     }
 }

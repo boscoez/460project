@@ -1,6 +1,5 @@
 package com.example.ezchat.activities;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.ViewGroup;
@@ -16,6 +15,7 @@ import com.example.ezchat.databinding.ActivityNewChatRoomBinding;
 import com.example.ezchat.databinding.ActivityNewChatRoomRecyclerItemBinding;
 import com.example.ezchat.models.ChatroomModel;
 import com.example.ezchat.models.UserModel;
+import com.example.ezchat.utilities.PreferenceManager;
 import com.example.ezchat.utilities.Utilities;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Activity for creating a new chat room by selecting users from a list.
+ * Activity for selecting users to start a chat room.
  */
 public class NewChatRoomActivity extends AppCompatActivity {
 
@@ -32,7 +32,10 @@ public class NewChatRoomActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private UserAdapter userAdapter;
     private final List<UserModel> userList = new ArrayList<>();
-    private final List<String> selectedPhones = new ArrayList<>(); // List of selected user phone numbers
+    private final List<String> selectedPhones = new ArrayList<>(); // List of selected phone numbers
+    private String currentUserPhone; // Current user's phone number
+
+    private PreferenceManager preferenceManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,8 +45,17 @@ public class NewChatRoomActivity extends AppCompatActivity {
         binding = ActivityNewChatRoomBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Initialize Firestore and RecyclerView
+        // Initialize Firestore, SharedPreferences, and RecyclerView
         db = FirebaseFirestore.getInstance();
+        preferenceManager = PreferenceManager.getInstance(getApplicationContext());
+        currentUserPhone = preferenceManager.getString(UserModel.FIELD_PHONE);
+
+        if (currentUserPhone == null || currentUserPhone.isEmpty()) {
+            Toast.makeText(this, "Failed to load current user.", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
         userAdapter = new UserAdapter(userList);
         binding.usersRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         binding.usersRecyclerView.setAdapter(userAdapter);
@@ -54,9 +66,9 @@ public class NewChatRoomActivity extends AppCompatActivity {
         // Set up Start Chat button
         binding.startChatButton.setOnClickListener(v -> {
             if (!selectedPhones.isEmpty()) {
-                createChatRoom();
+                navigateToChatRoom();
             } else {
-                Toast.makeText(this, "Please select at least one user", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Please select at least one user.", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -71,89 +83,40 @@ public class NewChatRoomActivity extends AppCompatActivity {
         db.collection(UserModel.FIELD_COLLECTION_NAME)
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
-                    userList.clear();
-                    String currentUserPhone = getCurrentUserPhone();
+                    userList.clear(); // Clear the list before adding users
                     for (DocumentSnapshot document : querySnapshot) {
                         UserModel user = document.toObject(UserModel.class);
                         if (user != null && !user.phone.equals(currentUserPhone)) {
-                            userList.add(user);
+                            userList.add(user); // Add only other users
                         }
                     }
                     if (userList.isEmpty()) {
-                        Toast.makeText(this, "No other users available", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "No other users available to chat with.", Toast.LENGTH_SHORT).show();
                     }
-                    userAdapter.notifyDataSetChanged();
+                    userAdapter.notifyDataSetChanged(); // Notify the adapter of data changes
                 })
                 .addOnFailureListener(e -> Toast.makeText(this, "Failed to fetch users: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
     /**
-     * Creates a new chat room and navigates to the chat room activity.
+     * Navigates to the ChatRoomActivity, passing a `ChatroomModel` object.
      */
-    private void createChatRoom() {
-        String chatRoomId = generateChatRoomId(); // Generate a unique chat room ID
-        String currentUserPhone = getCurrentUserPhone();
-
-        // Add the creator's phone number to the selected phones list
-        selectedPhones.add(currentUserPhone);
-
-        ChatroomModel chatRoom = new ChatroomModel();
-        chatRoom.chatroomId = chatRoomId;
-        chatRoom.phoneNumbers = new ArrayList<>(selectedPhones); // Use selected phones
-        chatRoom.creatorPhone = currentUserPhone;
-
-        // Create the chat room in Firestore
-        db.collection(ChatroomModel.FIELD_COLLECTION_NAME)
-                .document(chatRoomId)
-                .set(chatRoom)
-                .addOnSuccessListener(aVoid -> {
-                    // Navigate to ChatRoomActivity and pass the selected numbers
-                    navigateToChatRoom(chatRoomId, selectedPhones);
-                })
-                .addOnFailureListener(e -> Toast.makeText(this, "Failed to create chat room", Toast.LENGTH_SHORT).show());
-    }
-
-    /**
-     * Navigates to the ChatRoomActivity after successfully creating a chat room.
-     *
-     * @param chatRoomId     The ID of the created chat room.
-     * @param selectedPhones The list of phone numbers in the chat room.
-     */
-    private void navigateToChatRoom(String chatRoomId, List<String> selectedPhones) {
-        Intent intent = new Intent(this, ChatRoomActivity.class);
-        intent.putExtra(ChatroomModel.FIELD_CHATROOM_ID, chatRoomId);
-
-        // Pass the first selected phone (assume one-on-one chat)
-        if (selectedPhones.size() > 1) {
-            // Exclude the current user's phone and pass only the other user's phone
-            String otherUserPhone = selectedPhones.stream()
-                    .filter(phone -> !phone.equals(getCurrentUserPhone()))
-                    .findFirst()
-                    .orElse(null);
-
-            intent.putExtra("otherUserPhone", otherUserPhone);
+    private void navigateToChatRoom() {
+        // Add the current user's phone to the list of selected phones
+        if (!selectedPhones.contains(currentUserPhone)) {
+            selectedPhones.add(currentUserPhone);
         }
 
+        // Create a ChatroomModel object locally
+        ChatroomModel chatRoom = new ChatroomModel();
+        chatRoom.phoneNumbers = new ArrayList<>(selectedPhones);
+        chatRoom.creatorPhone = currentUserPhone;
+
+        // Navigate to ChatRoomActivity with the ChatroomModel object
+        Intent intent = new Intent(this, ChatRoomActivity.class);
+        intent.putExtra("chatRoom", chatRoom); // Pass ChatroomModel as a Serializable object
         startActivity(intent);
         finish(); // Close this activity to avoid duplicates
-    }
-
-    /**
-     * Generates a unique chat room ID.
-     *
-     * @return A unique chat room ID.
-     */
-    private String generateChatRoomId() {
-        return db.collection(ChatroomModel.FIELD_COLLECTION_NAME).document().getId();
-    }
-
-    /**
-     * Retrieves the current user's phone number from SharedPreferences.
-     *
-     * @return The current user's phone number.
-     */
-    private String getCurrentUserPhone() {
-        return getSharedPreferences("APP_PREFS", MODE_PRIVATE).getString(UserModel.FIELD_PHONE, "");
     }
 
     @Override
@@ -213,14 +176,20 @@ public class NewChatRoomActivity extends AppCompatActivity {
                     itemBinding.userProfileImage.setImageResource(R.drawable.ic_person);
                 }
 
-                // Checkbox to select/deselect the user
+                // Update the checkbox state
                 itemBinding.userCheckBox.setChecked(selectedPhones.contains(user.phone));
+
+                // Handle checkbox toggle
                 itemBinding.userCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
                     if (isChecked) {
-                        selectedPhones.add(user.phone);
+                        if (!selectedPhones.contains(user.phone)) {
+                            selectedPhones.add(user.phone); // Add to the list of selected phones
+                        }
                     } else {
-                        selectedPhones.remove(user.phone);
+                        selectedPhones.remove(user.phone); // Remove from the list of selected phones
                     }
+
+                    // Enable or disable the Start Chat button based on selection
                     binding.startChatButton.setEnabled(!selectedPhones.isEmpty());
                 });
             }

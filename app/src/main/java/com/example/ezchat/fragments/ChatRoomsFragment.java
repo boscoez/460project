@@ -21,44 +21,58 @@ import com.example.ezchat.databinding.FragmentChatRoomsRecyclerItemBinding;
 import com.example.ezchat.models.ChatroomModel;
 import com.example.ezchat.models.UserModel;
 import com.example.ezchat.utilities.PreferenceManager;
-import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 /**
- * Fragment to display the list of chat rooms the current user is part of.
- * Users can click on a chat room to navigate to its messages.
+ * Fragment to display the current user's chat rooms.
+ * Actively listens for changes in the chat rooms in real-time.
  */
 public class ChatRoomsFragment extends Fragment {
+    private static final String TAG = "ChatRoomsFragment";
 
-    private FragmentChatRoomsBinding binding; // View binding for the fragment
-    private PreferenceManager preferenceManager; // Preference manager for user data
-    private List<ChatroomModel> chatRoomList; // List of chat rooms
-    private ChatRoomAdapter chatRoomAdapter; // Adapter for the RecyclerView
-    private FirebaseFirestore firestore; // Firestore instance
+    private FragmentChatRoomsBinding binding;
+    private PreferenceManager preferenceManager;
+    private List<ChatroomModel> chatRoomList;
+    private ChatRoomAdapter chatRoomAdapter;
+    private FirebaseFirestore firestore;
+    private ListenerRegistration chatRoomListener;
 
+    @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentChatRoomsBinding.inflate(inflater, container, false);
 
-        // Initialize Firebase Firestore and PreferenceManager
+        // Initialize Firestore and PreferenceManager
         firestore = FirebaseFirestore.getInstance();
         preferenceManager = PreferenceManager.getInstance(requireContext());
 
         // Set up RecyclerView
         setupRecyclerView();
 
-        // Fetch chat rooms for the current user
-        fetchChatRooms();
-
-        // Set up "New Chat" button click listener
+        // Set up "New Chat" button
         binding.fabNewChat.setOnClickListener(v -> navigateToNewChatRoom());
 
+        // Start listening to chat room changes
+        listenForChatRoomChanges();
+
         return binding.getRoot();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (chatRoomListener != null) {
+            chatRoomListener.remove(); // Remove listener to avoid memory leaks
+        }
+        binding = null;
     }
 
     /**
@@ -72,9 +86,9 @@ public class ChatRoomsFragment extends Fragment {
     }
 
     /**
-     * Fetches chat rooms associated with the current user from Firestore.
+     * Listens for changes to the user's chat rooms in real-time.
      */
-    private void fetchChatRooms() {
+    private void listenForChatRoomChanges() {
         String phoneNumber = preferenceManager.getString(UserModel.FIELD_PHONE);
 
         if (phoneNumber == null) {
@@ -82,58 +96,72 @@ public class ChatRoomsFragment extends Fragment {
             return;
         }
 
-        firestore.collection(UserModel.FIELD_COLLECTION_NAME)
-                .document(phoneNumber) // User's phone number as document ID
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        UserModel user = documentSnapshot.toObject(UserModel.class);
-                        if (user != null && user.chatRooms != null && !user.chatRooms.isEmpty()) {
-                            loadChatRooms(user.chatRooms);
-                        } else {
-                            showNoChatRoomsMessage();
-                        }
-                    } else {
-                        showNoChatRoomsMessage();
+        Log.d(TAG, "Listening for chat room changes for user: " + phoneNumber);
+
+        chatRoomListener = firestore.collection(ChatroomModel.FIELD_COLLECTION_NAME)
+                .whereArrayContains("phoneNumbers", phoneNumber) // Filter chat rooms for the current user
+                .addSnapshotListener((querySnapshot, error) -> {
+                    if (error != null) {
+                        Log.e(TAG, "Error listening to chat rooms", error);
+                        return;
                     }
-                })
-                .addOnFailureListener(e -> {
-                    showNoChatRoomsMessage();
-                    Log.e("ChatRoomsFragment", "Error fetching user chat rooms", e);
+
+                    if (querySnapshot != null) {
+                        for (DocumentChange documentChange : querySnapshot.getDocumentChanges()) {
+                            ChatroomModel chatRoom = documentChange.getDocument().toObject(ChatroomModel.class);
+                            switch (documentChange.getType()) {
+                                case ADDED:
+                                    // Add new chat room to the list
+                                    chatRoomList.add(chatRoom);
+                                    chatRoomAdapter.notifyItemInserted(chatRoomList.size() - 1);
+                                    Log.d(TAG, "Chat room added: " + chatRoom.chatroomId);
+                                    break;
+
+                                case MODIFIED:
+                                    // Update an existing chat room in the list
+                                    int index = findChatRoomIndex(chatRoom.chatroomId);
+                                    if (index != -1) {
+                                        chatRoomList.set(index, chatRoom);
+                                        chatRoomAdapter.notifyItemChanged(index);
+                                        Log.d(TAG, "Chat room modified: " + chatRoom.chatroomId);
+                                    }
+                                    break;
+
+                                case REMOVED:
+                                    // Remove a chat room from the list
+                                    index = findChatRoomIndex(chatRoom.chatroomId);
+                                    if (index != -1) {
+                                        chatRoomList.remove(index);
+                                        chatRoomAdapter.notifyItemRemoved(index);
+                                        Log.d(TAG, "Chat room removed: " + chatRoom.chatroomId);
+                                    }
+                                    break;
+                            }
+                        }
+
+                        // Hide "No Chats" message if there are any chat rooms
+                        if (!chatRoomList.isEmpty()) {
+                            binding.noChatsMessage.setVisibility(View.GONE);
+                        } else {
+                            binding.noChatsMessage.setVisibility(View.VISIBLE);
+                        }
+                    }
                 });
     }
 
     /**
-     * Loads the chat rooms from Firestore based on the user's chat room IDs.
+     * Finds the index of a chat room in the list by its ID.
      *
-     * @param chatRoomIds The list of chat room IDs.
+     * @param chatRoomId The ID of the chat room to find.
+     * @return The index of the chat room, or -1 if not found.
      */
-    private void loadChatRooms(List<String> chatRoomIds) {
-        for (String chatRoomId : chatRoomIds) {
-            firestore.collection(ChatroomModel.FIELD_COLLECTION_NAME)
-                    .document(chatRoomId)
-                    .get()
-                    .addOnSuccessListener(documentSnapshot -> {
-                        if (documentSnapshot.exists()) {
-                            ChatroomModel chatRoom = documentSnapshot.toObject(ChatroomModel.class);
-                            if (chatRoom != null) {
-                                chatRoomList.add(chatRoom);
-                                chatRoomAdapter.notifyItemInserted(chatRoomList.size() - 1);
-                                binding.noChatsMessage.setVisibility(View.GONE);
-                            }
-                        }
-                    })
-                    .addOnFailureListener(e -> Log.e("ChatRoomsFragment", "Error loading chat room: " + chatRoomId, e));
+    private int findChatRoomIndex(String chatRoomId) {
+        for (int i = 0; i < chatRoomList.size(); i++) {
+            if (chatRoomList.get(i).chatroomId.equals(chatRoomId)) {
+                return i;
+            }
         }
-    }
-
-    /**
-     * Displays a message when no chat rooms are found.
-     */
-    private void showNoChatRoomsMessage() {
-        binding.noChatsMessage.setVisibility(View.VISIBLE);
-        chatRoomList.clear();
-        chatRoomAdapter.notifyDataSetChanged();
+        return -1;
     }
 
     /**
@@ -144,12 +172,6 @@ public class ChatRoomsFragment extends Fragment {
         startActivity(intent);
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
-    }
-
     /**
      * Adapter for displaying chat rooms in a RecyclerView.
      */
@@ -157,11 +179,6 @@ public class ChatRoomsFragment extends Fragment {
 
         private final List<ChatroomModel> chatRooms;
 
-        /**
-         * Constructor for ChatRoomAdapter.
-         *
-         * @param chatRooms List of chat rooms to display.
-         */
         public ChatRoomAdapter(List<ChatroomModel> chatRooms) {
             this.chatRooms = chatRooms;
         }
@@ -190,44 +207,32 @@ public class ChatRoomsFragment extends Fragment {
         class ChatRoomViewHolder extends RecyclerView.ViewHolder {
             private final FragmentChatRoomsRecyclerItemBinding itemBinding;
 
-            /**
-             * Constructor for ChatRoomViewHolder.
-             *
-             * @param itemBinding View binding for the RecyclerView item.
-             */
             public ChatRoomViewHolder(@NonNull FragmentChatRoomsRecyclerItemBinding itemBinding) {
                 super(itemBinding.getRoot());
                 this.itemBinding = itemBinding;
             }
 
-            /**
-             * Binds the chat room data to the view.
-             *
-             * @param chatRoom The chat room to bind.
-             */
             public void bind(ChatroomModel chatRoom) {
-                itemBinding.textViewUserName.setText(chatRoom.lastMessageSenderPhone); // Placeholder for user name
-                itemBinding.textViewLastMessage.setText(chatRoom.lastMessage);
+                String otherParticipantPhone = chatRoom.phoneNumbers.stream()
+                        .filter(phone -> !phone.equals(preferenceManager.getString(UserModel.FIELD_PHONE)))
+                        .findFirst()
+                        .orElse("Unknown");
+
+                itemBinding.textViewUserName.setText(otherParticipantPhone);
+                itemBinding.textViewLastMessage.setText(chatRoom.lastMessage != null ? chatRoom.lastMessage : "No messages yet");
                 itemBinding.textViewTimestamp.setText(formatTimestamp(chatRoom.lastMessageTimestamp));
 
-                // Handle item click
                 itemBinding.getRoot().setOnClickListener(v -> {
                     Intent intent = new Intent(requireContext(), ChatRoomActivity.class);
-                    intent.putExtra(ChatroomModel.FIELD_CHATROOM_ID, chatRoom.chatroomId);
+                    intent.putExtra("chatRoom", chatRoom); // Pass the full ChatroomModel object
                     startActivity(intent);
                 });
             }
 
-            /**
-             * Formats a Firestore timestamp into a user-friendly date string.
-             *
-             * @param timestamp The timestamp to format.
-             * @return A formatted date string.
-             */
-            private String formatTimestamp(com.google.firebase.Timestamp timestamp) {
-                if (timestamp == null) return "";
+            private String formatTimestamp(Date timestamp) {
+                if (timestamp == null) return "Unknown time";
                 SimpleDateFormat sdf = new SimpleDateFormat("MMM d, h:mm a", Locale.getDefault());
-                return sdf.format(timestamp.toDate());
+                return sdf.format(timestamp);
             }
         }
     }
