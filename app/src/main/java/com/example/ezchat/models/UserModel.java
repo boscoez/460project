@@ -134,7 +134,7 @@ public class UserModel implements Serializable {
         );
 
         // Add the message to the Firestore subcollection
-        firestore.collection(ChatroomModel.FIELD_COLLECTION_NAME)
+        firestore.collection(ChatModel.FIELD_COLLECTION_NAME)
                 .document(chatRoomId)
                 .collection("messages")
                 .add(message)
@@ -154,12 +154,12 @@ public class UserModel implements Serializable {
      * @param onComplete Callback for success or failure.
      */
     private void updateChatRoomMetadata(FirebaseFirestore firestore, String chatRoomId, MessageModel message, Consumer<Boolean> onComplete) {
-        firestore.collection(ChatroomModel.FIELD_COLLECTION_NAME)
+        firestore.collection(ChatModel.FIELD_COLLECTION_NAME)
                 .document(chatRoomId)
                 .update(
-                        ChatroomModel.FIELD_LAST_MESSAGE, message.message,
-                        ChatroomModel.FIELD_LAST_MESSAGE_TIMESTAMP, message.timestamp,
-                        ChatroomModel.FIELD_LAST_MESSAGE_SENDER_PHONE, message.senderPhone
+                        ChatModel.FIELD_LAST_MESSAGE, message.message,
+                        ChatModel.FIELD_LAST_MESSAGE_TIMESTAMP, message.timestamp,
+                        ChatModel.FIELD_LAST_MESSAGE_SENDER_PHONE, message.senderPhone
                 )
                 .addOnSuccessListener(aVoid -> onComplete.accept(true))
                 .addOnFailureListener(e -> onComplete.accept(false));
@@ -188,12 +188,12 @@ public class UserModel implements Serializable {
      * @param onComplete    Callback for success or failure.
      */
     public void deleteChatRoom(FirebaseFirestore firestore, String chatRoomId, Context context, Consumer<Boolean> onComplete) {
-        firestore.collection(ChatroomModel.FIELD_COLLECTION_NAME)
+        firestore.collection(ChatModel.FIELD_COLLECTION_NAME)
                 .document(chatRoomId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        ChatroomModel chatRoom = documentSnapshot.toObject(ChatroomModel.class);
+                        ChatModel chatRoom = documentSnapshot.toObject(ChatModel.class);
                         if (chatRoom != null && phone.equals(chatRoom.creatorPhone)) {
                             deleteChatRoomAndMessages(firestore, chatRoomId, onComplete);
                         } else {
@@ -215,7 +215,7 @@ public class UserModel implements Serializable {
      * Deletes the chat room and its messages.
      */
     private void deleteChatRoomAndMessages(FirebaseFirestore firestore, String chatRoomId, Consumer<Boolean> onComplete) {
-        firestore.collection(ChatroomModel.FIELD_COLLECTION_NAME)
+        firestore.collection(ChatModel.FIELD_COLLECTION_NAME)
                 .document(chatRoomId)
                 .collection("messages")
                 .get()
@@ -223,7 +223,7 @@ public class UserModel implements Serializable {
                     for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
                         doc.getReference().delete();
                     }
-                    firestore.collection(ChatroomModel.FIELD_COLLECTION_NAME)
+                    firestore.collection(ChatModel.FIELD_COLLECTION_NAME)
                             .document(chatRoomId)
                             .delete()
                             .addOnSuccessListener(aVoid -> onComplete.accept(true))

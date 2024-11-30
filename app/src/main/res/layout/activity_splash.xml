@@ -1,55 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
-    android:background="@color/my_primary"
     android:layout_height="match_parent"
+    android:background="@color/primary"
     tools:context=".activities.SplashActivity">
 
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical">
-
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center">
-
-            <!-- Overlayed Image (e.g., icon) -->
-            <ImageView
-                android:layout_width="333dp"
-                android:layout_height="333dp"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_chat"
-                app:tint="@color/my_secondary" />
-            <!-- Background Image (e.g., logo) -->
-            <ImageView
-                android:id="@+id/logoImageView"
-                android:layout_width="280dp"
-                android:layout_height="220dp"
-                android:layout_gravity="center"
-                android:padding="15dp"
-                android:src="@drawable/academicalliancepng" />
-        </FrameLayout>
-
-        <ProgressBar
-            android:layout_width="32dp"
-            android:layout_height="wrap_content" />
-
-    </LinearLayout>
-
-    <TextView
-        android:layout_width="match_parent"
+    <!-- Logo and Icon Container -->
+    <FrameLayout
+        android:id="@+id/logoContainer"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/developer_info"
-        android:layout_alignParentBottom="true"
-        android:gravity="center"
-        android:layout_marginBottom="10dp"
-        android:textColor="@color/off_white"/>
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/progressBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintVertical_chainStyle="packed">
 
-</RelativeLayout>
+        <!-- Background Icon -->
+        <ImageView
+            android:layout_width="333dp"
+            android:layout_height="333dp"
+            android:contentDescription="Chat Icon Background"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_chat"
+            app:tint="@color/secondary" />
+
+        <!-- Foreground Logo -->
+        <ImageView
+            android:id="@+id/logoImageView"
+            android:layout_width="280dp"
+            android:layout_height="220dp"
+            android:contentDescription="Academic Alliance Logo"
+            android:layout_gravity="center"
+            android:padding="15dp"
+            android:src="@drawable/academicalliancepng" />
+    </FrameLayout>
+
+    <!-- Progress Bar -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:indeterminateTint="@color/off_white"
+        app:layout_constraintTop_toBottomOf="@id/logoContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/developerText" />
+
+    <!-- Developer Information -->
+    <TextView
+        android:id="@+id/developerText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="@string/developer_info"
+        android:textColor="@color/off_white"
+        android:gravity="center"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

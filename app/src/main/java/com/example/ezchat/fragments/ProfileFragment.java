@@ -23,6 +23,7 @@ import com.example.ezchat.activities.SplashActivity;
 import com.example.ezchat.databinding.FragmentProfileBinding;
 import com.example.ezchat.models.UserModel;
 import com.example.ezchat.utilities.PreferenceManager;
+import com.example.ezchat.utilities.Utilities;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -87,8 +88,8 @@ public class ProfileFragment extends Fragment {
                         Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
 
                         // Compress and encode image
-                        Bitmap compressedBitmap = compressImage(bitmap);
-                        encodedImage = encodeImage(compressedBitmap);
+                        Bitmap compressedBitmap = Utilities.compressImage(bitmap);
+                        encodedImage = Utilities.encodeImage(compressedBitmap);
 
                         // Update UI with selected image
                         binding.profileImageView.setImageBitmap(compressedBitmap);
@@ -123,7 +124,7 @@ public class ProfileFragment extends Fragment {
                 binding.profilePhone.setText(user.phone);
 
                 if (user.profilePic != null && !user.profilePic.isEmpty()) {
-                    Bitmap bitmap = decodeImage(user.profilePic);
+                    Bitmap bitmap = Utilities.decodeImage(user.profilePic);
                     binding.profileImageView.setImageBitmap(bitmap);
                     binding.textAddImage.setVisibility(View.GONE);
                 }
@@ -189,34 +190,6 @@ public class ProfileFragment extends Fragment {
     private void setInProgress(boolean inProgress) {
         binding.profileProgressBar.setVisibility(inProgress ? View.VISIBLE : View.GONE);
         binding.profileUpdateBtn.setVisibility(inProgress ? View.GONE : View.VISIBLE);
-    }
-
-    /**
-     * Compresses the given bitmap to reduce file size.
-     */
-    private Bitmap compressImage(Bitmap bitmap) {
-        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 50, outStream);
-        byte[] byteArray = outStream.toByteArray();
-        return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
-    }
-
-    /**
-     * Encodes a bitmap to a Base64 string.
-     */
-    private String encodeImage(Bitmap bitmap) {
-        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outStream);
-        byte[] byteArray = outStream.toByteArray();
-        return android.util.Base64.encodeToString(byteArray, android.util.Base64.DEFAULT);
-    }
-
-    /**
-     * Decodes a Base64 string to a bitmap.
-     */
-    private Bitmap decodeImage(String encodedImage) {
-        byte[] bytes = android.util.Base64.decode(encodedImage, android.util.Base64.DEFAULT);
-        return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
     }
 
     @Override

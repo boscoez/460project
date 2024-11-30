@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.ezchat.R;
 import com.example.ezchat.databinding.ActivityMainBinding;
 import com.example.ezchat.fragments.CalendarFragment;
-import com.example.ezchat.fragments.ChatRoomsFragment;
+import com.example.ezchat.fragments.ChatCollectionFragment;
 import com.example.ezchat.fragments.ProfileFragment;
 import com.example.ezchat.models.UserModel;
 import com.example.ezchat.utilities.FirebaseUtil;
@@ -18,13 +18,13 @@ import com.google.firebase.messaging.FirebaseMessaging;
 
 /**
  * Main activity of the application that serves as the entry point after login.
- * It contains navigation to chat rooms and profile sections, and manages Firebase Cloud Messaging (FCM) tokens.
+ * It contains navigation to chat s and profile sections, and manages Firebase Cloud Messaging (FCM) tokens.
  */
 public class MainActivity extends AppCompatActivity {
 
     private SharedPreferences preferences; // Shared preferences to store user-related data
     private ActivityMainBinding binding;  // View binding for activity_main.xml
-    private ChatRoomsFragment chatRoomFragment; // Fragment for chat rooms
+    private ChatCollectionFragment chatFragment; // Fragment for chat
     private ProfileFragment profileFragment;    // Fragment for user profile
     private CalendarFragment calendarFragment;
 
@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
         preferences = getSharedPreferences(PreferenceManager.KEY_PREFERENCE_NAME, MODE_PRIVATE);
 
         // Initialize fragments
-        chatRoomFragment = new ChatRoomsFragment();
+        chatFragment = new ChatCollectionFragment();
         profileFragment = new ProfileFragment();
         calendarFragment = new CalendarFragment();
 
@@ -58,9 +58,9 @@ public class MainActivity extends AppCompatActivity {
         // Set up bottom navigation item selection listener
         binding.bottomNavigation.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.menu_chat) {
-                // Navigate to ChatRoomsFragment
+                // Navigate to ChatsFragment
                 getSupportFragmentManager().beginTransaction()
-                        .replace(binding.mainFrameLayout.getId(), chatRoomFragment).commit();
+                        .replace(binding.mainFrameLayout.getId(), chatFragment).commit();
             } else if (item.getItemId() == R.id.menu_profile) {
                 // Navigate to ProfileFragment
                 getSupportFragmentManager().beginTransaction()
@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
-        // Set default navigation to chat rooms
+        // Set default navigation to chat s
         binding.bottomNavigation.setSelectedItemId(R.id.menu_chat);
 
         // Fetch FCM token

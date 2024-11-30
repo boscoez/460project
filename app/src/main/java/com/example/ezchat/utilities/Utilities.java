@@ -23,8 +23,8 @@ public class Utilities {
      * @param encodedImage The Base64-encoded image string.
      * @return A Bitmap representation of the decoded image.
      */
-    public static Bitmap getBitmapFromEncodedString(String encodedImage) {
-        byte[] bytes = Base64.decode(encodedImage, Base64.DEFAULT);
+    public static Bitmap decodeImage(String encodedImage) {
+        byte[] bytes = Base64.decode(encodedImage, android.util.Base64.DEFAULT);
         return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
     }
 
@@ -42,16 +42,27 @@ public class Utilities {
         return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
     }
 
+    /**
+     * Encodes a bitmap to a Base64 string.
+     * @param bitmap The Bitmap image to encode.
+     */
+    public static String encodeImage(Bitmap bitmap) {
+        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+        // Compress the bitmap into JPEG format with 100% quality
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outStream);
+        byte[] byteArray = outStream.toByteArray();
+        // Encode the byte array into a Base64 string
+        return android.util.Base64.encodeToString(byteArray, android.util.Base64.DEFAULT);
+    }
 
     /**
      * Encodes a Bitmap image to a Base64 string after resizing and compressing it.
      *
      * @param bitmap The Bitmap image to encode.
+     * @param previewWidth The desired width for the preview image
      * @return A Base64 encoded string representation of the image.
      */
-    public static String encodeImage(Bitmap bitmap) {
-        // Define the desired width for the preview image
-        int previewWidth = 150;
+    public static String encodeImage(Bitmap bitmap, int previewWidth) {
         // Calculate the height to maintain the aspect ratio
         int previewHeight = bitmap.getHeight() * previewWidth / bitmap.getWidth();
 

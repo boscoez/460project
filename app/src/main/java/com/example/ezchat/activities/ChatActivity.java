@@ -13,9 +13,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.ezchat.databinding.ActivityChatRoomBinding;
-import com.example.ezchat.databinding.ActivityChatRoomRecyclerItemBinding;
-import com.example.ezchat.models.ChatroomModel;
+import com.example.ezchat.databinding.ActivityChatBinding;
+import com.example.ezchat.databinding.ActivityChatRecyclerItemBinding;
+import com.example.ezchat.models.ChatModel;
 import com.example.ezchat.models.MessageModel;
 import com.example.ezchat.models.UserModel;
 import com.example.ezchat.utilities.PreferenceManager;
@@ -27,24 +27,25 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Manages the chat interface for users to send and view messages within a chat room.
- * Automatically creates a new chat room if one doesn't exist.
+ * Activity for managing a chat interface where users can send and view messages.
+ * This activity handles the initialization of a chat, sending messages, and listening for updates.
  */
 public class ChatActivity extends AppCompatActivity {
 
-    private ActivityChatRoomBinding binding; // View binding for activity layout
-    private String chatRoomId; // ID of the chat room
-    private String currentUserPhone; // Current user's phone number
-    private String otherUserPhone; // Other participant's phone number
-    private List<MessageModel> messageList; // List of messages in the chat
-    private MessageAdapter messageAdapter; // Adapter for RecyclerView
-    private boolean isChatRoomCreated; // Indicates if the chat room is already created
-    private ChatroomModel chatRoom; // ChatroomModel instance for managing chat room
-    private PreferenceManager preferenceManager; // Preference manager for shared preferences
-    private FirebaseFirestore db; // Firestore instance
+    private ActivityChatBinding binding; // Binding for activity_chat.xml
+    private String chatId; // Unique ID for the chat
+    private String currentUserPhone; // Phone number of the current user
+    private String otherUserPhone; // Phone number of the other user in the chat
+    private List<MessageModel> messageList; // List of messages displayed in the chat
+    private MessageAdapter messageAdapter; // Adapter for displaying chat messages
+    private boolean isChatCreated; // Flag to indicate if the chat has been initialized
+    private ChatModel chat; // Represents the chat object
+    private PreferenceManager preferenceManager; // Manages user preferences
+    private FirebaseFirestore db; // Firebase Firestore instance for database operations
 
     /**
-     * Initializes the activity, sets up the chat room interface, and listens for messages.
+     * Called when the activity is first created.
+     * Sets up the chat interface, retrieves chat details, and initializes listeners for messages.
      *
      * @param savedInstanceState Saved state from a previous instance of this activity.
      */
@@ -52,60 +53,70 @@ public class ChatActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        binding = ActivityChatRoomBinding.inflate(getLayoutInflater());
+        // Initialize view binding
+        binding = ActivityChatBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        // Initialize Firestore and shared preference manager
         db = FirebaseFirestore.getInstance();
         preferenceManager = PreferenceManager.getInstance(getApplicationContext());
         currentUserPhone = preferenceManager.getString(UserModel.FIELD_PHONE);
 
+        // Validate current user phone number
         if (currentUserPhone == null) {
             Toast.makeText(this, "Unable to fetch current user details.", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        chatRoom = (ChatroomModel) getIntent().getSerializableExtra("chatRoom");
+        // Retrieve chat details passed via intent
+        chat = (ChatModel) getIntent().getSerializableExtra(ChatModel.FIELD_COLLECTION_NAME);
 
-        if (chatRoom == null || chatRoom.phoneNumbers == null || chatRoom.phoneNumbers.isEmpty()) {
-            Toast.makeText(this, "Invalid chat room details.", Toast.LENGTH_SHORT).show();
+        // Validate chat details
+        if (chat == null || chat.phoneNumbers == null || chat.phoneNumbers.isEmpty()) {
+            Toast.makeText(this, "Invalid chat details.", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        chatRoomId = chatRoom.chatroomId;
-        isChatRoomCreated = !TextUtils.isEmpty(chatRoomId);
+        chatId = chat.chatId;
+        isChatCreated = !TextUtils.isEmpty(chatId);
 
+        // Initialize UI components and listeners
         setupRecyclerView();
         setupButtonListeners();
 
-        if (isChatRoomCreated) {
+        // Start listening for messages if the chat is already created
+        if (isChatCreated) {
             listenForMessages();
         }
     }
 
     /**
-     * Sets up the RecyclerView to display chat messages.
+     * Configures the RecyclerView to display chat messages.
+     * Initializes the MessageAdapter for binding messages to the RecyclerView.
      */
     private void setupRecyclerView() {
         messageList = new ArrayList<>();
-        boolean isTwoUsers = chatRoom.phoneNumbers.size() == 2;
+        boolean isTwoUsers = chat.phoneNumbers.size() == 2; // Check if the chat involves only two users
         messageAdapter = new MessageAdapter(this, messageList, currentUserPhone, isTwoUsers);
         binding.chatRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         binding.chatRecyclerView.setAdapter(messageAdapter);
     }
 
     /**
-     * Sets up click listeners for the send message and back buttons.
+     * Sets up click listeners for UI elements, such as the back button and the send message button.
      */
     private void setupButtonListeners() {
+        // Handle back button click
         binding.backButton.setOnClickListener(v -> onBackPressed());
 
+        // Handle send message button click
         binding.messageSendButton.setOnClickListener(v -> {
             String messageText = binding.inputMessage.getText().toString().trim();
             if (!TextUtils.isEmpty(messageText)) {
                 sendMessage(messageText);
-                binding.inputMessage.setText("");
+                binding.inputMessage.setText(""); // Clear the input field
             } else {
                 Toast.makeText(this, "Message cannot be empty", Toast.LENGTH_SHORT).show();
             }
@@ -113,38 +124,39 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     /**
-     * Sends a message and ensures the chat room exists.
+     * Sends a message. If the chat does not exist, it creates a new one before sending.
      *
-     * @param messageText The text of the message to send.
+     * @param messageText The text of the message to be sent.
      */
     private void sendMessage(String messageText) {
-        if (!isChatRoomCreated) {
-            if (TextUtils.isEmpty(chatRoomId)) {
-                chatRoomId = db.collection(ChatroomModel.FIELD_COLLECTION_NAME).document().getId();
+        if (!isChatCreated) {
+            if (TextUtils.isEmpty(chatId)) {
+                // Generate a new chat ID if it doesn't exist
+                chatId = db.collection(ChatModel.FIELD_COLLECTION_NAME).document().getId();
             }
 
-            chatRoom.createChatRoom(db, chatRoomId, chatRoom.phoneNumbers, currentUserPhone, success -> {
+            chat.createChat(db, chatId, chat.phoneNumbers, currentUserPhone, success -> {
                 if (Boolean.TRUE.equals(success)) {
-                    isChatRoomCreated = true;
-                    addMessageToChatRoom(messageText);
+                    isChatCreated = true;
+                    addMessageToChat(messageText);
                 } else {
-                    Toast.makeText(this, "Failed to create chat room", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Failed to create chat.", Toast.LENGTH_SHORT).show();
                 }
             });
         } else {
-            addMessageToChatRoom(messageText);
+            addMessageToChat(messageText);
         }
     }
 
     /**
-     * Adds a message to the chat room and updates the UI.
+     * Adds a message to the chat and updates the local UI with the new message.
      *
-     * @param messageText The text of the message to add.
+     * @param messageText The text of the message to be added.
      */
-    private void addMessageToChatRoom(String messageText) {
-        chatRoom.addMessageToChatRoom(db, chatRoomId, currentUserPhone, otherUserPhone, messageText, success -> {
+    private void addMessageToChat(String messageText) {
+        chat.addMessageToChat(db, chatId, currentUserPhone, otherUserPhone, messageText, success -> {
             if (Boolean.TRUE.equals(success)) {
-                // Add the message to the local list
+                // Add the sent message to the local list and notify the adapter
                 MessageModel sentMessage = new MessageModel(
                         currentUserPhone,
                         otherUserPhone,
@@ -156,16 +168,17 @@ public class ChatActivity extends AppCompatActivity {
                 messageAdapter.notifyItemInserted(messageList.size() - 1);
                 binding.chatRecyclerView.scrollToPosition(messageList.size() - 1);
             } else {
-                Toast.makeText(this, "Failed to send message", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Failed to send message.", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     /**
-     * Listens for real-time updates of messages in the chat room and updates the UI.
+     * Listens for real-time updates to messages in the chat.
+     * Updates the UI with new messages as they are received.
      */
     private void listenForMessages() {
-        chatRoom.listenForMessages(db, chatRoomId, message -> {
+        chat.listenForMessages(db, chatId, message -> {
             messageList.add(message);
             messageAdapter.notifyItemInserted(messageList.size() - 1);
             binding.chatRecyclerView.scrollToPosition(messageList.size() - 1);
@@ -173,15 +186,23 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     /**
-     * RecyclerView adapter for displaying chat messages with different layouts for sent and received messages.
+     * Adapter for managing and displaying chat messages in the RecyclerView.
      */
-    class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
+    static class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
 
-        private final Context context;
-        private final List<MessageModel> messages;
-        private final String currentUserPhone;
-        private final boolean isTwoUsers;
+        private final Context context; // Context for inflating views
+        private final List<MessageModel> messages; // List of chat messages
+        private final String currentUserPhone; // Phone number of the current user
+        private final boolean isTwoUsers; // Indicates if the chat is between two users
 
+        /**
+         * Constructs a MessageAdapter for managing chat messages.
+         *
+         * @param context          The context of the activity.
+         * @param messages         The list of messages to display.
+         * @param currentUserPhone The phone number of the current user.
+         * @param isTwoUsers       Indicates if the chat is a two-user conversation.
+         */
         public MessageAdapter(Context context, List<MessageModel> messages, String currentUserPhone, boolean isTwoUsers) {
             this.context = context;
             this.messages = messages;
@@ -192,7 +213,7 @@ public class ChatActivity extends AppCompatActivity {
         @NonNull
         @Override
         public MessageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            ActivityChatRoomRecyclerItemBinding binding = ActivityChatRoomRecyclerItemBinding.inflate(LayoutInflater.from(context), parent, false);
+            ActivityChatRecyclerItemBinding binding = ActivityChatRecyclerItemBinding.inflate(LayoutInflater.from(context), parent, false);
             return new MessageViewHolder(binding);
         }
 
@@ -213,15 +234,23 @@ public class ChatActivity extends AppCompatActivity {
             return messages.size();
         }
 
+        /**
+         * ViewHolder class for managing individual message views in the RecyclerView.
+         */
         class MessageViewHolder extends RecyclerView.ViewHolder {
 
-            private final ActivityChatRoomRecyclerItemBinding binding;
+            private final ActivityChatRecyclerItemBinding binding; // Binding for message item layout
 
-            public MessageViewHolder(@NonNull ActivityChatRoomRecyclerItemBinding binding) {
+            public MessageViewHolder(@NonNull ActivityChatRecyclerItemBinding binding) {
                 super(binding.getRoot());
                 this.binding = binding;
             }
 
+            /**
+             * Binds a sent message to the right-aligned layout.
+             *
+             * @param message The message to be displayed.
+             */
             void bindSentMessage(MessageModel message) {
                 binding.messageLayoutLeft.setVisibility(View.GONE);
                 binding.messageLayoutRight.setVisibility(View.VISIBLE);
@@ -231,6 +260,11 @@ public class ChatActivity extends AppCompatActivity {
                 if (!isTwoUsers) binding.usernameTextRight.setText(message.senderPhone);
             }
 
+            /**
+             * Binds a received message to the left-aligned layout.
+             *
+             * @param message The message to be displayed.
+             */
             void bindReceivedMessage(MessageModel message) {
                 binding.messageLayoutRight.setVisibility(View.GONE);
                 binding.messageLayoutLeft.setVisibility(View.VISIBLE);
@@ -240,6 +274,12 @@ public class ChatActivity extends AppCompatActivity {
                 if (!isTwoUsers) binding.usernameTextLeft.setText(message.senderPhone);
             }
 
+            /**
+             * Formats a Firebase Timestamp into a user-friendly date and time string.
+             *
+             * @param timestamp The timestamp to format.
+             * @return A formatted date and time string.
+             */
             private String formatTimestamp(com.google.firebase.Timestamp timestamp) {
                 if (timestamp == null) return "";
                 SimpleDateFormat sdf = new SimpleDateFormat("MMM d, h:mm a", Locale.getDefault());

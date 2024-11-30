@@ -1,5 +1,6 @@
 package com.example.ezchat.utilities;
 
+import com.example.ezchat.models.ChatModel;
 import com.example.ezchat.models.UserModel;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
@@ -26,19 +27,19 @@ public class FirebaseUtil {
     }
 
     public static DocumentReference currentUserDetails(){
-        return FirebaseFirestore.getInstance().collection("users").document(currentUserId());
+        return FirebaseFirestore.getInstance().collection(UserModel.FIELD_COLLECTION_NAME).document(currentUserId());
     }
 
     public static CollectionReference allUserCollectionReference(){
-        return FirebaseFirestore.getInstance().collection("users");
+        return FirebaseFirestore.getInstance().collection(UserModel.FIELD_COLLECTION_NAME);
     }
 
     public static DocumentReference getChatroomReference(String chatroomId){
-        return FirebaseFirestore.getInstance().collection("chatrooms").document(chatroomId);
+        return FirebaseFirestore.getInstance().collection(ChatModel.FIELD_COLLECTION_NAME).document(chatroomId);
     }
 
     public static CollectionReference getChatroomMessageReference(String chatroomId){
-        return getChatroomReference(chatroomId).collection("chats");
+        return getChatroomReference(chatroomId).collection(ChatModel.FIELD_COLLECTION_NAME);
     }
 
     public static String getChatroomId(String userId1,String userId2){
@@ -50,7 +51,7 @@ public class FirebaseUtil {
     }
 
     public static CollectionReference allChatroomCollectionReference(){
-        return FirebaseFirestore.getInstance().collection("chatrooms");
+        return FirebaseFirestore.getInstance().collection(ChatModel.FIELD_COLLECTION_NAME);
     }
 
     public static DocumentReference getOtherUserFromChatroom(List<String> userIds){
@@ -70,12 +71,12 @@ public class FirebaseUtil {
     }
 
     public static StorageReference  getCurrentProfilePicStorageRef(){
-        return FirebaseStorage.getInstance().getReference().child("profile_pic")
+        return FirebaseStorage.getInstance().getReference().child(UserModel.FIELD_PROFILE_PIC)
                 .child(FirebaseUtil.currentUserId());
     }
 
     public static StorageReference  getOtherProfilePicStorageRef(String otherUserId){
-        return FirebaseStorage.getInstance().getReference().child("profile_pic")
+        return FirebaseStorage.getInstance().getReference().child(UserModel.FIELD_PROFILE_PIC)
                 .child(otherUserId);
     }
 

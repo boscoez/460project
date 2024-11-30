@@ -16,9 +16,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ezchat.activities.ChatActivity;
 import com.example.ezchat.activities.ChatCreatorActivity;
-import com.example.ezchat.databinding.FragmentChatRoomsBinding;
-import com.example.ezchat.databinding.FragmentChatRoomsRecyclerItemBinding;
-import com.example.ezchat.models.ChatroomModel;
+import com.example.ezchat.databinding.FragmentChatCollectionBinding;
+import com.example.ezchat.databinding.FragmentChatCollectionRecyclerItemBinding;
+import com.example.ezchat.models.ChatModel;
 import com.example.ezchat.models.UserModel;
 import com.example.ezchat.utilities.PreferenceManager;
 import com.google.firebase.firestore.DocumentChange;
@@ -32,15 +32,15 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Fragment to display the current user's chat rooms.
- * Actively listens for changes in the chat rooms in real-time.
+ * Fragment to display the current user's chat.
+ * Actively listens for changes in the chat in real-time.
  */
-public class ChatRoomsFragment extends Fragment {
-    private static final String TAG = "ChatRoomsFragment";
+public class ChatCollectionFragment extends Fragment {
+    private static final String TAG = "ChatCollectionFragment";
 
-    private FragmentChatRoomsBinding binding;
+    private FragmentChatCollectionBinding binding;
     private PreferenceManager preferenceManager;
-    private List<ChatroomModel> chatRoomList;
+    private List<ChatModel> chatRoomList;
     private ChatRoomAdapter chatRoomAdapter;
     private FirebaseFirestore firestore;
     private ListenerRegistration chatRoomListener;
@@ -48,7 +48,7 @@ public class ChatRoomsFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        binding = FragmentChatRoomsBinding.inflate(inflater, container, false);
+        binding = FragmentChatCollectionBinding.inflate(inflater, container, false);
 
         // Initialize Firestore and PreferenceManager
         firestore = FirebaseFirestore.getInstance();
@@ -76,7 +76,7 @@ public class ChatRoomsFragment extends Fragment {
     }
 
     /**
-     * Sets up the RecyclerView to display chat rooms.
+     * Sets up the RecyclerView to display chat.
      */
     private void setupRecyclerView() {
         chatRoomList = new ArrayList<>();
@@ -86,7 +86,7 @@ public class ChatRoomsFragment extends Fragment {
     }
 
     /**
-     * Listens for changes to the user's chat rooms in real-time.
+     * Listens for changes to the user's chat in real-time.
      */
     private void listenForChatRoomChanges() {
         String phoneNumber = preferenceManager.getString(UserModel.FIELD_PHONE);
@@ -98,48 +98,42 @@ public class ChatRoomsFragment extends Fragment {
 
         Log.d(TAG, "Listening for chat room changes for user: " + phoneNumber);
 
-        chatRoomListener = firestore.collection(ChatroomModel.FIELD_COLLECTION_NAME)
-                .whereArrayContains("phoneNumbers", phoneNumber) // Filter chat rooms for the current user
+        chatRoomListener = firestore.collection(ChatModel.FIELD_COLLECTION_NAME)
+                .whereArrayContains("phoneNumbers", phoneNumber) // Filter chat for the current user
                 .addSnapshotListener((querySnapshot, error) -> {
                     if (error != null) {
-                        Log.e(TAG, "Error listening to chat rooms", error);
+                        Log.e(TAG, "Error listening to chat", error);
                         return;
                     }
 
                     if (querySnapshot != null) {
                         for (DocumentChange documentChange : querySnapshot.getDocumentChanges()) {
-                            ChatroomModel chatRoom = documentChange.getDocument().toObject(ChatroomModel.class);
+                            ChatModel chatRoom = documentChange.getDocument().toObject(ChatModel.class);
                             switch (documentChange.getType()) {
-                                case ADDED:
-                                    // Add new chat room to the list
+                                case ADDED: // Add new chat room to the list
                                     chatRoomList.add(chatRoom);
                                     chatRoomAdapter.notifyItemInserted(chatRoomList.size() - 1);
-                                    Log.d(TAG, "Chat room added: " + chatRoom.chatroomId);
                                     break;
 
-                                case MODIFIED:
-                                    // Update an existing chat room in the list
-                                    int index = findChatRoomIndex(chatRoom.chatroomId);
+                                case MODIFIED: // Update an existing chat room in the list
+                                    int index = findChatRoomIndex(chatRoom.chatId);
                                     if (index != -1) {
                                         chatRoomList.set(index, chatRoom);
                                         chatRoomAdapter.notifyItemChanged(index);
-                                        Log.d(TAG, "Chat room modified: " + chatRoom.chatroomId);
                                     }
                                     break;
 
-                                case REMOVED:
-                                    // Remove a chat room from the list
-                                    index = findChatRoomIndex(chatRoom.chatroomId);
+                                case REMOVED:// Remove a chat room from the list
+                                    index = findChatRoomIndex(chatRoom.chatId);
                                     if (index != -1) {
                                         chatRoomList.remove(index);
                                         chatRoomAdapter.notifyItemRemoved(index);
-                                        Log.d(TAG, "Chat room removed: " + chatRoom.chatroomId);
                                     }
                                     break;
                             }
                         }
 
-                        // Hide "No Chats" message if there are any chat rooms
+                        // Hide "No Chats" message if there are any chat
                         if (!chatRoomList.isEmpty()) {
                             binding.noChatsMessage.setVisibility(View.GONE);
                         } else {
@@ -157,7 +151,7 @@ public class ChatRoomsFragment extends Fragment {
      */
     private int findChatRoomIndex(String chatRoomId) {
         for (int i = 0; i < chatRoomList.size(); i++) {
-            if (chatRoomList.get(i).chatroomId.equals(chatRoomId)) {
+            if (chatRoomList.get(i).chatId.equals(chatRoomId)) {
                 return i;
             }
         }
@@ -173,46 +167,46 @@ public class ChatRoomsFragment extends Fragment {
     }
 
     /**
-     * Adapter for displaying chat rooms in a RecyclerView.
+     * Adapter for displaying chat in a RecyclerView.
      */
     private class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ChatRoomViewHolder> {
 
-        private final List<ChatroomModel> chatRooms;
+        private final List<ChatModel> chat;
 
-        public ChatRoomAdapter(List<ChatroomModel> chatRooms) {
-            this.chatRooms = chatRooms;
+        public ChatRoomAdapter(List<ChatModel> chat) {
+            this.chat = chat;
         }
 
         @NonNull
         @Override
         public ChatRoomViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            FragmentChatRoomsRecyclerItemBinding itemBinding = FragmentChatRoomsRecyclerItemBinding.inflate(
+            FragmentChatCollectionRecyclerItemBinding itemBinding = FragmentChatCollectionRecyclerItemBinding.inflate(
                     LayoutInflater.from(parent.getContext()), parent, false);
             return new ChatRoomViewHolder(itemBinding);
         }
 
         @Override
         public void onBindViewHolder(@NonNull ChatRoomViewHolder holder, int position) {
-            holder.bind(chatRooms.get(position));
+            holder.bind(chat.get(position));
         }
 
         @Override
         public int getItemCount() {
-            return chatRooms.size();
+            return chat.size();
         }
 
         /**
          * ViewHolder class for individual chat room items.
          */
         class ChatRoomViewHolder extends RecyclerView.ViewHolder {
-            private final FragmentChatRoomsRecyclerItemBinding itemBinding;
+            private final FragmentChatCollectionRecyclerItemBinding itemBinding;
 
-            public ChatRoomViewHolder(@NonNull FragmentChatRoomsRecyclerItemBinding itemBinding) {
+            public ChatRoomViewHolder(@NonNull FragmentChatCollectionRecyclerItemBinding itemBinding) {
                 super(itemBinding.getRoot());
                 this.itemBinding = itemBinding;
             }
 
-            public void bind(ChatroomModel chatRoom) {
+            public void bind(ChatModel chatRoom) {
                 String otherParticipantPhone = chatRoom.phoneNumbers.stream()
                         .filter(phone -> !phone.equals(preferenceManager.getString(UserModel.FIELD_PHONE)))
                         .findFirst()
@@ -224,7 +218,7 @@ public class ChatRoomsFragment extends Fragment {
 
                 itemBinding.getRoot().setOnClickListener(v -> {
                     Intent intent = new Intent(requireContext(), ChatActivity.class);
-                    intent.putExtra("chatRoom", chatRoom); // Pass the full ChatroomModel object
+                    intent.putExtra("chatRoom", chatRoom); // Pass the full ChatModel object
                     startActivity(intent);
                 });
             }

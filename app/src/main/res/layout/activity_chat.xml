@@ -6,72 +6,98 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
-    android:padding="10dp"
-    android:background="@color/my_primary"
+    android:background="@color/primary"
     tools:context=".activities.ChatActivity">
 
-    <!-- Back Button to Return to the Previous Screen -->
+    <!-- Back Button: Allows users to return to the previous screen -->
     <ImageButton
         android:id="@+id/backButton"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
-        android:src="@drawable/ic_back"
+        android:layout_width="43dp"
+        android:layout_height="43dp"
+        android:layout_margin="17dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        app:tint="@color/white"
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_back"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:tint="@color/white" />
 
-    <!-- Delete Chat Button (Visible only to the creator of the chat) -->
+    <TextView
+        android:id="@+id/titleText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="17dp"
+        android:gravity="center"
+        android:paddingHorizontal="25dp"
+        android:text="Chat"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/backButton"
+        app:layout_constraintLeft_toRightOf="@id/backButton"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/backButton" />
+
+    <!-- Delete Chat Button: Visible only to the chat creator for deleting the chat room -->
     <Button
         android:id="@+id/deleteChatButton"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Delete Chat Room"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        android:backgroundTint="@android:color/holo_red_dark"
-        android:textColor="@color/white"
-        android:visibility="visible" /> <!-- Initially hidden -->
+        android:layout_marginStart="17dp"
+        android:backgroundTint="@android:color/holo_red_light"
+        android:text="DELETE"
+        android:textSize="23sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/backButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/backButton"
+        app:tint="@android:color/holo_red_dark" />
 
-    <!-- RecyclerView for displaying chat messages -->
+    <!-- RecyclerView: Displays the list of chat messages -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/chatRecyclerView"
         android:layout_width="match_parent"
-        android:background="@drawable/bg_content_top"
         android:layout_height="0dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="20dp"
-        android:padding="10dp"
-        app:layout_constraintTop_toBottomOf="@id/backButton"
-        app:layout_constraintBottom_toTopOf="@id/inputMessage"
+        android:layout_marginVertical="17dp"
+        android:background="@drawable/bg_content_top"
+        android:padding="17dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:stackFromEnd="true"/>
+        app:layout_constraintBottom_toTopOf="@id/inputMessage"
+        app:layout_constraintTop_toBottomOf="@id/backButton"
+        app:stackFromEnd="true"
+        tools:listitem="@layout/activity_chat_recycler_item" />
 
-    <!-- EditText for typing messages -->
+    <!-- EditText: Input field for composing chat messages -->
     <EditText
         android:id="@+id/inputMessage"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
+        android:layout_marginHorizontal="17dp"
+        android:layout_marginVertical="17dp"
         android:hint="Type a message"
         android:inputType="text"
+        android:paddingVertical="17dp"
         android:textColor="@color/white"
         android:textColorHint="@android:color/darker_gray"
+        android:textSize="23sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/messageSendButton"/>
+        app:layout_constraintEnd_toStartOf="@+id/messageSendButton"
+        app:layout_constraintStart_toStartOf="parent" />
 
-    <!-- Button to Send Message -->
+    <!-- Send Button: Sends the typed chat message -->
     <ImageButton
         android:id="@+id/messageSendButton"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:src="@drawable/ic_send"
-        android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
+        android:layout_width="43dp"
+        android:layout_height="43dp"
+        android:layout_margin="17dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        app:tint="@color/white"
+        android:enabled="false"
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_send"
+        android:tooltipText="SEND"
+        app:layout_constraintBottom_toBottomOf="@+id/inputMessage"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintTop_toTopOf="@+id/inputMessage"
+        app:tint="@color/white" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

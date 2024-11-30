@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="my_primary">#000833</color>
-    <color name="my_secondary">#FFFFFF</color>
+    <color name="primary">#000833</color>
+    <color name="secondary">#FFFFFF</color>
 
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
@@ -10,8 +10,11 @@
     <color name="light_gray">#6C6C6C</color>
     <color name="primary_dark">#FF000000</color>
 
-    <color name="chat_color_sender">#6C6C6C</color>
-    <color name="chat_color_receiver">#000833</color>
+    <color name="chat_color_sender">#004D40</color>
+    <color name="chat_color_receiver">#311B92</color>
 
     <color name="input_background">#ECECEC</color>
+
+    <color name="fab_background">#B2DFDB</color>
+
 </resources>

@@ -5,31 +5,36 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="19dp"
     android:gravity="center"
     android:orientation="vertical"
-    android:weightSum="100">
-    
-    
+    android:padding="19dp"
+    android:weightSum="100"
+    tools:context=".activities.LoginUserNameActivity">
+
+    <!-- Welcome Message -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
         android:text="Welcome to Academic Alliance"
+        android:textColor="@color/primary"
         android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="@color/primary_dark" />
+        android:textStyle="bold" />
 
+    <!-- Prompt for Username or Email -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_weight="5"
+        android:gravity="center"
         android:letterSpacing="0.07"
         android:text="Enter Username or Email"
+        android:textColor="@color/black"
         android:textSize="22sp"
-        android:textStyle="bold"/>
+        android:textStyle="bold" />
 
+    <!-- Input Fields Section -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -37,6 +42,7 @@
         android:gravity="center"
         android:orientation="vertical">
 
+        <!-- Username Input -->
         <EditText
             android:id="@+id/login_username"
             android:layout_width="match_parent"
@@ -47,8 +53,11 @@
             android:hint="Username"
             android:inputType="text"
             android:minHeight="48dp"
-            android:padding="10dp" />
+            android:padding="10dp"
+            android:textColor="@color/black"
+            android:textColorHint="@color/light_gray" />
 
+        <!-- Password Input -->
         <EditText
             android:id="@+id/login_password"
             android:layout_width="match_parent"
@@ -57,54 +66,50 @@
             android:background="@drawable/bg_rectangle"
             android:elevation="5dp"
             android:hint="Password"
-            android:inputType="text"
+            android:inputType="textPassword"
             android:minHeight="48dp"
-            android:padding="10dp" />
+            android:padding="10dp"
+            android:textColor="@color/black"
+            android:textColorHint="@color/light_gray" />
 
+        <!-- Sign-In Button and Progress Bar -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:layout_weight="20"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
             android:gravity="center_vertical"
             android:orientation="vertical">
 
+            <!-- Sign-In Button -->
             <Button
                 android:id="@+id/login_code_btn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_rectangle"
-                android:text=" SIGN IN " />
+                android:padding="10dp"
+                android:text="SIGN IN"
+                android:textColor="@color/white"
+                android:textSize="18sp" />
 
-
-
+            <!-- Progress Bar -->
             <ProgressBar
                 android:id="@+id/login_progress_bar"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
                 android:layout_gravity="center"
-                android:visibility="invisible"
-                android:indeterminateTint="@color/my_primary"/>
-
+                android:indeterminateTint="@color/primary"
+                android:visibility="invisible" />
         </LinearLayout>
 
-       <TextView
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           android:layout_marginTop="10dp"
-           android:text="Create New Account"
-           android:textColor="@color/primary_dark"
-           android:textSize="18sp"
-           android:textStyle="bold"/>
-
-
-
-
-
-
-
-
+        <!-- Create New Account Link -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:text="Create New Account"
+            android:textColor="@color/primary_dark"
+            android:textSize="18sp"
+            android:textStyle="bold" />
     </LinearLayout>
-
-
-
 </LinearLayout>

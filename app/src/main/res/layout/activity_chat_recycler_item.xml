@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--activity_chat_room_recycler_item.xml-->
+<?xml version="1.0" encoding="utf-8"?><!-- Layout for individual chat messages in the chat room -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -24,6 +23,7 @@
             android:id="@+id/imageProfileLeft"
             android:layout_width="40dp"
             android:layout_height="40dp"
+            android:layout_marginEnd="8dp"
             android:background="@drawable/bg_circle"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_person"
@@ -36,18 +36,17 @@
             android:id="@+id/messageTextLeft"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
+            android:layout_marginStart="8dp"
             android:background="@drawable/bg_message_left"
-            android:paddingStart="20dp"
+            android:paddingStart="16dp"
             android:paddingTop="8dp"
-            android:paddingEnd="20dp"
+            android:paddingEnd="16dp"
             android:paddingBottom="8dp"
-            android:text="This is a received message jhfkekhdkhchksdhksdchkcdshkcdshkdshkdsckhdshk"
+            android:text="Received message"
             android:textColor="@color/white"
-            android:textSize="16sp"
+            android:textSize="27sp"
             app:layout_constraintStart_toEndOf="@id/imageProfileLeft"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintWidth_max="wrap"
             app:layout_constraintWidth_percent="0.75" />
 
         <!-- Username and Timestamp for Received Message -->
@@ -55,10 +54,9 @@
             android:id="@+id/usernameTextLeft"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingEnd="20dp"
             android:text="Username"
-            android:textColor="@color/my_primary"
-            android:textSize="14sp"
+            android:textColor="@color/primary"
+            android:textSize="17sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="@id/messageTextLeft"
             app:layout_constraintTop_toBottomOf="@id/messageTextLeft" />
@@ -67,15 +65,15 @@
             android:id="@+id/timestampTextLeft"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
             android:text="12:00 PM"
             android:textColor="@color/light_gray"
-            android:textSize="14sp"
+            android:textSize="17sp"
             app:layout_constraintStart_toEndOf="@id/usernameTextLeft"
             app:layout_constraintTop_toBottomOf="@id/messageTextLeft" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-
-    <!-- Left Message Layout (For Sent Messages) -->
+    <!-- Right Message Layout (For Sent Messages) -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/messageLayoutRight"
         android:layout_width="match_parent"
@@ -91,6 +89,7 @@
             android:id="@+id/imageProfileRight"
             android:layout_width="40dp"
             android:layout_height="40dp"
+            android:layout_marginStart="8dp"
             android:background="@drawable/bg_circle"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_person"
@@ -103,18 +102,17 @@
             android:id="@+id/messageTextRight"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
+            android:layout_marginEnd="8dp"
             android:background="@drawable/bg_message_right"
-            android:paddingStart="20dp"
+            android:paddingStart="16dp"
             android:paddingTop="8dp"
-            android:paddingEnd="20dp"
+            android:paddingEnd="16dp"
             android:paddingBottom="8dp"
-            android:text="This is a sent message jhfkekhdkhchksdhksdchkcdshkcdshkdshkdsckhdshk"
+            android:text="Sent message"
             android:textColor="@color/white"
-            android:textSize="16sp"
+            android:textSize="27sp"
             app:layout_constraintEnd_toStartOf="@id/imageProfileRight"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintWidth_max="wrap"
             app:layout_constraintWidth_percent="0.75" />
 
         <!-- Username and Timestamp for Sent Message -->
@@ -122,10 +120,9 @@
             android:id="@+id/usernameTextRight"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingStart="20dp"
             android:text="Username"
-            android:textColor="@color/my_primary"
-            android:textSize="14sp"
+            android:textColor="@color/primary"
+            android:textSize="17sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="@id/messageTextRight"
             app:layout_constraintTop_toBottomOf="@id/messageTextRight" />
@@ -134,9 +131,10 @@
             android:id="@+id/timestampTextRight"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
             android:text="12:00 PM"
             android:textColor="@color/light_gray"
-            android:textSize="14sp"
+            android:textSize="17sp"
             app:layout_constraintEnd_toStartOf="@id/usernameTextRight"
             app:layout_constraintTop_toBottomOf="@id/messageTextRight" />
     </androidx.constraintlayout.widget.ConstraintLayout>

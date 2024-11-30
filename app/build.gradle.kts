@@ -49,6 +49,7 @@ dependencies {
     implementation(libs.media3.common)
     implementation(libs.roundedimageview)
     implementation(libs.recyclerview)
+    implementation(libs.geocoder)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

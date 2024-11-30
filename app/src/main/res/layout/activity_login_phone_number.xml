@@ -1,155 +1,175 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="19dp"
+    android:padding="16dp"
     android:gravity="center"
     android:orientation="vertical"
-    android:weightSum="100"
     tools:context=".activities.LoginPhoneNumberActivity">
 
+    <!-- Welcome Message -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
+        android:layout_marginBottom="8dp"
         android:text="Welcome to Academic Alliance"
         android:textColor="@color/primary_dark"
-        android:textSize="25sp"
-        android:textStyle="bold" />
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:gravity="center" />
 
+    <!-- Step Indicator -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="20"
-        android:gravity="center">
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:weightSum="3">
 
-        <RelativeLayout
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_margin="10dp"
-            android:background="@drawable/bg_circle"
-            android:backgroundTint="@color/my_primary">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:text="@string/_1"
-                android:textColor="@color/white"
-                android:textSize="25sp" />
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:layout_margin="10dp"
-            android:background="@drawable/bg_circle"
-            android:backgroundTint="@color/light_gray">
+        <!-- Step 1 (Active Step) -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center">
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:text="@string/_2"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/bg_circle"
+                android:backgroundTint="@color/primary"
+                android:gravity="center"
+                android:text="1"
                 android:textColor="@color/white"
-                android:textSize="25sp" />
-        </RelativeLayout>
+                android:textSize="20sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
-        <RelativeLayout
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:layout_margin="10dp"
-            android:background="@drawable/bg_circle"
-            android:backgroundTint="@color/light_gray">
+        <!-- Step 2 -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center">
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:text="@string/_3"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_circle"
+                android:backgroundTint="@color/light_gray"
+                android:gravity="center"
+                android:text="2"
                 android:textColor="@color/white"
-                android:textSize="25sp" />
-        </RelativeLayout>
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Step 3 -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_circle"
+                android:backgroundTint="@color/light_gray"
+                android:gravity="center"
+                android:text="3"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </LinearLayout>
     </LinearLayout>
 
+    <!-- Illustration Image -->
     <ImageView
-        android:layout_width="222dp"
-        android:layout_height="222dp"
-        android:layout_weight="20"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_marginTop="16dp"
+        android:contentDescription="Phone icon"
         android:src="@drawable/ic_phone"
-        app:tint="@color/my_primary" />
+        app:tint="@color/primary" />
 
-    <!-- Title TextView for "Create New Account" -->
+    <!-- Title -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="16dp"
         android:text="Enter Mobile Number"
-        android:textColor="@color/my_primary"
-        android:textSize="25sp"
-        android:textStyle="bold" />
+        android:textColor="@color/primary"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:gravity="center" />
 
+    <!-- Input Fields Section -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
-        android:layout_weight="5"
+        android:layout_marginTop="20dp"
         android:gravity="center"
         android:orientation="horizontal">
 
+        <!-- Country Code Picker -->
         <com.hbb20.CountryCodePicker
             android:id="@+id/login_countrycode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
             app:ccp_showFlag="true"
             app:ccp_showNameCode="false"
-            app:ccp_textSize="25dp" />
+            app:ccp_textSize="18sp" />
 
+        <!-- Phone Number Input -->
         <EditText
             android:id="@+id/login_mobile_number"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
             android:background="@drawable/bg_rectangle"
-            android:elevation="5dp"
-            android:hint="phone"
+            android:hint="Phone Number"
             android:inputType="phone"
-            android:padding="10dp"
-            android:textSize="25dp" />
-
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:textColor="@color/primary"
+            android:textColorHint="@color/light_gray"
+            android:textSize="18sp" />
     </LinearLayout>
 
-    <LinearLayout
+    <!-- Send OTP Button and ProgressBar -->
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:layout_marginTop="28dp"
-        android:layout_weight="20"
-        android:gravity="center_vertical"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp">
 
-        <!-- MaterialButton for signing up -->
+        <!-- Send OTP Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/send_otp_btn"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:backgroundTint="@color/my_primary"
-            android:text="SEND"
+            android:layout_height="50dp"
+            android:backgroundTint="@color/primary"
+            android:contentDescription="Send OTP Button"
+            android:text="Send OTP"
             android:textColor="@color/white"
-            android:textSize="25sp"
+            android:textSize="18sp"
             android:textStyle="bold"
             app:cornerRadius="8dp" />
 
+        <!-- ProgressBar -->
         <ProgressBar
             android:id="@+id/login_progress_bar"
-            android:layout_width="32dp"
-            android:layout_height="wrap_content"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:layout_gravity="center"
-            android:indeterminateTint="@color/my_primary"
-            android:visibility="invisible" />
-
-    </LinearLayout>
-
+            android:visibility="invisible"
+            android:indeterminateTint="@color/primary" />
+    </FrameLayout>
 </LinearLayout>

@@ -1,66 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:background="@color/my_primary"
+    android:background="@color/primary"
     tools:context=".activities.ChatCreatorActivity">
+
+    <!-- Back Button to Return to the Previous Screen -->
+    <ImageButton
+        android:id="@+id/backButton"
+        android:layout_width="43dp"
+        android:layout_height="43dp"
+        android:scaleType="fitXY"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_back"
+        app:layout_constraintBottom_toBottomOf="@id/titleText"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="@id/titleText"
+        app:tint="@color/white" />
 
     <!-- Title for the New Chat Screen -->
     <TextView
         android:id="@+id/titleText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="17dp"
-        android:text="Select Users To Chat With"
-        android:textAlignment="center"
+        android:layout_marginVertical="17dp"
+        android:gravity="center"
+        android:paddingHorizontal="25dp"
+        android:text="Chat Creator"
         android:textColor="@color/white"
-        android:textSize="25dp"
+        android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintLeft_toRightOf="@id/backButton"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <!-- Back Button to Return to the Previous Screen -->
-    <ImageButton
-        android:id="@+id/backButton"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_margin="17dp"
-        android:layout_marginEnd="25dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:src="@drawable/ic_back"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/white" />
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <!-- RecyclerView to Display Users -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/usersRecyclerView"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="17dp"
+        android:layout_marginVertical="17dp"
         android:background="@drawable/bg_content_top"
         android:padding="17dp"
         app:layout_constraintBottom_toTopOf="@id/startChatButton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/titleText" />
+        app:layout_constraintTop_toBottomOf="@id/titleText"
+        tools:listitem="@layout/activity_chat_creator_item" />
 
     <!-- Button to Start the Chat with Selected Users -->
-    <Button
+    <ImageButton
         android:id="@+id/startChatButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="43dp"
+        android:layout_height="43dp"
         android:layout_margin="17dp"
-        android:backgroundTint="@android:color/holo_green_dark"
+        android:background="?attr/selectableItemBackgroundBorderless"
         android:enabled="false"
-        android:text="Start"
-        android:textColor="@color/white"
-        android:textSize="20sp"
-        android:textStyle="bold"
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_send"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" /> <!-- Disabled by default until a user is selected -->
+        app:layout_constraintEnd_toEndOf="parent"
+        app:tint="@color/white" /> <!-- Disabled by default until a user is selected -->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,19 +1,6 @@
 package com.example.ezchat.models;
 
-import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.example.ezchat.databinding.ActivityChatRoomRecyclerItemBinding;
 import com.google.firebase.Timestamp;
-
-import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.Locale;
 
 /**
  * Represents a single message exchanged between users in a chat room.

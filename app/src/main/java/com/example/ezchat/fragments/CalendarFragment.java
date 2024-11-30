@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ezchat.R;
 import com.example.ezchat.databinding.FragmentCalendarBinding;
+import com.example.ezchat.models.UserModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -31,6 +32,7 @@ import java.util.Locale;
  * A fragment for managing a user's tasks by date. Tasks can be added, edited, and deleted, with data stored in Firestore.
  */
 public class CalendarFragment extends Fragment {
+    private static final String FIELD_COLLECTION_TASKS = "tasks";
 
     private FragmentCalendarBinding binding; // View Binding
     private FirebaseFirestore firestore;
@@ -38,10 +40,6 @@ public class CalendarFragment extends Fragment {
     private HashMap<String, List<String>> tasksByDate; // Stores tasks mapped to their dates
     private TaskAdapter taskAdapter; // Adapter for RecyclerView
     private String selectedDate; // Tracks the currently selected date
-
-    // Constants for Firestore collections
-    private static final String USERS_COLLECTION = "users";
-    private static final String TASKS_COLLECTION = "tasks";
 
     @Nullable
     @Override
@@ -115,9 +113,9 @@ public class CalendarFragment extends Fragment {
             return;
         }
 
-        firestore.collection(USERS_COLLECTION)
+        firestore.collection(UserModel.FIELD_COLLECTION_NAME)
                 .document(currentUserPhone)
-                .collection(TASKS_COLLECTION)
+                .collection(FIELD_COLLECTION_TASKS)
                 .document(selectedDate)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
@@ -175,20 +173,20 @@ public class CalendarFragment extends Fragment {
         }
 
         if (tasks.isEmpty()) {
-            firestore.collection(USERS_COLLECTION)
+            firestore.collection(UserModel.FIELD_COLLECTION_NAME)
                     .document(currentUserPhone)
-                    .collection(TASKS_COLLECTION)
+                    .collection(FIELD_COLLECTION_TASKS)
                     .document(date)
                     .delete()
                     .addOnSuccessListener(aVoid -> Toast.makeText(requireContext(), "No tasks left for this date. Date removed from Firestore.", Toast.LENGTH_SHORT).show())
                     .addOnFailureListener(e -> Toast.makeText(requireContext(), "Failed to remove date from Firestore: " + e.getMessage(), Toast.LENGTH_LONG).show());
         } else {
-            firestore.collection(USERS_COLLECTION)
+            firestore.collection(UserModel.FIELD_COLLECTION_NAME)
                     .document(currentUserPhone)
-                    .collection(TASKS_COLLECTION)
+                    .collection(FIELD_COLLECTION_TASKS)
                     .document(date)
                     .set(new HashMap<String, Object>() {{
-                        put("tasks", tasks);
+                        put(FIELD_COLLECTION_TASKS, tasks);
                     }})
                     .addOnSuccessListener(aVoid -> Toast.makeText(requireContext(), "Task saved successfully!", Toast.LENGTH_SHORT).show())
                     .addOnFailureListener(e -> Toast.makeText(requireContext(), "Failed to save task: " + e.getMessage(), Toast.LENGTH_LONG).show());

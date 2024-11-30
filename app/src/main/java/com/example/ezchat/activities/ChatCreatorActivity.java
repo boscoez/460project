@@ -11,9 +11,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ezchat.R;
-import com.example.ezchat.databinding.ActivityNewChatRoomBinding;
-import com.example.ezchat.databinding.ActivityNewChatRoomRecyclerItemBinding;
-import com.example.ezchat.models.ChatroomModel;
+import com.example.ezchat.databinding.ActivityChatCreatorBinding;
+import com.example.ezchat.databinding.ActivityChatCreatorItemBinding;
+import com.example.ezchat.models.ChatModel;
 import com.example.ezchat.models.UserModel;
 import com.example.ezchat.utilities.PreferenceManager;
 import com.example.ezchat.utilities.Utilities;
@@ -24,11 +24,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Activity for selecting users to start a chat room.
+ * Activity for selecting users to start a chat .
  */
 public class ChatCreatorActivity extends AppCompatActivity {
 
-    private ActivityNewChatRoomBinding binding;
+    private ActivityChatCreatorBinding binding;
     private FirebaseFirestore db;
     private UserAdapter userAdapter;
     private final List<UserModel> userList = new ArrayList<>();
@@ -42,7 +42,7 @@ public class ChatCreatorActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // Initialize View Binding
-        binding = ActivityNewChatRoomBinding.inflate(getLayoutInflater());
+        binding = ActivityChatCreatorBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         // Initialize Firestore, SharedPreferences, and RecyclerView
@@ -66,7 +66,7 @@ public class ChatCreatorActivity extends AppCompatActivity {
         // Set up Start Chat button
         binding.startChatButton.setOnClickListener(v -> {
             if (!selectedPhones.isEmpty()) {
-                navigateToChatRoom();
+                navigateToChat();
             } else {
                 Toast.makeText(this, "Please select at least one user.", Toast.LENGTH_SHORT).show();
             }
@@ -99,22 +99,22 @@ public class ChatCreatorActivity extends AppCompatActivity {
     }
 
     /**
-     * Navigates to the ChatActivity, passing a `ChatroomModel` object.
+     * Navigates to the ChatActivity, passing a `ChatModel` object.
      */
-    private void navigateToChatRoom() {
+    private void navigateToChat() {
         // Add the current user's phone to the list of selected phones
         if (!selectedPhones.contains(currentUserPhone)) {
             selectedPhones.add(currentUserPhone);
         }
 
-        // Create a ChatroomModel object locally
-        ChatroomModel chatRoom = new ChatroomModel();
-        chatRoom.phoneNumbers = new ArrayList<>(selectedPhones);
-        chatRoom.creatorPhone = currentUserPhone;
+        // Create a ChatModel object locally
+        ChatModel chat = new ChatModel();
+        chat.phoneNumbers = new ArrayList<>(selectedPhones);
+        chat.creatorPhone = currentUserPhone;
 
-        // Navigate to ChatActivity with the ChatroomModel object
+        // Navigate to ChatActivity with the ChatModel object
         Intent intent = new Intent(this, ChatActivity.class);
-        intent.putExtra("chatRoom", chatRoom); // Pass ChatroomModel as a Serializable object
+        intent.putExtra(ChatModel.KEY_CHAT, chat); // Pass ChatModel as a Serializable object
         startActivity(intent);
         finish(); // Close this activity to avoid duplicates
     }
@@ -126,7 +126,7 @@ public class ChatCreatorActivity extends AppCompatActivity {
     }
 
     /**
-     * Adapter for displaying users in a RecyclerView for chat room creation.
+     * Adapter for displaying users in a RecyclerView for chat  creation.
      */
     private class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
 
@@ -139,7 +139,7 @@ public class ChatCreatorActivity extends AppCompatActivity {
         @NonNull
         @Override
         public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new UserViewHolder(ActivityNewChatRoomRecyclerItemBinding.inflate(getLayoutInflater(), parent, false));
+            return new UserViewHolder(ActivityChatCreatorItemBinding.inflate(getLayoutInflater(), parent, false));
         }
 
         @Override
@@ -158,9 +158,9 @@ public class ChatCreatorActivity extends AppCompatActivity {
          */
         private class UserViewHolder extends RecyclerView.ViewHolder {
 
-            private final ActivityNewChatRoomRecyclerItemBinding itemBinding;
+            private final ActivityChatCreatorItemBinding itemBinding;
 
-            UserViewHolder(ActivityNewChatRoomRecyclerItemBinding binding) {
+            UserViewHolder(ActivityChatCreatorItemBinding binding) {
                 super(binding.getRoot());
                 this.itemBinding = binding;
             }
@@ -171,7 +171,7 @@ public class ChatCreatorActivity extends AppCompatActivity {
 
                 // Set a placeholder or user profile picture
                 if (user.profilePic != null && !user.profilePic.isEmpty()) {
-                    itemBinding.userProfileImage.setImageBitmap(Utilities.getBitmapFromEncodedString(user.profilePic));
+                    itemBinding.userProfileImage.setImageBitmap(Utilities.decodeImage(user.profilePic));
                 } else {
                     itemBinding.userProfileImage.setImageResource(R.drawable.ic_person);
                 }

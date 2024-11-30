@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
-    <solid android:color="@color/my_primary" />
-    <corners android:topLeftRadius="11dp" android:topRightRadius="33dp"  android:bottomLeftRadius="11dp" />
+    <solid android:color="@color/chat_color_sender" />
+    <corners android:topLeftRadius="11dp" android:topRightRadius="20dp"  android:bottomLeftRadius="11dp" />
 </shape>

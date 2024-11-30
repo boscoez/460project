@@ -4,51 +4,59 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:layout_margin="10dp">
+    android:layout_margin="8dp"
+    android:padding="8dp"
+    android:background="@color/white">
 
-    <TextView
-        android:id="@+id/divider"
+    <!-- Divider -->
+    <View
+        android:id="@+id/item_divider"
         android:layout_width="match_parent"
-        android:layout_height="3dp"
-        android:background="@color/my_primary"
+        android:layout_height="1dp"
+        android:layout_marginBottom="8dp"
+        android:background="@color/primary"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginBottom="10dp"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Task Text -->
     <TextView
         android:id="@+id/task_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:padding="8dp"
+        android:layout_marginEnd="8dp"
         android:text="Task details"
-        android:textColor="@color/my_primary"
-        android:textSize="20sp"
-        app:layout_constraintTop_toBottomOf="@id/divider"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@id/edit_button"/>
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/item_divider"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/edit_button"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
+    <!-- Edit Button -->
     <ImageButton
         android:id="@+id/edit_button"
         android:layout_width="40dp"
         android:layout_height="40dp"
+        android:layout_marginEnd="8dp"
+        android:contentDescription="Edit Task"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:hapticFeedbackEnabled="true"
-        android:scaleType="fitXY"
         android:src="@drawable/ic_edit"
-        app:tint="@color/my_primary"
-        app:layout_constraintRight_toLeftOf="@id/delete_button"
-        app:layout_constraintTop_toBottomOf="@id/divider"/>
+        app:tint="@color/primary"
+        app:layout_constraintTop_toTopOf="@id/task_text"
+        app:layout_constraintBottom_toBottomOf="@id/task_text"
+        app:layout_constraintEnd_toStartOf="@id/delete_button" />
 
+    <!-- Delete Button -->
     <ImageButton
         android:id="@+id/delete_button"
-        android:layout_width="55dp"
-        android:layout_height="41dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:contentDescription="Delete Task"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:hapticFeedbackEnabled="true"
-        android:scaleType="fitXY"
         android:src="@drawable/ic_delete"
         app:tint="@android:color/holo_red_dark"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/divider"/>
+        app:layout_constraintTop_toTopOf="@id/task_text"
+        app:layout_constraintBottom_toBottomOf="@id/task_text"
+        app:layout_constraintEnd_toEndOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

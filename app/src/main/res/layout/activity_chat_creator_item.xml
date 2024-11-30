@@ -1,16 +1,15 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--activity_new_chat_room_recycler_item-->
+<?xml version="1.0" encoding="utf-8"?><!-- Layout file for an item in the "New Chat Room" RecyclerView -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    android:padding="10dp">
+    android:layout_margin="7dp"
+    android:background="?attr/selectableItemBackground">
 
-    <!--Border top -->
+    <!-- Top Border: Divider line at the top of each item -->
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="3dp"
+        android:layout_height="1dp"
         android:background="@color/black"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -22,54 +21,63 @@
         android:layout_marginTop="10dp"
         android:layout_marginEnd="10dp"
         android:background="@drawable/bg_circle"
+        android:contentDescription="User profile picture"
         android:scaleType="centerCrop"
         android:src="@drawable/ic_person"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/white" />
+        app:tint="@color/primary" />
 
-    <!-- User Name and Phone -->
+    <!-- Container for User Name and Phone -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
-        android:layout_weight="1"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/userCheckBox"
         app:layout_constraintStart_toEndOf="@id/userProfileImage"
         app:layout_constraintTop_toTopOf="parent">
 
+        <!-- User Name -->
         <TextView
             android:id="@+id/userNameText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:contentDescription="Name of the user"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:text="User Name"
             android:textColor="@color/black"
-            android:textSize="16sp"
+            android:textSize="17sp"
             android:textStyle="bold" />
 
+        <!-- User Phone -->
         <TextView
             android:id="@+id/userPhoneText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:contentDescription="Phone number of the user"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:text="+0(000)-000-0000"
-            android:textColor="@color/my_primary"
-            android:textSize="14sp" />
+            android:textColor="@color/primary"
+            android:textSize="17sp" />
     </LinearLayout>
 
-    <!-- Checkbox to select user for new chat -->
+    <!-- Checkbox for Selecting User -->
     <CheckBox
         android:id="@+id/userCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
         android:layout_marginStart="10dp"
+        android:buttonTint="@color/primary"
         android:checked="false"
+        android:contentDescription="Select user for chat"
         android:focusable="false"
-        android:textColor="@color/black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
