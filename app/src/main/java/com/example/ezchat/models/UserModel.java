@@ -5,7 +5,9 @@ import android.util.Base64;
 import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -21,7 +23,7 @@ public class UserModel {
     private String email; // The email address of the user
     private String hashedPassword; // The hashed password of the user
     private String fcmToken; // The FCM token for push notifications
-    private Set<String> chats; // Set of chats the user is part of (unique values)
+    private List<String> chats; // Set of chats the user is part
 
     public UserModel(){}
 
@@ -41,7 +43,7 @@ public class UserModel {
         this.email = null; // No email initially
         this.hashedPassword = null; // Password will be set later
         this.fcmToken = null; // No FCM token initially
-        this.chats = new HashSet<>(); // Set of chat rooms initially (no duplicates)
+        this.chats = new ArrayList<>(); // Set of chat rooms initially (no duplicates)
     }
 
     // Getters and Setters
@@ -98,11 +100,11 @@ public class UserModel {
         this.fcmToken = fcmToken;
     }
 
-    public Set<String> getChats() {
+    public List<String> getChats() {
         return chats;
     }
 
-    public void setChats(Set<String> chats) {
+    public void setChats(List<String> chats) {
         this.chats = requireNonNullOrEmpty(chats, "Chat room IDs cannot be null or empty.");
     }
 
