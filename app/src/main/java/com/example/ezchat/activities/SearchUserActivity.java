@@ -67,14 +67,14 @@ public class SearchUserActivity extends AppCompatActivity {
             if (!query.isEmpty()) {
                 searchUsers(query);
             } else {
-                Toast.makeText(this, "Enter a username, email, or phone number to search.", Toast.LENGTH_SHORT).show();
+                Utilities.showToast(this, "Enter a username, email, or phone number to search.", Utilities.ToastType.INFO);
             }
         });
 
         // Set up the "Start Chat" button
         binding.btnStartChat.setOnClickListener(v -> {
             if (selectedUsers.isEmpty()) {
-                Toast.makeText(this, "No users selected.", Toast.LENGTH_SHORT).show();
+                Utilities.showToast(this, "No users selected.", Utilities.ToastType.WARNING);
             } else {
                 startChatWithSelectedUsers();
             }
@@ -112,10 +112,10 @@ public class SearchUserActivity extends AppCompatActivity {
                     adapter.notifyDataSetChanged();
 
                     if (userList.isEmpty()) {
-                        Toast.makeText(this, "No matching users found.", Toast.LENGTH_SHORT).show();
+                        Utilities.showToast(this, "No matching users found.", Utilities.ToastType.INFO);
                     }
                 })
-                .addOnFailureListener(e -> Toast.makeText(this, "Error fetching users: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> Utilities.showToast(this, "Error fetching users: " + e.getMessage(), Utilities.ToastType.ERROR));
     }
 
     /**

@@ -38,6 +38,9 @@ public class LoginOtpActivity extends AppCompatActivity {
     private FirebaseAuth mAuth = FirebaseAuth.getInstance(); // Firebase Authentication instance
     private PreferenceManager preferenceManager; // Shared preferences manager
 
+    private Timer resendTimer; // Timer for Resend OTP button
+    private Timer overallTimer; // Timer for overall OTP verification timeout
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,6 +58,8 @@ public class LoginOtpActivity extends AppCompatActivity {
         if (phoneNum != null) {
             // Send OTP to the phone number
             sendOtp(phoneNum, false);
+            // Start the overall 30-second timeout timer
+            startOverallTimeout();
         }
 
         // Set up "Next" button click listener
@@ -111,6 +116,7 @@ public class LoginOtpActivity extends AppCompatActivity {
                     public void onVerificationCompleted(PhoneAuthCredential phoneAuthCredential) {
                         signIn(phoneAuthCredential); // Auto verification
                         setInProgress(false);
+                        cancelOverallTimer(); // Cancel overall timeout if verification is auto-completed
                     }
 
                     @Override
@@ -166,10 +172,14 @@ public class LoginOtpActivity extends AppCompatActivity {
         mAuth.signInWithCredential(phoneAuthCredential).addOnCompleteListener(task -> {
             setInProgress(false);
             if (task.isSuccessful()) {
+                // Cancel the overall timeout timer as verification is successful
+                cancelOverallTimer();
+
                 // Navigate to the next activity
                 Intent intent = new Intent(LoginOtpActivity.this, LoginUserNameActivity.class);
                 intent.putExtra(Constants.PREF_KEY_PHONE, phoneNum); // Pass the phone number
                 startActivity(intent);
+                finish(); // Optional: Finish current activity
             } else {
                 Utilities.showToast(getApplicationContext(), "Code verification failed!", Utilities.ToastType.ERROR);
             }
@@ -181,18 +191,61 @@ public class LoginOtpActivity extends AppCompatActivity {
      */
     void startResendTimer() {
         binding.resendOtpTextview.setEnabled(false); // Disable the resend button
-        Timer timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
+        timeoutSeconds = 30L; // Reset the timeout
+        if (resendTimer != null) {
+            resendTimer.cancel(); // Cancel any existing timer
+        }
+        resendTimer = new Timer();
+        resendTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 timeoutSeconds--;
                 runOnUiThread(() -> binding.resendOtpTextview.setText("Resend Code in " + timeoutSeconds + " seconds."));
                 if (timeoutSeconds <= 0) {
-                    timeoutSeconds = 30L;
-                    timer.cancel();
-                    runOnUiThread(() -> binding.resendOtpTextview.setEnabled(true)); // Enable the button
+                    resendTimer.cancel();
+                    runOnUiThread(() -> {
+                        binding.resendOtpTextview.setText("Resend Code");
+                        binding.resendOtpTextview.setEnabled(true); // Enable the button
+                    });
                 }
             }
         }, 0, 1000); // Schedule the task every second
+    }
+
+    /**
+     * Starts an overall 30-second timeout timer. If the user doesn't verify the OTP within this period,
+     * the app navigates back to the previous activity.
+     */
+    void startOverallTimeout() {
+        overallTimer = new Timer();
+        overallTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(() -> {
+                    Utilities.showToast(getApplicationContext(), "Verification timed out. Returning to previous screen.", Utilities.ToastType.ERROR);
+                    finish(); // Navigate back to the previous activity
+                });
+            }
+        }, TimeUnit.SECONDS.toMillis(30)); // 30-second delay
+    }
+
+    /**
+     * Cancels the overall timeout timer if it's running.
+     */
+    void cancelOverallTimer() {
+        if (overallTimer != null) {
+            overallTimer.cancel();
+            overallTimer = null;
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (resendTimer != null) {
+            resendTimer.cancel();
+            resendTimer = null;
+        }
+        cancelOverallTimer(); // Ensure the overall timer is canceled
     }
 }

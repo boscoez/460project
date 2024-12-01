@@ -21,6 +21,7 @@ import com.example.ezchat.databinding.FragmentCalendarBinding;
 import com.example.ezchat.models.UserModel;
 import com.example.ezchat.utilities.PreferenceManager;
 import com.example.ezchat.utilities.Constants;
+import com.example.ezchat.utilities.Utilities;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -73,7 +74,7 @@ public class CalendarFragment extends Fragment {
         // Set calendar date change listener
         binding.calendarView.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
             selectedDate = String.format(Locale.getDefault(), "%d-%02d-%02d", year, month + 1, dayOfMonth);
-            binding.taskHeader.setText(String.format("Tasks for %s", selectedDate));
+            binding.taskHeader.setText(String.format("Tasks   for   %s", selectedDate));
             loadTasksFromFirestore();
         });
 
@@ -103,7 +104,7 @@ public class CalendarFragment extends Fragment {
      */
     private void loadTasksFromFirestore() {
         if (currentUserPhone == null) {
-            Toast.makeText(requireContext(), "User not logged in.", Toast.LENGTH_SHORT).show();
+            Utilities.showToast(requireContext(), "User not logged in.", Utilities.ToastType.WARNING);
             return;
         }
 
@@ -122,7 +123,7 @@ public class CalendarFragment extends Fragment {
                         taskAdapter.updateTasks(new ArrayList<>());
                     }
                 })
-                .addOnFailureListener(e -> Toast.makeText(requireContext(), "Failed to load tasks: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                .addOnFailureListener(e -> Utilities.showToast(requireContext(), "Failed to load tasks: " + e.getMessage(), Utilities.ToastType.ERROR));
     }
 
     /**
@@ -145,7 +146,7 @@ public class CalendarFragment extends Fragment {
                 taskAdapter.updateTasks(tasks);
                 saveTasksToFirestore(selectedDate, tasks);
             } else {
-                Toast.makeText(requireContext(), "Task details cannot be empty!", Toast.LENGTH_SHORT).show();
+                Utilities.showToast(requireContext(), "Task details cannot be empty!", Utilities.ToastType.WARNING);
             }
         });
 
@@ -162,7 +163,7 @@ public class CalendarFragment extends Fragment {
      */
     private void saveTasksToFirestore(String date, List<String> tasks) {
         if (currentUserPhone == null) {
-            Toast.makeText(requireContext(), "User not logged in.", Toast.LENGTH_SHORT).show();
+            Utilities.showToast(requireContext(), "User not logged in.", Utilities.ToastType.WARNING);
             return;
         }
 
@@ -172,8 +173,8 @@ public class CalendarFragment extends Fragment {
                     .collection(FIELD_COLLECTION_TASKS)
                     .document(date)
                     .delete()
-                    .addOnSuccessListener(aVoid -> Toast.makeText(requireContext(), "No tasks left for this date. Date removed from Firestore.", Toast.LENGTH_SHORT).show())
-                    .addOnFailureListener(e -> Toast.makeText(requireContext(), "Failed to remove date from Firestore: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                    .addOnSuccessListener(aVoid -> Utilities.showToast(requireContext(), "No tasks left for this date. Date removed from Firestore.", Utilities.ToastType.INFO))
+                    .addOnFailureListener(e -> Utilities.showToast(requireContext(), "Failed to remove date from Firestore: " + e.getMessage(), Utilities.ToastType.ERROR));
         } else {
             firestore.collection(Constants.USER_COLLECTION)
                     .document(currentUserPhone)
@@ -182,8 +183,8 @@ public class CalendarFragment extends Fragment {
                     .set(new HashMap<String, Object>() {{
                         put(FIELD_COLLECTION_TASKS, tasks);
                     }})
-                    .addOnSuccessListener(aVoid -> Toast.makeText(requireContext(), "Task saved successfully!", Toast.LENGTH_SHORT).show())
-                    .addOnFailureListener(e -> Toast.makeText(requireContext(), "Failed to save task: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                    .addOnSuccessListener(aVoid -> Utilities.showToast(requireContext(), "Task saved successfully!", Utilities.ToastType.SUCCESS))
+                    .addOnFailureListener(e -> Utilities.showToast(requireContext(), "Failed to save task: " + e.getMessage(), Utilities.ToastType.ERROR));
         }
     }
 
@@ -215,7 +216,7 @@ public class CalendarFragment extends Fragment {
                 tasks.remove(position);
                 notifyItemRemoved(position);
                 saveTasksToFirestore(selectedDate, tasks);
-                Toast.makeText(requireContext(), "Task deleted successfully!", Toast.LENGTH_SHORT).show();
+                Utilities.showToast(requireContext(), "Task deleted successfully!", Utilities.ToastType.SUCCESS);
             });
         }
 
@@ -257,7 +258,7 @@ public class CalendarFragment extends Fragment {
                     notifyItemChanged(taskPosition);
                     saveTasksToFirestore(selectedDate, tasks);
                 } else {
-                    Toast.makeText(requireContext(), "Task details cannot be empty!", Toast.LENGTH_SHORT).show();
+                    Utilities.showToast(requireContext(), "Task details cannot be empty!", Utilities.ToastType.WARNING);
                 }
             });
 

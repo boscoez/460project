@@ -3,6 +3,7 @@ package com.example.ezchat.activities;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -14,6 +15,7 @@ import com.example.ezchat.fragments.ProfileFragment;
 import com.example.ezchat.models.UserModel;
 import com.example.ezchat.utilities.PreferenceManager;
 import com.example.ezchat.utilities.Constants;
+import com.example.ezchat.utilities.Utilities;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
 
@@ -59,6 +61,9 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(MainActivity.this, SearchUserActivity.class));
         });
 
+        // Set default navigation to calendar
+        binding.bottomNavigation.setSelectedItemId(R.id.menu_calendar);
+
         // Set up bottom navigation item selection listener
         binding.bottomNavigation.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.menu_chat) {
@@ -74,9 +79,6 @@ public class MainActivity extends AppCompatActivity {
             }
             return true;
         });
-
-        // Set default navigation to chats
-        binding.bottomNavigation.setSelectedItemId(R.id.menu_chat);
 
         // Fetch FCM token
         getFCMToken();
@@ -123,6 +125,7 @@ public class MainActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Save the updated token locally in SharedPreferences
                             preferenceManager.putString(Constants.FIELD_FCM_TOKEN, token);
+                            Utilities.showToast(this, "Welcome back, " + preferenceManager.getString(Constants.PREF_KEY_USERNAME) + "!", Utilities.ToastType.SUCCESS);
                         }
                     });
         }

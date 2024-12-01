@@ -1,10 +1,7 @@
 package com.example.ezchat.models;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.util.Base64;
 
-import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -16,7 +13,7 @@ import java.util.Set;
  * This model contains user profile details such as phone number, username, profile picture,
  * email, hashed password, fcm token, and the list of chat room IDs the user is part of.
  */
-public class UserModel implements Serializable {
+public class UserModel {
 
     private String phone; // The phone number of the user
     private String username; // The username of the user
@@ -24,7 +21,7 @@ public class UserModel implements Serializable {
     private String email; // The email address of the user
     private String hashedPassword; // The hashed password of the user
     private String fcmToken; // The FCM token for push notifications
-    private Set<String> chatRoomIds; // Set of chat room IDs the user is part of (unique values)
+    private Set<String> chats; // Set of chats the user is part of (unique values)
 
     public UserModel(){}
 
@@ -44,7 +41,7 @@ public class UserModel implements Serializable {
         this.email = null; // No email initially
         this.hashedPassword = null; // Password will be set later
         this.fcmToken = null; // No FCM token initially
-        this.chatRoomIds = new HashSet<>(); // Set of chat rooms initially (no duplicates)
+        this.chats = new HashSet<>(); // Set of chat rooms initially (no duplicates)
     }
 
     // Getters and Setters
@@ -101,12 +98,12 @@ public class UserModel implements Serializable {
         this.fcmToken = fcmToken;
     }
 
-    public Set<String> getChatRoomIds() {
-        return chatRoomIds;
+    public Set<String> getChats() {
+        return chats;
     }
 
-    public void setChatRoomIds(Set<String> chatRoomIds) {
-        this.chatRoomIds = requireNonNullOrEmpty(chatRoomIds, "Chat room IDs cannot be null or empty.");
+    public void setChats(Set<String> chats) {
+        this.chats = requireNonNullOrEmpty(chats, "Chat room IDs cannot be null or empty.");
     }
 
     /**
@@ -116,7 +113,7 @@ public class UserModel implements Serializable {
      * @return True if the chat room ID was removed, false if it was not found.
      */
     public boolean removeChatRoomId(String chatRoomId) {
-        return this.chatRoomIds.remove(chatRoomId); // Removes the chat room ID if present
+        return this.chats.remove(chatRoomId); // Removes the chat room ID if present
     }
 
     /**

@@ -22,6 +22,7 @@ import com.example.ezchat.models.ChatModel;
 import com.example.ezchat.models.UserModel;
 import com.example.ezchat.utilities.Constants;
 import com.example.ezchat.utilities.PreferenceManager;
+import com.example.ezchat.utilities.Utilities;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
@@ -93,7 +94,7 @@ public class ChatCollectionFragment extends Fragment {
         String phoneNumber = preferenceManager.getString(Constants.PREF_KEY_PHONE);
 
         if (phoneNumber == null) {
-            Toast.makeText(requireContext(), "Failed to fetch user details.", Toast.LENGTH_SHORT).show();
+            Utilities.showToast(requireContext(), "Failed to fetch user details.", Utilities.ToastType.ERROR);
             return;
         }
 

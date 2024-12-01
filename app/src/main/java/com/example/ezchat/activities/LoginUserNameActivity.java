@@ -87,7 +87,7 @@ public class LoginUserNameActivity extends AppCompatActivity {
                         binding.textAddImage.setVisibility(View.GONE);
 
                     } catch (FileNotFoundException e) {
-                        Toast.makeText(this, "Image not found", Toast.LENGTH_SHORT).show();
+                        Utilities.showToast(this, "Image not found.", Utilities.ToastType.ERROR);
                     }
                 }
             }
@@ -119,6 +119,7 @@ public class LoginUserNameActivity extends AppCompatActivity {
      */
     private void preFillUserData() {
         binding.layoutImage.setEnabled(false);
+        binding.imageProfile.setImageBitmap(Utilities.decodeImage(userModel.getProfilePic()));
         binding.loginUsername.setText(userModel.getUsername());
         binding.loginUsername.setEnabled(false);
         binding.loginEmail.setVisibility(View.GONE);
@@ -135,7 +136,6 @@ public class LoginUserNameActivity extends AppCompatActivity {
         setInProgress(true);
         saveUserToPreferences(userModel); // Save user data to preferences
         navigateToMainActivity();
-        Toast.makeText(this, "Welcome back, " + userModel.getUsername() + "!", Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -166,7 +166,7 @@ public class LoginUserNameActivity extends AppCompatActivity {
                 saveUserToFirestore(newUser); // Save the new user to Firestore
             } else {
                 setInProgress(false);
-                Toast.makeText(this, "Failed to retrieve FCM token.", Toast.LENGTH_SHORT).show();
+                Utilities.showToast(this, "Failed to retrieve FCM token.", Utilities.ToastType.ERROR);
             }
         });
     }
@@ -206,9 +206,9 @@ public class LoginUserNameActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         saveUserToPreferences(userModel); // Save user data to preferences
                         navigateToMainActivity();
-                        Toast.makeText(this, "Welcome, " + userModel.getUsername() + "!", Toast.LENGTH_SHORT).show();
+                        Utilities.showToast(this, "Welcome, " + userModel.getUsername() + "!", Utilities.ToastType.SUCCESS);
                     } else {
-                        Toast.makeText(this, "Failed to save user data.", Toast.LENGTH_SHORT).show();
+                        Utilities.showToast(this,  "Failed to save user data.", Utilities.ToastType.ERROR);
                     }
                 });
     }

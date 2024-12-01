@@ -26,13 +26,7 @@ public class Utilities {
     /**
      * Enum representing different types of Toast messages.
      */
-    public enum ToastType {
-        INFO,
-        WARNING,
-        ERROR,
-        SUCCESS,
-        DEFAULT
-    }
+    public enum ToastType { INFO, WARNING, ERROR, SUCCESS, DEFAULT }
 
     /**
      * Displays a Toast message with the default type.
@@ -101,7 +95,7 @@ public class Utilities {
         textView.setTextColor(textColor);
 
         Toast toast = new Toast(context);
-        toast.setGravity(Gravity.BOTTOM, 0, 100);
+        toast.setGravity(Gravity.BOTTOM, 0, 1000);
         toast.setDuration(Toast.LENGTH_LONG);
         toast.setView(layout);
         toast.show();

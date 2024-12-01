@@ -51,7 +51,7 @@ public class ChatCreatorActivity extends AppCompatActivity {
         currentUserPhone = preferenceManager.getString(Constants.PREF_KEY_PHONE);
 
         if (currentUserPhone == null || currentUserPhone.isEmpty()) {
-            Toast.makeText(this, "Failed to load current user.", Toast.LENGTH_SHORT).show();
+            Utilities.showToast(this, "Failed to load current user.", Utilities.ToastType.ERROR);
             finish();
             return;
         }
@@ -68,7 +68,7 @@ public class ChatCreatorActivity extends AppCompatActivity {
             if (!selectedPhones.isEmpty()) {
                 navigateToChat();
             } else {
-                Toast.makeText(this, "Please select at least one user.", Toast.LENGTH_SHORT).show();
+                Utilities.showToast(this, "Please select at least one user.", Utilities.ToastType.WARNING);
             }
         });
 
@@ -91,11 +91,11 @@ public class ChatCreatorActivity extends AppCompatActivity {
                         }
                     }
                     if (userList.isEmpty()) {
-                        Toast.makeText(this, "No other users available to chat with.", Toast.LENGTH_SHORT).show();
+                        Utilities.showToast(this, "No other users available to chat with.", Utilities.ToastType.INFO);
                     }
                     userAdapter.notifyDataSetChanged(); // Notify the adapter of data changes
                 })
-                .addOnFailureListener(e -> Toast.makeText(this, "Failed to fetch users: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> Utilities.showToast(this, "Failed to fetch users: " + e.getMessage(), Utilities.ToastType.ERROR));
     }
 
     /**

@@ -55,6 +55,9 @@ public class ProfileFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentProfileBinding.inflate(inflater, container, false);
 
+        if(preferenceManager == null) {
+            throw new NullPointerException();
+        }
         // Fetch and display user data
         getUserData();
 
@@ -95,7 +98,7 @@ public class ProfileFragment extends Fragment {
                         binding.textAddImage.setVisibility(View.GONE);
 
                     } catch (FileNotFoundException e) {
-                        Toast.makeText(requireContext(), "Failed to load image", Toast.LENGTH_SHORT).show();
+                        Utilities.showToast(requireContext(), "Failed to load image", Utilities.ToastType.ERROR);
                     }
                 }
             }
@@ -110,7 +113,7 @@ public class ProfileFragment extends Fragment {
 
         if (phoneNumber == null) {
             setInProgress(false);
-            Toast.makeText(requireContext(), "Failed to fetch user data: No phone number.", Toast.LENGTH_SHORT).show();
+            Utilities.showToast(requireContext(), "Failed to fetch user data: No phone number.", Utilities.ToastType.ERROR);
             return;
         }
 
@@ -135,7 +138,7 @@ public class ProfileFragment extends Fragment {
                             }
                         }
                     } else {
-                        Toast.makeText(requireContext(), "User data not found.", Toast.LENGTH_SHORT).show();
+                        Utilities.showToast(requireContext(), "User data not found.", Utilities.ToastType.ERROR);
                     }
                 });
     }
@@ -190,10 +193,9 @@ public class ProfileFragment extends Fragment {
                         preferenceManager.putString(Constants.FIELD_USERNAME, newUsername);
                         preferenceManager.putString(Constants.FIELD_EMAIL, newEmail);
                         preferenceManager.putString(Constants.FIELD_PROFILE_PIC, updatedUser.getProfilePic());
-
-                        Toast.makeText(getContext(), "Profile updated successfully", Toast.LENGTH_SHORT).show();
+                        Utilities.showToast(requireContext(), "Profile updated successfully", Utilities.ToastType.SUCCESS);
                     } else {
-                        Toast.makeText(getContext(), "Failed to update profile.", Toast.LENGTH_SHORT).show();
+                        Utilities.showToast(requireContext(), "Failed to update profile.", Utilities.ToastType.ERROR);
                     }
                 });
     }

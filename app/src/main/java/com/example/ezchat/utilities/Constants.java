@@ -16,7 +16,7 @@ public class Constants {
     public static final String FIELD_EMAIL = "email";
     public static final String FIELD_PASSWORD = "hashedPassword";
     public static final String FIELD_FCM_TOKEN = "fcmToken";
-    public static final String FIELD_CHAT_ROOMS = "chatRooms";
+    public static final String FIELD_CHAT_ROOMS = "chats";
     public static final String FIELD_CHAT_ID = "chatId";
     public static final String FIELD_PHONE_NUMBERS = "phoneNumbers";
     public static final String FIELD_CREATOR_PHONE = "creatorPhone";
@@ -26,7 +26,6 @@ public class Constants {
     public static final String FIELD_CREATED_DATE = "createdDate";
 
     // ** Shared Preferences Keys **
-    public static final String PREF_NAME = "chatAppPreferences";
     public static final String PREF_KEY_PHONE = "userPhone";
     public static final String PREF_KEY_USERNAME = "username";
     public static final String PREF_KEY_EMAIL = "userEmail";
