@@ -10,4 +10,9 @@
         android:icon="@drawable/chat_icon"
         android:title="Chats"
         />
+
+    <item
+        android:id="@+id/menu_calendar"
+        android:icon="@drawable/ic_calendar"
+        android:title="Calendar"/>
 </menu>
