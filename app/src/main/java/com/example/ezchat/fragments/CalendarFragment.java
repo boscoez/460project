@@ -50,8 +50,6 @@ public class CalendarFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentCalendarBinding.inflate(inflater, container, false);
 
-        binding.calendarView.setDateTextAppearance(R.style.CalendarDateStyle); // Apply custom style
-
         // Initialize Firestore and get the current user's phone number
         firestore = FirebaseFirestore.getInstance();
         preferenceManager = PreferenceManager.getInstance(requireContext());

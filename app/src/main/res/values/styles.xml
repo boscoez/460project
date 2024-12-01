@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Custom style for weekday text -->
+    <style name="CalendarWeekdayTextStyle">
+        <item name="android:textColor">@color/chat_sender</item>  <!-- Custom color for weekday names -->
+        <item name="android:textSize">17sp</item>  <!-- Adjust font size for weekdays -->
+    </style>
+
     <style name="CalendarDateStyle">
-        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/primary</item>  <!-- Default color for dates -->
+        <item name="android:textSize">24sp</item>  <!-- Size for dates -->
+        <item name="android:fontFamily">sans-serif</item>  <!-- Change font family if needed -->
+    </style>
+
+    <!-- Custom style for weekday text -->
+    <style name="FocusedMonthDateTextStyle">
+        <item name="android:tint">@color/chat_receiver</item>
+        <item name="android:textColor">@drawable/bg_fab</item>  <!-- Custom color for weekday names -->
+        <item name="android:textSize">15sp</item>  <!-- Adjust font size for weekdays -->
     </style>
 </resources>
