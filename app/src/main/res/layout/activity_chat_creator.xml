@@ -9,48 +9,49 @@
 
     <!-- Back Button to Return to the Previous Screen -->
     <ImageButton
-        android:id="@+id/backButton"
+        android:id="@+id/btnBack"
         android:layout_width="43dp"
-        android:layout_height="43dp"
-        android:scaleType="fitXY"
+        android:layout_height="0dp"
         android:background="?attr/selectableItemBackgroundBorderless"
+        android:scaleType="fitXY"
         android:src="@drawable/ic_back"
-        app:layout_constraintBottom_toBottomOf="@id/titleText"
+        app:layout_constraintBottom_toBottomOf="@id/textviewTitle"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="@id/titleText"
+        app:layout_constraintTop_toTopOf="@id/textviewTitle"
         app:tint="@color/white" />
 
-    <!-- Title for the New Chat Screen -->
+    <!-- Title for the Screen -->
     <TextView
-        android:id="@+id/titleText"
+        android:id="@+id/textviewTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginVertical="17dp"
         android:gravity="center"
-        android:paddingHorizontal="25dp"
+        android:paddingHorizontal="23dp"
+        android:paddingVertical="5dp"
         android:text="Chat Creator"
         android:textColor="@color/white"
-        android:textSize="24sp"
+        android:textSize="23sp"
         android:textStyle="bold"
-        app:layout_constraintLeft_toRightOf="@id/backButton"
+        app:layout_constraintLeft_toRightOf="@id/btnBack"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- RecyclerView to Display Users -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/usersRecyclerView"
+        android:id="@+id/recyclerviewUsers"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginVertical="17dp"
         android:background="@drawable/bg_content_top"
-        android:padding="17dp"
-        app:layout_constraintBottom_toTopOf="@id/startChatButton"
-        app:layout_constraintTop_toBottomOf="@id/titleText"
+        android:padding="11dp"
+        app:layout_constraintBottom_toTopOf="@id/btnStartChat"
+        app:layout_constraintTop_toBottomOf="@id/textviewTitle"
         tools:listitem="@layout/activity_chat_creator_item" />
 
     <!-- Button to Start the Chat with Selected Users -->
     <ImageButton
-        android:id="@+id/startChatButton"
+        android:id="@+id/btnStartChat"
         android:layout_width="43dp"
         android:layout_height="43dp"
         android:layout_margin="17dp"

@@ -13,18 +13,18 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.ezchat.R;
 import com.example.ezchat.databinding.ActivityChatCreatorBinding;
 import com.example.ezchat.databinding.ActivityChatCreatorItemBinding;
-import com.example.ezchat.models.ChatModel;
 import com.example.ezchat.models.UserModel;
+import com.example.ezchat.utilities.Constants;
 import com.example.ezchat.utilities.PreferenceManager;
 import com.example.ezchat.utilities.Utilities;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Activity for selecting users to start a chat .
+ * Activity for selecting users to start a chat.
  */
 public class ChatCreatorActivity extends AppCompatActivity {
 
@@ -48,7 +48,7 @@ public class ChatCreatorActivity extends AppCompatActivity {
         // Initialize Firestore, SharedPreferences, and RecyclerView
         db = FirebaseFirestore.getInstance();
         preferenceManager = PreferenceManager.getInstance(getApplicationContext());
-        currentUserPhone = preferenceManager.getString(UserModel.FIELD_PHONE);
+        currentUserPhone = preferenceManager.getString(Constants.PREF_KEY_PHONE);
 
         if (currentUserPhone == null || currentUserPhone.isEmpty()) {
             Toast.makeText(this, "Failed to load current user.", Toast.LENGTH_SHORT).show();
@@ -57,14 +57,14 @@ public class ChatCreatorActivity extends AppCompatActivity {
         }
 
         userAdapter = new UserAdapter(userList);
-        binding.usersRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        binding.usersRecyclerView.setAdapter(userAdapter);
+        binding.recyclerviewUsers.setLayoutManager(new LinearLayoutManager(this));
+        binding.recyclerviewUsers.setAdapter(userAdapter);
 
         // Fetch users to display in the list
         fetchUsers();
 
         // Set up Start Chat button
-        binding.startChatButton.setOnClickListener(v -> {
+        binding.btnStartChat.setOnClickListener(v -> {
             if (!selectedPhones.isEmpty()) {
                 navigateToChat();
             } else {
@@ -73,20 +73,20 @@ public class ChatCreatorActivity extends AppCompatActivity {
         });
 
         // Set up Back button
-        binding.backButton.setOnClickListener(v -> onBackPressed());
+        binding.btnBack.setOnClickListener(v -> onBackPressed());
     }
 
     /**
      * Fetches all users from Firestore and populates the RecyclerView, excluding the current user.
      */
     private void fetchUsers() {
-        db.collection(UserModel.FIELD_COLLECTION_NAME)
+        db.collection(Constants.USER_COLLECTION)
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
                     userList.clear(); // Clear the list before adding users
                     for (DocumentSnapshot document : querySnapshot) {
                         UserModel user = document.toObject(UserModel.class);
-                        if (user != null && !user.phone.equals(currentUserPhone)) {
+                        if (user != null && !user.getPhone().equals(currentUserPhone)) {
                             userList.add(user); // Add only other users
                         }
                     }
@@ -99,7 +99,7 @@ public class ChatCreatorActivity extends AppCompatActivity {
     }
 
     /**
-     * Navigates to the ChatActivity, passing a `ChatModel` object.
+     * Navigates to the ChatActivity, passing selected users for chat creation.
      */
     private void navigateToChat() {
         // Add the current user's phone to the list of selected phones
@@ -107,16 +107,10 @@ public class ChatCreatorActivity extends AppCompatActivity {
             selectedPhones.add(currentUserPhone);
         }
 
-        // Create a ChatModel object locally
-        ChatModel chat = new ChatModel();
-        chat.phoneNumbers = new ArrayList<>(selectedPhones);
-        chat.creatorPhone = currentUserPhone;
-
-        // Navigate to ChatActivity with the ChatModel object
+        // Pass selected phones to ChatActivity for message sending and chat creation
         Intent intent = new Intent(this, ChatActivity.class);
-        intent.putExtra(ChatModel.KEY_CHAT, chat); // Pass ChatModel as a Serializable object
+        intent.putStringArrayListExtra(Constants.USER_COLLECTION, new ArrayList<>(selectedPhones)); // Pass the selected phones
         startActivity(intent);
-        finish(); // Close this activity to avoid duplicates
     }
 
     @Override
@@ -126,7 +120,7 @@ public class ChatCreatorActivity extends AppCompatActivity {
     }
 
     /**
-     * Adapter for displaying users in a RecyclerView for chat  creation.
+     * Adapter for displaying users in a RecyclerView for chat creation.
      */
     private class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
 
@@ -166,31 +160,31 @@ public class ChatCreatorActivity extends AppCompatActivity {
             }
 
             void bind(UserModel user) {
-                itemBinding.userNameText.setText(user.username);
-                itemBinding.userPhoneText.setText(user.phone);
+                itemBinding.userNameText.setText(user.getUsername());
+                itemBinding.textviewPhone.setText(user.getPhone());
 
                 // Set a placeholder or user profile picture
-                if (user.profilePic != null && !user.profilePic.isEmpty()) {
-                    itemBinding.userProfileImage.setImageBitmap(Utilities.decodeImage(user.profilePic));
+                if (user.getProfilePic() != null && !user.getProfilePic().isEmpty()) {
+                    itemBinding.roundedviewProfilePic.setImageBitmap(Utilities.decodeImage(user.getProfilePic()));
                 } else {
-                    itemBinding.userProfileImage.setImageResource(R.drawable.ic_person);
+                    itemBinding.roundedviewProfilePic.setImageResource(R.drawable.ic_person);
                 }
 
                 // Update the checkbox state
-                itemBinding.userCheckBox.setChecked(selectedPhones.contains(user.phone));
+                itemBinding.userCheckBox.setChecked(selectedPhones.contains(user.getPhone()));
 
                 // Handle checkbox toggle
                 itemBinding.userCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
                     if (isChecked) {
-                        if (!selectedPhones.contains(user.phone)) {
-                            selectedPhones.add(user.phone); // Add to the list of selected phones
+                        if (!selectedPhones.contains(user.getPhone())) {
+                            selectedPhones.add(user.getPhone()); // Add to the list of selected phones
                         }
                     } else {
-                        selectedPhones.remove(user.phone); // Remove from the list of selected phones
+                        selectedPhones.remove(user.getPhone()); // Remove from the list of selected phones
                     }
 
                     // Enable or disable the Start Chat button based on selection
-                    binding.startChatButton.setEnabled(!selectedPhones.isEmpty());
+                    binding.btnStartChat.setEnabled(!selectedPhones.isEmpty());
                 });
             }
         }

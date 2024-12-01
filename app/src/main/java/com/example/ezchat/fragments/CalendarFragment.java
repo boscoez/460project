@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CalendarView;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,6 +19,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.ezchat.R;
 import com.example.ezchat.databinding.FragmentCalendarBinding;
 import com.example.ezchat.models.UserModel;
+import com.example.ezchat.utilities.PreferenceManager;
+import com.example.ezchat.utilities.Constants;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -40,15 +43,19 @@ public class CalendarFragment extends Fragment {
     private HashMap<String, List<String>> tasksByDate; // Stores tasks mapped to their dates
     private TaskAdapter taskAdapter; // Adapter for RecyclerView
     private String selectedDate; // Tracks the currently selected date
+    private PreferenceManager preferenceManager; // Preference manager to fetch user data
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentCalendarBinding.inflate(inflater, container, false);
 
+        binding.calendarView.setDateTextAppearance(R.style.CalendarDateStyle); // Apply custom style
+
         // Initialize Firestore and get the current user's phone number
         firestore = FirebaseFirestore.getInstance();
-        currentUserPhone = getCurrentUserPhone();
+        preferenceManager = PreferenceManager.getInstance(requireContext());
+        currentUserPhone = preferenceManager.getString(Constants.FIELD_PHONE);
 
         // Initialize task storage
         tasksByDate = new HashMap<>();
@@ -85,17 +92,6 @@ public class CalendarFragment extends Fragment {
     }
 
     /**
-     * Fetches the current user's phone number.
-     *
-     * @return The current user's phone number or null if not logged in.
-     */
-    private String getCurrentUserPhone() {
-        return FirebaseAuth.getInstance().getCurrentUser() != null
-                ? FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber()
-                : null;
-    }
-
-    /**
      * Gets the current date in "yyyy-MM-dd" format.
      *
      * @return The current date as a string.
@@ -113,7 +109,7 @@ public class CalendarFragment extends Fragment {
             return;
         }
 
-        firestore.collection(UserModel.FIELD_COLLECTION_NAME)
+        firestore.collection(Constants.USER_COLLECTION)
                 .document(currentUserPhone)
                 .collection(FIELD_COLLECTION_TASKS)
                 .document(selectedDate)
@@ -173,7 +169,7 @@ public class CalendarFragment extends Fragment {
         }
 
         if (tasks.isEmpty()) {
-            firestore.collection(UserModel.FIELD_COLLECTION_NAME)
+            firestore.collection(Constants.USER_COLLECTION)
                     .document(currentUserPhone)
                     .collection(FIELD_COLLECTION_TASKS)
                     .document(date)
@@ -181,7 +177,7 @@ public class CalendarFragment extends Fragment {
                     .addOnSuccessListener(aVoid -> Toast.makeText(requireContext(), "No tasks left for this date. Date removed from Firestore.", Toast.LENGTH_SHORT).show())
                     .addOnFailureListener(e -> Toast.makeText(requireContext(), "Failed to remove date from Firestore: " + e.getMessage(), Toast.LENGTH_LONG).show());
         } else {
-            firestore.collection(UserModel.FIELD_COLLECTION_NAME)
+            firestore.collection(Constants.USER_COLLECTION)
                     .document(currentUserPhone)
                     .collection(FIELD_COLLECTION_TASKS)
                     .document(date)

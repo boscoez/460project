@@ -16,7 +16,7 @@
         android:layout_margin="16dp"
         android:gravity="center"
         android:text="@string/app_name"
-        android:textColor="@color/off_white"
+        android:textColor="@color/white_off"
         android:textSize="22sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"

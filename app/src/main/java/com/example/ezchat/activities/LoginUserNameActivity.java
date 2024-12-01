@@ -17,6 +17,7 @@ import com.example.ezchat.databinding.ActivityLoginUserNameBinding;
 import com.example.ezchat.models.UserModel;
 import com.example.ezchat.utilities.PreferenceManager;
 import com.example.ezchat.utilities.Utilities;
+import com.example.ezchat.utilities.Constants;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -45,10 +46,13 @@ public class LoginUserNameActivity extends AppCompatActivity {
         binding = ActivityLoginUserNameBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        phoneNumber = getIntent().getStringExtra(UserModel.FIELD_PHONE);
+        // Retrieve the phone number from the intent
+        phoneNumber = getIntent().getStringExtra(Constants.PREF_KEY_PHONE);
 
-        checkIfUserExists(); // Check if the user already exists
+        // Check if user already exists
+        checkIfUserExists();
 
+        // Set up "Next" button click listener
         binding.loginCodeBtn.setOnClickListener(v -> {
             if (userModel != null) {
                 signInUser(); // Existing user flow
@@ -57,6 +61,7 @@ public class LoginUserNameActivity extends AppCompatActivity {
             }
         });
 
+        // Set up "Pick Image" button click listener
         binding.layoutImage.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -64,6 +69,7 @@ public class LoginUserNameActivity extends AppCompatActivity {
         });
     }
 
+    // Image picker result launcher
     private final ActivityResultLauncher<Intent> pickImage = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
@@ -73,6 +79,7 @@ public class LoginUserNameActivity extends AppCompatActivity {
                         InputStream inputStream = getContentResolver().openInputStream(imageUri);
                         Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
 
+                        // Compress and encode image
                         Bitmap compressedBitmap = Utilities.compressImage(bitmap);
                         encodedImage = Utilities.encodeImage(compressedBitmap);
 
@@ -91,7 +98,7 @@ public class LoginUserNameActivity extends AppCompatActivity {
      */
     private void checkIfUserExists() {
         setInProgress(true);
-        db.collection(UserModel.FIELD_COLLECTION_NAME)
+        db.collection(Constants.USER_COLLECTION)
                 .document(phoneNumber)
                 .get()
                 .addOnCompleteListener(task -> {
@@ -102,7 +109,7 @@ public class LoginUserNameActivity extends AppCompatActivity {
                             preFillUserData();
                         }
                     } else {
-                        userModel = null;
+                        userModel = null; // If user does not exist
                     }
                 });
     }
@@ -111,11 +118,12 @@ public class LoginUserNameActivity extends AppCompatActivity {
      * Pre-fills the UI fields for existing users.
      */
     private void preFillUserData() {
-        binding.loginUsername.setText(userModel.username);
+        binding.layoutImage.setEnabled(false);
+        binding.loginUsername.setText(userModel.getUsername());
         binding.loginUsername.setEnabled(false);
+        binding.loginEmail.setVisibility(View.GONE);
         binding.loginPassword.setVisibility(View.GONE);
         binding.loginConfirmedPassword.setVisibility(View.GONE);
-        binding.textSignIn.setVisibility(View.GONE);
         binding.createAccountTitle.setVisibility(View.GONE);
         binding.loginCodeBtn.setText("Sign In");
     }
@@ -125,9 +133,9 @@ public class LoginUserNameActivity extends AppCompatActivity {
      */
     private void signInUser() {
         setInProgress(true);
-        saveUserToPreferences(userModel);
+        saveUserToPreferences(userModel); // Save user data to preferences
         navigateToMainActivity();
-        Toast.makeText(this, "Welcome back, " + userModel.username + "!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Welcome back, " + userModel.getUsername() + "!", Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -135,25 +143,27 @@ public class LoginUserNameActivity extends AppCompatActivity {
      */
     private void signUpNewUser() {
         String username = binding.loginUsername.getText().toString().trim();
+        String email = binding.loginEmail.getText().toString().trim();
         String password = binding.loginPassword.getText().toString().trim();
         String confirmPassword = binding.loginConfirmedPassword.getText().toString().trim();
 
-        if (!validateInputs(username, password, confirmPassword)) return;
+        if (!validateInputs(username, email, password, confirmPassword)) return;
 
         setInProgress(true);
 
+        // Retrieve FCM token for the new user
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 String fcmToken = task.getResult();
                 UserModel newUser = new UserModel(
                         phoneNumber,
-                        username,
-                        Timestamp.now(),
-                        fcmToken,
-                        encodedImage,
-                        new ArrayList<>()
+                        username
                 );
-                saveUserToFirestore(newUser);
+                newUser.setEmail(email); // Set the email
+                newUser.setProfilePic(encodedImage); // Set the profile picture
+                newUser.setFcmToken(fcmToken); // Set the FCM token
+                newUser.setHashedPassword(password); // Store hashed password
+                saveUserToFirestore(newUser); // Save the new user to Firestore
             } else {
                 setInProgress(false);
                 Toast.makeText(this, "Failed to retrieve FCM token.", Toast.LENGTH_SHORT).show();
@@ -161,9 +171,16 @@ public class LoginUserNameActivity extends AppCompatActivity {
         });
     }
 
-    private boolean validateInputs(String username, String password, String confirmPassword) {
+    /**
+     * Validates input fields for username, email, password, and confirmed password.
+     */
+    private boolean validateInputs(String username, String email, String password, String confirmPassword) {
         if (username.isEmpty() || username.length() < 3) {
             binding.loginUsername.setError("Username must be at least 3 characters.");
+            return false;
+        }
+        if (email.isEmpty() || !email.contains("@")) {
+            binding.loginEmail.setError("Please enter a valid email address.");
             return false;
         }
         if (password.isEmpty() || password.length() < 6) {
@@ -181,34 +198,44 @@ public class LoginUserNameActivity extends AppCompatActivity {
      * Saves a new user to Firestore.
      */
     private void saveUserToFirestore(UserModel userModel) {
-        db.collection(UserModel.FIELD_COLLECTION_NAME)
-                .document(userModel.phone)
+        db.collection(Constants.USER_COLLECTION)
+                .document(userModel.getPhone())
                 .set(userModel)
                 .addOnCompleteListener(task -> {
                     setInProgress(false);
                     if (task.isSuccessful()) {
-                        saveUserToPreferences(userModel);
+                        saveUserToPreferences(userModel); // Save user data to preferences
                         navigateToMainActivity();
-                        Toast.makeText(this, "Welcome, " + userModel.username + "!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Welcome, " + userModel.getUsername() + "!", Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(this, "Failed to save user data.", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
+    /**
+     * Saves user data to SharedPreferences for quick access later.
+     */
     private void saveUserToPreferences(UserModel userModel) {
-        preferenceManager.putString(UserModel.FIELD_PHONE, userModel.phone);
-        preferenceManager.putString(UserModel.FIELD_USERNAME, userModel.username);
-        preferenceManager.putString(UserModel.FIELD_PROFILE_PIC, userModel.profilePic);
-        preferenceManager.putString(UserModel.FIELD_FCM_TOKEN, userModel.fcmToken);
+        preferenceManager.putString(Constants.PREF_KEY_PHONE, userModel.getPhone());
+        preferenceManager.putString(Constants.PREF_KEY_USERNAME, userModel.getUsername());
+        preferenceManager.putString(Constants.FIELD_PROFILE_PIC, userModel.getProfilePic());
+        preferenceManager.putString(Constants.PREF_KEY_FCM_TOKEN, userModel.getFcmToken());
+        preferenceManager.putString(Constants.PREF_KEY_EMAIL, userModel.getEmail()); // Save email
     }
 
+    /**
+     * Navigates to the MainActivity after successful sign-in or sign-up.
+     */
     private void navigateToMainActivity() {
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
     }
 
+    /**
+     * Toggles the progress state of the activity.
+     */
     private void setInProgress(boolean inProgress) {
         binding.loginProgressBar.setVisibility(inProgress ? View.VISIBLE : View.GONE);
         binding.loginCodeBtn.setVisibility(inProgress ? View.GONE : View.VISIBLE);

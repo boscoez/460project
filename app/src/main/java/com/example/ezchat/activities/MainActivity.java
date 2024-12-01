@@ -12,13 +12,14 @@ import com.example.ezchat.fragments.CalendarFragment;
 import com.example.ezchat.fragments.ChatCollectionFragment;
 import com.example.ezchat.fragments.ProfileFragment;
 import com.example.ezchat.models.UserModel;
-import com.example.ezchat.utilities.FirebaseUtil;
 import com.example.ezchat.utilities.PreferenceManager;
+import com.example.ezchat.utilities.Constants;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 /**
  * Main activity of the application that serves as the entry point after login.
- * It contains navigation to chat s and profile sections, and manages Firebase Cloud Messaging (FCM) tokens.
+ * It contains navigation to chat, profile, and calendar sections, and manages Firebase Cloud Messaging (FCM) tokens.
  */
 public class MainActivity extends AppCompatActivity {
 
@@ -27,6 +28,8 @@ public class MainActivity extends AppCompatActivity {
     private ChatCollectionFragment chatFragment; // Fragment for chat
     private ProfileFragment profileFragment;    // Fragment for user profile
     private CalendarFragment calendarFragment;
+
+    private PreferenceManager preferenceManager; // Shared preferences manager
 
     /**
      * Called when the activity is first created.
@@ -43,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         // Initialize SharedPreferences
+        preferenceManager = PreferenceManager.getInstance(getApplicationContext());
         preferences = getSharedPreferences(PreferenceManager.KEY_PREFERENCE_NAME, MODE_PRIVATE);
 
         // Initialize fragments
@@ -71,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
-        // Set default navigation to chat s
+        // Set default navigation to chats
         binding.bottomNavigation.setSelectedItemId(R.id.menu_chat);
 
         // Fetch FCM token
@@ -87,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
             if (task.isSuccessful()) {
                 String token = task.getResult();
                 saveTokenToPreferences(token); // Save token locally
-                FirebaseUtil.currentUserDetails().update(UserModel.FIELD_FCM_TOKEN, token); // Update token in Firebase
+                updateFCMTokenInDatabase(token); // Update token in Firestore
             }
         });
     }
@@ -98,7 +102,30 @@ public class MainActivity extends AppCompatActivity {
      * @param token The FCM token to be saved.
      */
     private void saveTokenToPreferences(String token) {
-        preferences.edit().putString(UserModel.FIELD_FCM_TOKEN, token).apply();
+        preferenceManager.putString(Constants.FIELD_FCM_TOKEN, token); // Save the token using PreferenceManager
+    }
+
+    /**
+     * Updates the FCM token in Firestore for the current user.
+     * @param token The FCM token to be saved in Firestore.
+     */
+    private void updateFCMTokenInDatabase(String token) {
+        // Get the current user's phone number from SharedPreferences
+        String phone = preferenceManager.getString(Constants.FIELD_PHONE);
+
+        if (phone != null) {
+            // Update the FCM token in Firestore for the user using their phone number as document ID
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            db.collection(Constants.USER_COLLECTION)
+                    .document(phone) // Use phone number as document ID
+                    .update(Constants.FIELD_FCM_TOKEN, token)
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            // Save the updated token locally in SharedPreferences
+                            preferenceManager.putString(Constants.FIELD_FCM_TOKEN, token);
+                        }
+                    });
+        }
     }
 
     /**

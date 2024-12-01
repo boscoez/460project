@@ -1,12 +1,111 @@
 package com.example.ezchat.utilities;
 
+import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.PorterDuff;
 import android.util.Base64;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.core.content.ContextCompat;
+import androidx.core.view.ViewCompat;
+
+import com.example.ezchat.R;
 
 import java.io.ByteArrayOutputStream;
 
 public class Utilities {
+
+    /**
+     * Enum representing different types of Toast messages.
+     */
+    public enum ToastType {
+        INFO,
+        WARNING,
+        ERROR,
+        SUCCESS,
+        DEFAULT
+    }
+
+    /**
+     * Displays a Toast message with the default type.
+     * @param context The context to use for displaying the Toast.
+     * @param message The message to display in the Toast.
+     */
+    public static void showToast(Context context, String message) {
+        showToast(context, message, ToastType.DEFAULT);
+    }
+
+    /**
+     * Displays a Toast message with the specified type.
+     * @param context The context to use for displaying the Toast.
+     * @param message The message to display in the Toast.
+     * @param type    The type of the message: INFO, WARNING, ERROR, SUCCESS, or DEFAULT.
+     */
+    public static void showToast(Context context, String message, ToastType type) {
+        if (type == null) {
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        displayCustomToast(context, message, type);
+    }
+
+    /**
+     * Displays a custom Toast with styling based on the provided ToastType.
+     * @param context The context to use for displaying the Toast.
+     * @param message The message to display in the Toast.
+     * @param type    The type of the message: INFO, WARNING, ERROR, or SUCCESS.
+     */
+    private static void displayCustomToast(Context context, String message, ToastType type) {
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View layout = inflater.inflate(R.layout.container_custom_toast, null);
+        ImageView imageView = layout.findViewById(R.id.imageToast);
+        TextView textView = layout.findViewById(R.id.textToast);
+        textView.setText(message);
+
+        int iconResId;
+        int bgColor;
+        int textColor = ContextCompat.getColor(context, R.color.black);
+
+        switch (type) {
+            case INFO:
+                iconResId = R.drawable.ic_info;
+                bgColor = R.color.info;
+                break;
+            case WARNING:
+                iconResId = R.drawable.ic_warning;
+                bgColor = R.color.warning;
+                break;
+            case ERROR:
+                iconResId = R.drawable.ic_error;
+                bgColor = R.color.error;
+                break;
+            case SUCCESS:
+                iconResId = R.drawable.ic_success;
+                bgColor = R.color.success;
+                break;
+            default:
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+                return;
+        }
+
+        imageView.setImageResource(iconResId);
+        ViewCompat.setBackgroundTintList(layout, ColorStateList.valueOf(ContextCompat.getColor(context, bgColor)));
+        textView.setTextColor(textColor);
+
+        Toast toast = new Toast(context);
+        toast.setGravity(Gravity.BOTTOM, 0, 100);
+        toast.setDuration(Toast.LENGTH_LONG);
+        toast.setView(layout);
+        toast.show();
+    }
 
     /**
      * Validates whether the provided string is a valid email address.

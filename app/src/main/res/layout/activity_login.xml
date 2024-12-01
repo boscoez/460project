@@ -55,7 +55,7 @@
             android:minHeight="48dp"
             android:padding="10dp"
             android:textColor="@color/black"
-            android:textColorHint="@color/light_gray" />
+            android:textColorHint="@color/input_hint" />
 
         <!-- Password Input -->
         <EditText
@@ -70,7 +70,7 @@
             android:minHeight="48dp"
             android:padding="10dp"
             android:textColor="@color/black"
-            android:textColorHint="@color/light_gray" />
+            android:textColorHint="@color/input_hint" />
 
         <!-- Sign-In Button and Progress Bar -->
         <LinearLayout
@@ -85,7 +85,7 @@
                 android:id="@+id/login_code_btn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_rectangle"
+                android:background="@color/primary"
                 android:padding="10dp"
                 android:text="SIGN IN"
                 android:textColor="@color/white"

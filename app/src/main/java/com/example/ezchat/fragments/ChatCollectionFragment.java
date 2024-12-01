@@ -20,6 +20,7 @@ import com.example.ezchat.databinding.FragmentChatCollectionBinding;
 import com.example.ezchat.databinding.FragmentChatCollectionRecyclerItemBinding;
 import com.example.ezchat.models.ChatModel;
 import com.example.ezchat.models.UserModel;
+import com.example.ezchat.utilities.Constants;
 import com.example.ezchat.utilities.PreferenceManager;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -89,7 +90,7 @@ public class ChatCollectionFragment extends Fragment {
      * Listens for changes to the user's chat in real-time.
      */
     private void listenForChatRoomChanges() {
-        String phoneNumber = preferenceManager.getString(UserModel.FIELD_PHONE);
+        String phoneNumber = preferenceManager.getString(Constants.PREF_KEY_PHONE);
 
         if (phoneNumber == null) {
             Toast.makeText(requireContext(), "Failed to fetch user details.", Toast.LENGTH_SHORT).show();
@@ -98,7 +99,7 @@ public class ChatCollectionFragment extends Fragment {
 
         Log.d(TAG, "Listening for chat room changes for user: " + phoneNumber);
 
-        chatRoomListener = firestore.collection(ChatModel.FIELD_COLLECTION_NAME)
+        chatRoomListener = firestore.collection(Constants.CHAT_COLLECTION)
                 .whereArrayContains("phoneNumbers", phoneNumber) // Filter chat for the current user
                 .addSnapshotListener((querySnapshot, error) -> {
                     if (error != null) {
@@ -208,13 +209,13 @@ public class ChatCollectionFragment extends Fragment {
 
             public void bind(ChatModel chatRoom) {
                 String otherParticipantPhone = chatRoom.phoneNumbers.stream()
-                        .filter(phone -> !phone.equals(preferenceManager.getString(UserModel.FIELD_PHONE)))
+                        .filter(phone -> !phone.equals(preferenceManager.getString(Constants.PREF_KEY_PHONE)))
                         .findFirst()
                         .orElse("Unknown");
 
                 itemBinding.textViewUserName.setText(otherParticipantPhone);
-                itemBinding.textViewLastMessage.setText(chatRoom.lastMessage != null ? chatRoom.lastMessage : "No messages yet");
-                itemBinding.textViewTimestamp.setText(formatTimestamp(chatRoom.lastMessageTimestamp));
+                itemBinding.textViewLastMessage.setText(chatRoom.lastMessage != null ? chatRoom.lastMessage.getMessage() : "No messages yet");
+                itemBinding.textViewTimestamp.setText(formatTimestamp(chatRoom.createdDate));
 
                 itemBinding.getRoot().setOnClickListener(v -> {
                     Intent intent = new Intent(requireContext(), ChatActivity.class);

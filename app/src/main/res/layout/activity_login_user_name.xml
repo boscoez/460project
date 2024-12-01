@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -42,7 +41,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:background="@drawable/bg_circle"
-                android:backgroundTint="@color/light_gray"
+                android:backgroundTint="@color/input_hint"
                 android:gravity="center"
                 android:text="1"
                 android:textColor="@color/white"
@@ -61,7 +60,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:background="@drawable/bg_circle"
-                android:backgroundTint="@color/light_gray"
+                android:backgroundTint="@color/input_hint"
                 android:gravity="center"
                 android:text="2"
                 android:textColor="@color/white"
@@ -123,7 +122,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="Add Image"
-            android:textColor="@color/light_gray"
             android:textSize="14sp"
             android:gravity="center" />
     </FrameLayout>
@@ -143,13 +141,29 @@
             android:layout_height="50dp"
             android:layout_marginBottom="16dp"
             android:background="@drawable/bg_rectangle"
-            android:hint="Username or email"
+            android:hint="Username"
             android:imeOptions="actionNext"
             android:importantForAutofill="no"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:textColor="@color/primary"
-            android:textColorHint="@color/light_gray"
+            android:textColorHint="@color/input_hint"
+            android:textSize="18sp" />
+
+        <EditText
+            android:id="@+id/login_email"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/bg_rectangle"
+            android:hint="Email"
+            android:inputType="textEmailAddress"
+            android:imeOptions="actionNext"
+            android:importantForAutofill="no"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:textColor="@color/primary"
+            android:textColorHint="@color/input_hint"
             android:textSize="18sp" />
 
         <!-- Password -->
@@ -166,7 +180,7 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:textColor="@color/primary"
-            android:textColorHint="@color/light_gray"
+            android:textColorHint="@color/input_hint"
             android:textSize="18sp" />
 
         <!-- Confirm Password -->
@@ -182,7 +196,7 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:textColor="@color/primary"
-            android:textColorHint="@color/light_gray"
+            android:textColorHint="@color/input_hint"
             android:textSize="18sp" />
     </LinearLayout>
 
@@ -211,19 +225,4 @@
             android:visibility="invisible"
             android:indeterminateTint="@color/primary" />
     </FrameLayout>
-
-    <!-- Sign In Prompt -->
-    <TextView
-        android:id="@+id/textSignIn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="20dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:text="Already have an account?\nSIGN IN"
-        android:textColor="@color/light_gray"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:gravity="center" />
 </LinearLayout>

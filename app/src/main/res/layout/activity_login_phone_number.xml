@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -61,7 +60,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:background="@drawable/bg_circle"
-                android:backgroundTint="@color/light_gray"
+                android:backgroundTint="@color/gray_light"
                 android:gravity="center"
                 android:text="2"
                 android:textColor="@color/white"
@@ -80,7 +79,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:background="@drawable/bg_circle"
-                android:backgroundTint="@color/light_gray"
+                android:backgroundTint="@color/gray_light"
                 android:gravity="center"
                 android:text="3"
                 android:textColor="@color/white"
@@ -125,7 +124,7 @@
             android:layout_marginEnd="8dp"
             app:ccp_showFlag="true"
             app:ccp_showNameCode="false"
-            app:ccp_textSize="18sp" />
+            app:ccp_textSize="21sp" />
 
         <!-- Phone Number Input -->
         <EditText
@@ -140,8 +139,8 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:textColor="@color/primary"
-            android:textColorHint="@color/light_gray"
-            android:textSize="18sp" />
+            android:textColorHint="@color/input_hint"
+            android:textSize="23sp" />
     </LinearLayout>
 
     <!-- Send OTP Button and ProgressBar -->

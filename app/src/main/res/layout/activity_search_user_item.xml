@@ -4,69 +4,79 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    android:padding="10dp">
+    android:paddingBottom="9dp"
+    android:background="?attr/selectableItemBackground">
+
+    <!-- Top Border: Divider line at the top of each item -->
+    <TextView
+        android:layout_marginBottom="9dp"
+        android:id="@+id/textviewDivider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/input_hint"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- User Profile Picture -->
     <com.makeramen.roundedimageview.RoundedImageView
-        android:id="@+id/profilePic"
+        android:id="@+id/roundedimageviewProfilePic"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:background="@drawable/bg_circle"
         android:layout_marginEnd="8dp"
+        android:background="@drawable/bg_circle"
         android:scaleType="centerCrop"
+        app:layout_constraintBottom_toBottomOf="@id/layoutUserInfo"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/layoutUserInfo"
         app:riv_border_color="@color/black"
         app:riv_border_width="2dp"
-        app:riv_corner_radius="25dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:riv_corner_radius="25dp" />
 
-    <!-- User Info Container -->
+    <!-- Container for User Name and Phone -->
     <LinearLayout
-        android:id="@+id/userInfoContainer"
+        android:id="@+id/layoutUserInfo"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="10dp"
         android:orientation="vertical"
-        app:layout_constraintStart_toEndOf="@id/profilePic"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/userCheckBox">
+        app:layout_constraintEnd_toStartOf="@id/userCheckBox"
+        app:layout_constraintStart_toEndOf="@id/roundedimageviewProfilePic"
+        app:layout_constraintTop_toTopOf="@id/textviewDivider">
 
-        <!-- Username -->
+        <!-- User Name -->
         <TextView
             android:id="@+id/textViewUsername"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="User Name"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Username"
             android:textColor="@color/black"
-            android:textSize="16sp"
+            android:textSize="17sp"
             android:textStyle="bold" />
 
-        <!-- Phone Number -->
+        <!-- User Phone -->
         <TextView
-            android:id="@+id/textViewPhone"
+            android:id="@+id/textviewPhone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="+0000000000"
-            android:textColor="@color/light_gray"
-            android:textSize="14sp" />
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="+0(000)-000-0000"
+            android:textColor="@color/black"
+            android:textSize="17sp" />
     </LinearLayout>
 
-    <!-- User Checkbox -->
+    <!-- Checkbox for Selecting User -->
     <CheckBox
         android:id="@+id/userCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:contentDescription="Select User"
-        android:text="Select"
         android:checked="false"
         android:focusable="false"
         android:textColor="@color/black"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

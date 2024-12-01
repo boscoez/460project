@@ -8,7 +8,7 @@
 
     <!-- Title for the Chat Room Screen -->
     <TextView
-        android:id="@+id/titleText"
+        android:id="@+id/textviewTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:paddingVertical="17dp"
@@ -46,7 +46,7 @@
         android:layout_height="2dp"
         android:layout_marginTop="8dp"
         android:background="@color/primary"
-        app:layout_constraintTop_toBottomOf="@id/titleText"
+        app:layout_constraintTop_toBottomOf="@id/textviewTitle"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -69,7 +69,7 @@
         android:layout_margin="16dp"
         android:text="No chats started"
         android:textAlignment="center"
-        android:textColor="@color/light_gray"
+        android:textColor="@color/gray_light"
         android:textSize="18sp"
         android:textStyle="italic"
         android:visibility="gone"

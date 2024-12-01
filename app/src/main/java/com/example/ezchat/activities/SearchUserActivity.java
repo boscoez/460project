@@ -18,6 +18,7 @@ import com.example.ezchat.R;
 import com.example.ezchat.databinding.ActivityChatCreatorItemBinding;
 import com.example.ezchat.databinding.ActivitySearchUserBinding;
 import com.example.ezchat.models.UserModel;
+import com.example.ezchat.utilities.Constants;
 import com.example.ezchat.utilities.PreferenceManager;
 import com.example.ezchat.utilities.Utilities;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -29,7 +30,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Activity for searching users by username or phone number.
+ * Activity for searching users by username, email, or phone number.
  * Users can select a contact to start a new chat room.
  */
 public class SearchUserActivity extends AppCompatActivity {
@@ -56,22 +57,22 @@ public class SearchUserActivity extends AppCompatActivity {
         currentUserPhone = getCurrentUserPhone();
 
         // Set up RecyclerView
-        binding.searchUserRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        binding.recyclerviewUsers.setLayoutManager(new LinearLayoutManager(this));
         adapter = new SearchUserRecyclerAdapter(userList, selectedUsers, this::updateStartChatButtonVisibility);
-        binding.searchUserRecyclerView.setAdapter(adapter);
+        binding.recyclerviewUsers.setAdapter(adapter);
 
         // Set up the search button
-        binding.searchUserBtn.setOnClickListener(v -> {
-            String query = binding.searchUsernameInput.getText().toString().trim();
+        binding.btnSearchUsers.setOnClickListener(v -> {
+            String query = binding.editTextUsername.getText().toString().trim();
             if (!query.isEmpty()) {
                 searchUsers(query);
             } else {
-                Toast.makeText(this, "Enter a username or phone number to search.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Enter a username, email, or phone number to search.", Toast.LENGTH_SHORT).show();
             }
         });
 
         // Set up the "Start Chat" button
-        binding.startChatBtn.setOnClickListener(v -> {
+        binding.btnStartChat.setOnClickListener(v -> {
             if (selectedUsers.isEmpty()) {
                 Toast.makeText(this, "No users selected.", Toast.LENGTH_SHORT).show();
             } else {
@@ -80,28 +81,30 @@ public class SearchUserActivity extends AppCompatActivity {
         });
 
         // Back button listener
-        binding.backBtn.setOnClickListener(v -> onBackPressed());
+        binding.btnBack.setOnClickListener(v -> onBackPressed());
     }
 
     /**
-     * Searches for users in Firestore based on username or phone number.
+     * Searches for users in Firestore based on username, email, or phone number.
      *
      * @param query The search query entered by the user.
      */
     private void searchUsers(String query) {
         String lowerQuery = query.toLowerCase().replaceAll("\\s", ""); // Normalize query
 
-        db.collection(UserModel.FIELD_COLLECTION_NAME)
+        db.collection(Constants.USER_COLLECTION)  // Use the correct collection name from Constants
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
                     userList.clear();
                     for (DocumentSnapshot document : querySnapshot.getDocuments()) {
                         UserModel user = document.toObject(UserModel.class);
 
+                        // Check if the user's username, phone, or email matches the query
                         if (user != null &&
-                                (user.username.toLowerCase().contains(lowerQuery) ||
-                                        user.phone.replaceAll("\\s", "").toLowerCase().contains(lowerQuery)) &&
-                                !user.phone.equals(currentUserPhone)) {
+                                (user.getUsername().toLowerCase().contains(lowerQuery) ||
+                                        user.getPhone().replaceAll("\\s", "").toLowerCase().contains(lowerQuery) ||
+                                        (user.getEmail() != null && user.getEmail().toLowerCase().contains(lowerQuery))) &&
+                                !user.getPhone().equals(currentUserPhone)) { // Exclude current user
                             userList.add(user);
                         }
                     }
@@ -119,18 +122,26 @@ public class SearchUserActivity extends AppCompatActivity {
      * Starts a chat with the selected users.
      */
     private void startChatWithSelectedUsers() {
-        ArrayList<UserModel> selectedUserList = new ArrayList<>(selectedUsers);
+        // Create a list with the phone numbers of the selected users
+        List<String> selectedUserPhones = new ArrayList<>();
+        for (UserModel user : selectedUsers) {
+            selectedUserPhones.add(user.getPhone());
+        }
 
-        Intent intent = new Intent(this, ChatActivity.class);
-        //intent.putParcelableArrayListExtra("selectedUsers", (ArrayList<? extends Parcelable>) selectedUserList); // Pass selected users
-        //startActivity(intent);
+        // Add the current user to the list of participants (phone number)
+        selectedUserPhones.add(currentUserPhone);
+
+        // Start the ChatActivity and pass the selected users' phone numbers
+        Intent intent = new Intent(SearchUserActivity.this, ChatActivity.class);
+        intent.putStringArrayListExtra(Constants.FIELD_PHONE_NUMBERS, (ArrayList<String>) selectedUserPhones); // Pass selected users' phone numbers
+        startActivity(intent);
     }
 
     /**
      * Updates the visibility of the "Start Chat" button based on selected users.
      */
     private void updateStartChatButtonVisibility() {
-        binding.startChatBtn.setVisibility(selectedUsers.isEmpty() ? View.GONE : View.VISIBLE);
+        binding.btnStartChat.setVisibility(selectedUsers.isEmpty() ? View.GONE : View.VISIBLE);
     }
 
     /**
@@ -139,7 +150,8 @@ public class SearchUserActivity extends AppCompatActivity {
      * @return The phone number of the current user.
      */
     private String getCurrentUserPhone() {
-        return getSharedPreferences(PreferenceManager.KEY_PREFERENCE_NAME, MODE_PRIVATE).getString(UserModel.FIELD_PHONE, "");
+        return getSharedPreferences(PreferenceManager.KEY_PREFERENCE_NAME, MODE_PRIVATE)
+                .getString(Constants.PREF_KEY_PHONE, "");
     }
 
     /**
@@ -186,15 +198,15 @@ public class SearchUserActivity extends AppCompatActivity {
             }
 
             public void bind(UserModel user) {
-                binding.userNameText.setText(user.username);
-                binding.userPhoneText.setText(user.phone);
+                binding.userNameText.setText(user.getUsername());
+                binding.textviewPhone.setText(user.getPhone());
 
                 // Load profile picture
-                if (user.profilePic != null && !user.profilePic.isEmpty()) {
-                    Bitmap bitmap = Utilities.decodeImage(user.profilePic);
-                    binding.userProfileImage.setImageBitmap(bitmap);
+                if (user.getProfilePic() != null && !user.getProfilePic().isEmpty()) {
+                    Bitmap bitmap = Utilities.decodeImage(user.getProfilePic());
+                    binding.roundedviewProfilePic.setImageBitmap(bitmap);
                 } else {
-                    binding.userProfileImage.setImageResource(R.drawable.ic_person);
+                    binding.roundedviewProfilePic.setImageResource(R.drawable.ic_person);
                 }
 
                 // Handle checkbox selection

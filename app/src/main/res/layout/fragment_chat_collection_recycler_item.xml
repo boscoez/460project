@@ -23,7 +23,7 @@
 
     <!-- User Info: Name and Phone -->
     <LinearLayout
-        android:id="@+id/userInfoContainer"
+        android:id="@+id/textviewDivider"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
@@ -43,11 +43,11 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/textViewPhone"
+            android:id="@+id/textviewPhone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="+0000000000"
-            android:textColor="@color/light_gray"
+            android:textColor="@color/gray_light"
             android:textSize="17sp" />
     </LinearLayout>
 
@@ -60,7 +60,7 @@
         android:paddingBottom="10dp"
         android:orientation="vertical"
         app:layout_constraintStart_toEndOf="@id/imageViewProfilePic"
-        app:layout_constraintTop_toBottomOf="@id/userInfoContainer"
+        app:layout_constraintTop_toBottomOf="@id/textviewDivider"
         app:layout_constraintEnd_toEndOf="parent">
 
         <TextView
@@ -79,7 +79,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:text="Timestamp"
-            android:textColor="@color/light_gray"
+            android:textColor="@color/gray_light"
             android:textSize="15sp" />
     </LinearLayout>
 

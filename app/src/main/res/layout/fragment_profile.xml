@@ -10,7 +10,7 @@
 
     <!-- Title for the Profile Screen -->
     <TextView
-        android:id="@+id/titleText"
+        android:id="@+id/textviewTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:paddingVertical="17dp"
@@ -37,9 +37,9 @@
         android:padding="5dp"
         android:scaleType="fitXY"
         android:src="@drawable/ic_power"
-        app:layout_constraintBottom_toBottomOf="@+id/titleText"
+        app:layout_constraintBottom_toBottomOf="@+id/textviewTitle"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/titleText"
+        app:layout_constraintTop_toTopOf="@+id/textviewTitle"
         app:tint="@color/primary" />
 
     <!-- Divider Below Title -->
@@ -49,7 +49,7 @@
         android:layout_height="2dp"
         android:layout_marginTop="8dp"
         android:background="@color/primary"
-        app:layout_constraintTop_toBottomOf="@id/titleText" />
+        app:layout_constraintTop_toBottomOf="@id/textviewTitle" />
 
     <!-- Profile Image and Add Image Text -->
     <FrameLayout
@@ -78,7 +78,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="Add Image"
-            android:textColor="@color/light_gray"
+            android:textColor="@color/gray_light"
             android:textSize="25sp" />
     </FrameLayout>
 
@@ -102,6 +102,25 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/layoutImage" />
 
+    <!-- Email Input -->
+    <EditText
+        android:id="@+id/profile_email"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_rectangle"
+        android:hint="Email"
+        android:inputType="textEmailAddress"
+        android:importantForAutofill="no"
+        android:paddingStart="16dp"
+        android:paddingEnd="17dp"
+        android:textColor="@color/primary"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/profile_username" />
+
     <!-- Phone Number Input (Read-Only) -->
     <EditText
         android:id="@+id/profile_phone"
@@ -120,7 +139,45 @@
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/profile_username" />
+        app:layout_constraintTop_toBottomOf="@id/profile_email" />
+
+    <!-- Password Input -->
+    <EditText
+        android:id="@+id/profile_password"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_rectangle"
+        android:hint="Password"
+        android:inputType="textPassword"
+        android:importantForAutofill="no"
+        android:paddingStart="16dp"
+        android:paddingEnd="17dp"
+        android:textColor="@color/primary"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/profile_phone" />
+
+    <!-- Confirm Password Input -->
+    <EditText
+        android:id="@+id/profile_confirm_password"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_rectangle"
+        android:hint="Confirm Password"
+        android:inputType="textPassword"
+        android:importantForAutofill="no"
+        android:paddingStart="16dp"
+        android:paddingEnd="17dp"
+        android:textColor="@color/primary"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/profile_password" />
 
     <!-- Update Button and Progress Bar -->
     <FrameLayout
@@ -130,7 +187,7 @@
         android:layout_marginTop="17dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/profile_phone">
+        app:layout_constraintTop_toBottomOf="@id/profile_confirm_password">
 
         <!-- Update Button -->
         <com.google.android.material.button.MaterialButton

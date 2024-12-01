@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="white">#FFFFFF</color>
+    <color name="secondary">#F2F2F2</color>
+    <color name="input">#F5F5F5</color>
+    <color name="white_off">#EDEDED</color>
+    <color name="input_hint">#9E9E9E</color>
+    <color name="warning">#FFC107</color>
+    <color name="sticker">#E6C97F</color>
+    <color name="fab">#80CBC4</color>
+    <color name="info">#2196F3</color>
+    <color name="success">#4CAF50</color>
+    <color name="chat_sender">#26A69A</color>
+    <color name="error">#E57373</color>
+    <color name="gray_light">#BDBDBD</color>
+    <color name="chat_receiver">#7E57C2</color>
+    <color name="launcher">#001F4D</color>
+    <color name="primary_dark">#000629</color>
     <color name="primary">#000833</color>
-    <color name="secondary">#FFFFFF</color>
-
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-
-    <color name="off_white">#FAFAFA</color>
-    <color name="light_gray">#6C6C6C</color>
-    <color name="primary_dark">#FF000000</color>
-
-    <color name="chat_color_sender">#004D40</color>
-    <color name="chat_color_receiver">#311B92</color>
-
-    <color name="input_background">#ECECEC</color>
-
-    <color name="fab_background">#B2DFDB</color>
-
+    <color name="black">#000000</color>
 </resources>

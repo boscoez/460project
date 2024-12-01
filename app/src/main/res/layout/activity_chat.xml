@@ -11,7 +11,7 @@
 
     <!-- Back Button: Allows users to return to the previous screen -->
     <ImageButton
-        android:id="@+id/backButton"
+        android:id="@+id/btnBack"
         android:layout_width="43dp"
         android:layout_height="43dp"
         android:layout_margin="17dp"
@@ -23,7 +23,7 @@
         app:tint="@color/white" />
 
     <TextView
-        android:id="@+id/titleText"
+        android:id="@+id/textviewTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginVertical="17dp"
@@ -33,10 +33,10 @@
         android:textColor="@color/white"
         android:textSize="24sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@id/backButton"
-        app:layout_constraintLeft_toRightOf="@id/backButton"
+        app:layout_constraintBottom_toBottomOf="@id/btnBack"
+        app:layout_constraintLeft_toRightOf="@id/btnBack"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/backButton" />
+        app:layout_constraintTop_toTopOf="@+id/btnBack" />
 
     <!-- Delete Chat Button: Visible only to the chat creator for deleting the chat room -->
     <Button
@@ -44,14 +44,14 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="17dp"
-        android:backgroundTint="@android:color/holo_red_light"
+        android:backgroundTint="@color/error"
         android:text="DELETE"
+        android:textColor="@color/white"
         android:textSize="23sp"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@+id/backButton"
+        app:layout_constraintBottom_toBottomOf="@+id/btnBack"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/backButton"
-        app:tint="@android:color/holo_red_dark" />
+        app:layout_constraintTop_toTopOf="@+id/btnBack" />
 
     <!-- RecyclerView: Displays the list of chat messages -->
     <androidx.recyclerview.widget.RecyclerView
@@ -63,7 +63,7 @@
         android:padding="17dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintBottom_toTopOf="@id/inputMessage"
-        app:layout_constraintTop_toBottomOf="@id/backButton"
+        app:layout_constraintTop_toBottomOf="@id/btnBack"
         app:stackFromEnd="true"
         tools:listitem="@layout/activity_chat_recycler_item" />
 
@@ -72,13 +72,17 @@
         android:id="@+id/inputMessage"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="17dp"
+        android:layout_marginHorizontal="9dp"
         android:layout_marginVertical="17dp"
+        android:background="@drawable/bg_rectangle"
+        android:backgroundTint="@color/input"
+        android:elevation="4dp"
         android:hint="Type a message"
         android:inputType="text"
-        android:paddingVertical="17dp"
-        android:textColor="@color/white"
-        android:textColorHint="@android:color/darker_gray"
+        android:paddingHorizontal="23dp"
+        android:paddingVertical="5dp"
+        android:textColor="@color/black"
+        android:textColorHint="@color/input_hint"
         android:textSize="23sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/messageSendButton"

@@ -24,9 +24,9 @@ import com.example.ezchat.databinding.FragmentProfileBinding;
 import com.example.ezchat.models.UserModel;
 import com.example.ezchat.utilities.PreferenceManager;
 import com.example.ezchat.utilities.Utilities;
+import com.example.ezchat.utilities.Constants;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -39,7 +39,6 @@ public class ProfileFragment extends Fragment {
 
     private FragmentProfileBinding binding; // View binding for fragment_profile.xml
     private PreferenceManager preferenceManager; // Preference manager for user data
-    private UserModel currentUserModel; // Current user's profile data
     private String encodedImage = ""; // Holds the Base64-encoded profile picture
     private FirebaseFirestore firestore; // Firestore instance
 
@@ -107,7 +106,7 @@ public class ProfileFragment extends Fragment {
      */
     private void getUserData() {
         setInProgress(true);
-        String phoneNumber = preferenceManager.getString(UserModel.FIELD_PHONE);
+        String phoneNumber = preferenceManager.getString(Constants.FIELD_PHONE);
 
         if (phoneNumber == null) {
             setInProgress(false);
@@ -115,54 +114,88 @@ public class ProfileFragment extends Fragment {
             return;
         }
 
-        currentUserModel = new UserModel();
-        currentUserModel.fetchUser(firestore, phoneNumber, user -> {
-            setInProgress(false);
-            if (user != null) {
-                currentUserModel = user;
-                binding.profileUsername.setText(user.username);
-                binding.profilePhone.setText(user.phone);
+        firestore.collection(Constants.USER_COLLECTION)
+                .document(phoneNumber)
+                .get()
+                .addOnCompleteListener(task -> {
+                    setInProgress(false);
+                    if (task.isSuccessful() && task.getResult() != null && task.getResult().exists()) {
+                        UserModel user = task.getResult().toObject(UserModel.class);
 
-                if (user.profilePic != null && !user.profilePic.isEmpty()) {
-                    Bitmap bitmap = Utilities.decodeImage(user.profilePic);
-                    binding.profileImageView.setImageBitmap(bitmap);
-                    binding.textAddImage.setVisibility(View.GONE);
-                }
-            } else {
-                Toast.makeText(requireContext(), "User data not found.", Toast.LENGTH_SHORT).show();
-            }
-        }, error -> {
-            setInProgress(false);
-            Toast.makeText(requireContext(), "Failed to fetch user data: " + error, Toast.LENGTH_SHORT).show();
-        });
+                        if (user != null) {
+                            // Pre-fill UI with user data
+                            binding.profileUsername.setText(user.getUsername());
+                            binding.profilePhone.setText(user.getPhone());  // This is read-only
+                            binding.profileEmail.setText(user.getEmail());  // Fill the email field
+
+                            if (user.getProfilePic() != null && !user.getProfilePic().isEmpty()) {
+                                Bitmap bitmap = Utilities.decodeImage(user.getProfilePic());
+                                binding.profileImageView.setImageBitmap(bitmap);
+                                binding.textAddImage.setVisibility(View.GONE);
+                            }
+                        }
+                    } else {
+                        Toast.makeText(requireContext(), "User data not found.", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     /**
-     * Updates the user's profile with the new username and profile picture.
+     * Updates the user's profile with the new username, email, password, and profile picture.
      */
     private void updateProfile() {
         String newUsername = binding.profileUsername.getText().toString().trim();
+        String newEmail = binding.profileEmail.getText().toString().trim();
+        String newPassword = binding.profilePassword.getText().toString().trim();
+        String confirmPassword = binding.profileConfirmPassword.getText().toString().trim();
 
+        // Validate username, email, and password fields
         if (newUsername.isEmpty() || newUsername.length() < 3) {
             binding.profileUsername.setError("Username must be at least 3 characters long");
             return;
         }
-
-        setInProgress(true);
-        currentUserModel.username = newUsername;
-
-        if (!encodedImage.isEmpty()) {
-            currentUserModel.profilePic = encodedImage;
+        if (newEmail.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(newEmail).matches()) {
+            binding.profileEmail.setError("Enter a valid email address.");
+            return;
+        }
+        if (!newPassword.equals(confirmPassword)) {
+            binding.profileConfirmPassword.setError("Passwords do not match.");
+            return;
         }
 
-        currentUserModel.updateUser(firestore, success -> {
-            setInProgress(false);
-            if (success) {
-                Toast.makeText(getContext(), "Profile updated successfully", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(getContext(), "Failed to update profile.", Toast.LENGTH_SHORT).show();
-            }
-        });
+        setInProgress(true);
+
+        // Update the user's information in Firestore
+        UserModel updatedUser = new UserModel(preferenceManager.getString(Constants.FIELD_PHONE), newUsername);
+        updatedUser.setEmail(newEmail);
+        updatedUser.setFcmToken(preferenceManager.getString(Constants.FIELD_FCM_TOKEN));
+
+        // If the user has selected a profile picture, update it
+        if (!encodedImage.isEmpty()) {
+            updatedUser.setProfilePic(encodedImage);
+        }
+
+        // Set hashed password if provided
+        if (!newPassword.isEmpty()) {
+            updatedUser.setHashedPassword(newPassword);
+        }
+
+        firestore.collection(Constants.USER_COLLECTION)
+                .document(updatedUser.getPhone())
+                .set(updatedUser)
+                .addOnCompleteListener(task -> {
+                    setInProgress(false);
+                    if (task.isSuccessful()) {
+                        // Update preferences as well
+                        preferenceManager.putString(Constants.FIELD_USERNAME, newUsername);
+                        preferenceManager.putString(Constants.FIELD_EMAIL, newEmail);
+                        preferenceManager.putString(Constants.FIELD_PROFILE_PIC, updatedUser.getProfilePic());
+
+                        Toast.makeText(getContext(), "Profile updated successfully", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getContext(), "Failed to update profile.", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     /**
@@ -170,18 +203,14 @@ public class ProfileFragment extends Fragment {
      */
     private void logoutUser() {
         setInProgress(true);
-        currentUserModel.logoutUser(firestore, () -> {
-            setInProgress(false);
-            preferenceManager.clear();
-            FirebaseAuth.getInstance().signOut();
+        FirebaseAuth.getInstance().signOut();
 
-            Intent intent = new Intent(getContext(), SplashActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-        }, error -> {
-            setInProgress(false);
-            Toast.makeText(getContext(), "Failed to log out: " + error, Toast.LENGTH_SHORT).show();
-        });
+        // Clear preferences
+        preferenceManager.clear();
+
+        Intent intent = new Intent(getContext(), SplashActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
 
     /**
