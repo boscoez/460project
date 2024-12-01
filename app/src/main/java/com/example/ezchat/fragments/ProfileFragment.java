@@ -111,9 +111,10 @@ public class ProfileFragment extends Fragment {
         setInProgress(true);
         String phoneNumber = preferenceManager.getString(Constants.FIELD_PHONE);
 
-        if (phoneNumber == null) {
+        if (phoneNumber == null || phoneNumber.isEmpty()) {
             setInProgress(false);
-            Utilities.showToast(requireContext(), "Failed to fetch user data: No phone number.", Utilities.ToastType.ERROR);
+            Utilities.showToast(requireContext(), "No user logged in. Please log in again.", Utilities.ToastType.ERROR);
+            logoutUser(); // Redirect to login
             return;
         }
 
@@ -126,10 +127,9 @@ public class ProfileFragment extends Fragment {
                         UserModel user = task.getResult().toObject(UserModel.class);
 
                         if (user != null) {
-                            // Pre-fill UI with user data
                             binding.profileUsername.setText(user.getUsername());
-                            binding.profilePhone.setText(user.getPhone());  // This is read-only
-                            binding.profileEmail.setText(user.getEmail());  // Fill the email field
+                            binding.profilePhone.setText(user.getPhone());
+                            binding.profileEmail.setText(user.getEmail());
 
                             if (user.getProfilePic() != null && !user.getProfilePic().isEmpty()) {
                                 Bitmap bitmap = Utilities.decodeImage(user.getProfilePic());

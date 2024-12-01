@@ -1,11 +1,9 @@
 package com.example.ezchat.activities;
 
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -19,27 +17,21 @@ import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthOptions;
 import com.google.firebase.auth.PhoneAuthProvider;
 
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 /**
- * LoginOtpActivity handles OTP-based authentication for the provided phone number.
- * The phone number is passed from LoginPhoneNumberActivity.
+ * Handles OTP-based authentication for the provided phone number.
  */
 public class LoginOtpActivity extends AppCompatActivity {
 
     private ActivityLoginOtpBinding binding;
-    private String phoneNum; // Phone number passed from LoginPhoneNumberActivity
-    private Long timeoutSeconds = 30L; // Timeout for resend OTP timer in seconds
-    private String verificationCode; // Verification code for OTP
-    private PhoneAuthProvider.ForceResendingToken resendingToken; // Token for resending OTP
-
-    private FirebaseAuth mAuth = FirebaseAuth.getInstance(); // Firebase Authentication instance
+    private String phoneNum; // Phone number passed from the previous activity
+    private String verificationCode; // Verification code received via SMS
+    private FirebaseAuth mAuth; // Firebase Authentication instance
     private PreferenceManager preferenceManager; // Shared preferences manager
 
-    private Timer resendTimer; // Timer for Resend OTP button
-    private Timer overallTimer; // Timer for overall OTP verification timeout
+    private PhoneAuthProvider.ForceResendingToken resendingToken; // Token for resending OTP
+    private final long OTP_TIMEOUT = 60L; // Timeout for OTP verification in seconds
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,203 +41,172 @@ public class LoginOtpActivity extends AppCompatActivity {
         binding = ActivityLoginOtpBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Initialize Shared Preferences Manager
+        // Initialize Firebase Authentication and PreferenceManager
+        mAuth = FirebaseAuth.getInstance();
         preferenceManager = PreferenceManager.getInstance(getApplicationContext());
 
-        // Retrieve the phone number from the intent or SharedPreferences
+        // Retrieve the phone number from the intent
         phoneNum = getIntent().getStringExtra(Constants.PREF_KEY_PHONE);
-
-        if (phoneNum != null) {
-            // Send OTP to the phone number
-            sendOtp(phoneNum, false);
-            // Start the overall 30-second timeout timer
-            startOverallTimeout();
-        }
-
-        // Set up "Next" button click listener
-        binding.loginNextBtn.setOnClickListener(v -> {
-            String enteredCode = binding.loginOtp.getText().toString();
-            if (enteredCode.isEmpty() || enteredCode.length() < 6) {
-                Utilities.showToast(getApplicationContext(), "Enter a valid OTP", Utilities.ToastType.WARNING);
-                return;
-            }
-            PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationCode, enteredCode);
-            signIn(credential); // Verify and sign in the user
-        });
-
-        // Set up "Resend OTP" button click listener
-        binding.resendOtpTextview.setOnClickListener(v -> sendOtp(phoneNum, true)); // Resend OTP
-
-        // Set up Back button click listener
-        binding.btnBack.setOnClickListener(v -> {
-            onBackPressed();
-        });
-    }
-
-    /**
-     * Checks if the device is connected to the internet.
-     */
-    private boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
-        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
-    }
-
-    /**
-     * Sends an OTP to the specified phone number. Uses Firebase's PhoneAuthProvider.
-     *
-     * @param phoneNum The phone number to send the OTP to.
-     * @param isResend Boolean indicating if this is a resend request.
-     */
-    void sendOtp(String phoneNum, boolean isResend) {
-        if (!isNetworkAvailable()) {
-            Utilities.showToast(getApplicationContext(), "No internet connection. Please try again.", Utilities.ToastType.ERROR);
+        if (phoneNum == null || phoneNum.isEmpty()) {
+            Log.e("LoginOtpActivity", "Phone number is missing. Redirecting to LoginPhoneNumberActivity.");
+            navigateToPhoneNumberActivity();
             return;
         }
+        Log.d("LoginOtpActivity", "Phone number received: " + phoneNum);
 
-        startResendTimer(); // Start the resend timer
-        setInProgress(true); // Show the progress bar
+        // Send OTP to the phone number
+        sendOtp(phoneNum);
 
-        // Build the PhoneAuthOptions
-        PhoneAuthOptions.Builder builder = PhoneAuthOptions.newBuilder(mAuth)
-                .setPhoneNumber(phoneNum)
-                .setTimeout(timeoutSeconds, TimeUnit.SECONDS)
-                .setActivity(this)
+        // Set up button click listeners
+        binding.loginNextBtn.setOnClickListener(v -> verifyOtp());
+        binding.resendOtpTextview.setOnClickListener(v -> resendOtp());
+        binding.btnBack.setOnClickListener(v -> onBackPressed());
+    }
+
+    /**
+     * Sends an OTP to the specified phone number using Firebase PhoneAuthProvider.
+     *
+     * @param phoneNum The phone number to send the OTP to.
+     */
+    private void sendOtp(String phoneNum) {
+        Log.d("LoginOtpActivity", "Sending OTP to: " + phoneNum);
+
+        binding.resendOtpTextview.setEnabled(false); // Disable resend button during sending
+
+        PhoneAuthOptions options = PhoneAuthOptions.newBuilder(mAuth)
+                .setPhoneNumber(phoneNum) // Phone number to verify
+                .setTimeout(OTP_TIMEOUT, TimeUnit.SECONDS) // Timeout duration
+                .setActivity(this) // Activity context
                 .setCallbacks(new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
                     @Override
                     public void onVerificationCompleted(PhoneAuthCredential phoneAuthCredential) {
-                        signIn(phoneAuthCredential); // Auto verification
-                        setInProgress(false);
-                        cancelOverallTimer(); // Cancel overall timeout if verification is auto-completed
+                        Log.d("LoginOtpActivity", "Verification completed automatically.");
+                        signInWithCredential(phoneAuthCredential);
                     }
 
                     @Override
                     public void onVerificationFailed(FirebaseException e) {
-                        setInProgress(false);
-                        Utilities.showToast(getApplicationContext(), "Verification Failed: " + e.getMessage(), Utilities.ToastType.ERROR);
-                        // Enable retry option
-                        binding.resendOtpTextview.setEnabled(true); // Allow resend on failure
+                        Log.e("LoginOtpActivity", "Verification failed: " + e.getMessage());
+                        Utilities.showToast(getApplicationContext(), "Verification failed. Please try again.", Utilities.ToastType.ERROR);
+                        binding.resendOtpTextview.setEnabled(true); // Enable resend button
                     }
 
                     @Override
-                    public void onCodeSent(String s, PhoneAuthProvider.ForceResendingToken forceResendingToken) {
-                        super.onCodeSent(s, forceResendingToken);
-                        verificationCode = s; // Save the verification code
-                        resendingToken = forceResendingToken; // Save the resending token
-                        Utilities.showToast(getApplicationContext(), "Code sent successfully.", Utilities.ToastType.SUCCESS);
-                        setInProgress(false);
+                    public void onCodeSent(String verificationId, PhoneAuthProvider.ForceResendingToken token) {
+                        Log.d("LoginOtpActivity", "OTP sent. Verification ID: " + verificationId);
+                        verificationCode = verificationId;
+                        resendingToken = token;
+                        binding.resendOtpTextview.setEnabled(false); // Disable resend initially
+                        startResendTimer(); // Start timer for resend button
                     }
-                });
-
-        // Resend or send OTP based on isResend
-        if (isResend) {
-            PhoneAuthProvider.verifyPhoneNumber(builder.setForceResendingToken(resendingToken).build());
-        } else {
-            PhoneAuthProvider.verifyPhoneNumber(builder.build());
-        }
+                })
+                .build();
+        PhoneAuthProvider.verifyPhoneNumber(options);
     }
 
     /**
-     * Toggles the progress state of the activity.
-     *
-     * @param inProgress Boolean indicating whether to show the progress bar.
+     * Verifies the OTP entered by the user.
      */
-    void setInProgress(boolean inProgress) {
-        if (inProgress) {
-            binding.loginOtp.setVisibility(View.GONE);
-            binding.loginProgressBar.setVisibility(View.VISIBLE);
-            binding.loginNextBtn.setVisibility(View.GONE);
-        } else {
-            binding.loginOtp.setVisibility(View.VISIBLE);
+    private void verifyOtp() {
+        String enteredCode = binding.loginOtp.getText().toString().trim();
+
+        if (enteredCode.isEmpty() || enteredCode.length() < 6) {
+            Utilities.showToast(this, "Enter a valid 6-digit OTP.", Utilities.ToastType.WARNING);
+            Log.d("LoginOtpActivity", "Invalid OTP entered: " + enteredCode);
+            return;
+        }
+
+        Log.d("LoginOtpActivity", "Verifying OTP: " + enteredCode);
+
+        PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationCode, enteredCode);
+        signInWithCredential(credential);
+    }
+
+    /**
+     * Resends the OTP to the phone number.
+     */
+    private void resendOtp() {
+        if (resendingToken == null) {
+            Log.e("LoginOtpActivity", "Resending token is null. Cannot resend OTP.");
+            return;
+        }
+
+        Log.d("LoginOtpActivity", "Resending OTP to: " + phoneNum);
+
+        PhoneAuthOptions options = PhoneAuthOptions.newBuilder(mAuth)
+                .setPhoneNumber(phoneNum)
+                .setTimeout(OTP_TIMEOUT, TimeUnit.SECONDS)
+                .setActivity(this)
+                .setCallbacks(new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+                    @Override
+                    public void onVerificationCompleted(PhoneAuthCredential phoneAuthCredential) {
+                        Log.d("LoginOtpActivity", "Verification completed automatically.");
+                        signInWithCredential(phoneAuthCredential);
+                    }
+
+                    @Override
+                    public void onVerificationFailed(FirebaseException e) {
+                        Log.e("LoginOtpActivity", "Verification failed: " + e.getMessage());
+                        Utilities.showToast(getApplicationContext(), "Verification failed. Please try again.", Utilities.ToastType.ERROR);
+                    }
+
+                    @Override
+                    public void onCodeSent(String verificationId, PhoneAuthProvider.ForceResendingToken token) {
+                        Log.d("LoginOtpActivity", "OTP resent. Verification ID: " + verificationId);
+                        verificationCode = verificationId;
+                        resendingToken = token;
+                        startResendTimer(); // Start timer for resend button
+                    }
+                })
+                .setForceResendingToken(resendingToken) // Use resending token
+                .build();
+        PhoneAuthProvider.verifyPhoneNumber(options);
+    }
+
+    /**
+     * Signs in the user with the provided PhoneAuthCredential.
+     *
+     * @param credential The PhoneAuthCredential obtained after verification.
+     */
+    private void signInWithCredential(PhoneAuthCredential credential) {
+        binding.loginProgressBar.setVisibility(View.VISIBLE);
+
+        mAuth.signInWithCredential(credential).addOnCompleteListener(task -> {
             binding.loginProgressBar.setVisibility(View.GONE);
-            binding.loginNextBtn.setVisibility(View.VISIBLE);
-        }
-    }
 
-    /**
-     * Verifies the OTP and signs in the user.
-     *
-     * @param phoneAuthCredential The credential obtained after OTP verification.
-     */
-    void signIn(PhoneAuthCredential phoneAuthCredential) {
-        setInProgress(true); // Show progress bar
-        mAuth.signInWithCredential(phoneAuthCredential).addOnCompleteListener(task -> {
-            setInProgress(false);
             if (task.isSuccessful()) {
-                // Cancel the overall timeout timer as verification is successful
-                cancelOverallTimer();
+                Log.d("LoginOtpActivity", "Sign-in successful.");
+                Utilities.showToast(this, "Verification successful!", Utilities.ToastType.SUCCESS);
 
-                // Navigate to the next activity
+                // Navigate to LoginUserNameActivity
                 Intent intent = new Intent(LoginOtpActivity.this, LoginUserNameActivity.class);
-                intent.putExtra(Constants.PREF_KEY_PHONE, phoneNum); // Pass the phone number
+                intent.putExtra(Constants.PREF_KEY_PHONE, phoneNum);
                 startActivity(intent);
-                finish(); // Optional: Finish current activity
+                finish();
             } else {
-                Utilities.showToast(getApplicationContext(), "Code verification failed!", Utilities.ToastType.ERROR);
+                Log.e("LoginOtpActivity", "Sign-in failed: " + task.getException().getMessage());
+                Utilities.showToast(this, "Verification failed. Please try again.", Utilities.ToastType.ERROR);
             }
         });
     }
 
     /**
-     * Starts a timer for the "Resend OTP" button, making it clickable again after the timeout period.
+     * Starts a timer for enabling the "Resend OTP" button.
      */
-    void startResendTimer() {
-        binding.resendOtpTextview.setEnabled(false); // Disable the resend button
-        timeoutSeconds = 30L; // Reset the timeout
-        if (resendTimer != null) {
-            resendTimer.cancel(); // Cancel any existing timer
-        }
-        resendTimer = new Timer();
-        resendTimer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                timeoutSeconds--;
-                runOnUiThread(() -> binding.resendOtpTextview.setText("Resend Code in " + timeoutSeconds + " seconds."));
-                if (timeoutSeconds <= 0) {
-                    resendTimer.cancel();
-                    runOnUiThread(() -> {
-                        binding.resendOtpTextview.setText("Resend Code");
-                        binding.resendOtpTextview.setEnabled(true); // Enable the button
-                    });
-                }
-            }
-        }, 0, 1000); // Schedule the task every second
+    private void startResendTimer() {
+        binding.resendOtpTextview.setEnabled(false); // Disable resend button initially
+        binding.resendOtpTextview.postDelayed(() -> {
+            binding.resendOtpTextview.setEnabled(true); // Enable resend button after timeout
+        }, TimeUnit.SECONDS.toMillis(OTP_TIMEOUT));
     }
 
     /**
-     * Starts an overall 30-second timeout timer. If the user doesn't verify the OTP within this period,
-     * the app navigates back to the previous activity.
+     * Redirects the user to LoginPhoneNumberActivity if the phone number is missing.
      */
-    void startOverallTimeout() {
-        overallTimer = new Timer();
-        overallTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                runOnUiThread(() -> {
-                    Utilities.showToast(getApplicationContext(), "Verification timed out. Returning to previous screen.", Utilities.ToastType.ERROR);
-                    finish(); // Navigate back to the previous activity
-                });
-            }
-        }, TimeUnit.SECONDS.toMillis(30)); // 30-second delay
-    }
-
-    /**
-     * Cancels the overall timeout timer if it's running.
-     */
-    void cancelOverallTimer() {
-        if (overallTimer != null) {
-            overallTimer.cancel();
-            overallTimer = null;
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (resendTimer != null) {
-            resendTimer.cancel();
-            resendTimer = null;
-        }
-        cancelOverallTimer(); // Ensure the overall timer is canceled
+    private void navigateToPhoneNumberActivity() {
+        Intent intent = new Intent(this, LoginPhoneNumberActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 }

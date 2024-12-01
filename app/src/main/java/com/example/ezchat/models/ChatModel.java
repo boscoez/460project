@@ -16,7 +16,7 @@ public class ChatModel implements Serializable {
     public final Date createdDate; // Date the chat was created (final, immutable)
     public final String creatorPhone; // Phone number of the creator of the chat (final, immutable)
     public final List<String> phoneNumbers; // List of participant phone numbers (can be modified by adding participants)
-    public final List<MessageModel> messages; // List of messages in the chat (can be modified by adding messages)
+    public final transient List<MessageModel> messages; // List of messages in the chat (can be modified by adding messages)
     public MessageModel lastMessage; // The last message sent in the chat
 
     /**

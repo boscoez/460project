@@ -15,7 +15,7 @@ import java.util.Set;
  * This model contains user profile details such as phone number, username, profile picture,
  * email, hashed password, fcm token, and the list of chat room IDs the user is part of.
  */
-public class UserModel {
+public class UserModel implements Serializable{
 
     private String phone; // The phone number of the user
     private String username; // The username of the user
@@ -23,7 +23,7 @@ public class UserModel {
     private String email; // The email address of the user
     private String hashedPassword; // The hashed password of the user
     private String fcmToken; // The FCM token for push notifications
-    private List<String> chats; // Set of chats the user is part
+    private transient List<String> chats; // Set of chats the user is part
 
     public UserModel(){}
 

@@ -10,10 +10,10 @@ import java.util.Date;
  * a list of receiver phone numbers, the message content,
  * the timestamp of the message, and its status.
  */
-public class MessageModel {
+public class MessageModel implements Serializable{
 
     private String senderPhone; // Phone number of the sender
-    private List<String> receiverPhones; // List of phone numbers of the receivers
+    private transient List<String> receiverPhones; // List of phone numbers of the receivers
     private String message; // The content of the message
     private Date timestamp; // Timestamp of when the message was sent
     private String status; // Status of the message (e.g., sent, delivered, read)
