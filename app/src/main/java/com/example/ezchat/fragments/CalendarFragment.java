@@ -55,7 +55,7 @@ public class CalendarFragment extends Fragment {
         // Initialize Firestore and PreferenceManager
         firestore = FirebaseFirestore.getInstance();
         preferenceManager = PreferenceManager.getInstance(requireContext());
-        currentUserPhone = preferenceManager.get(Constants.PREF_KEY_PHONE, "");
+        currentUserPhone = preferenceManager.get(Constants.FIELD_PHONE, "");
 
         tasksByDate = new HashMap<>();
         selectedDate = getCurrentDate();
@@ -100,14 +100,14 @@ public class CalendarFragment extends Fragment {
             return;
         }
 
-        firestore.collection(Constants.USER_COLLECTION)
+        firestore.collection(Constants.COLLECTION_USER)
                 .document(currentUserPhone)
-                .collection(Constants.TASKS_COLLECTION)
+                .collection(Constants.COLLECTION_TASKS)
                 .document(selectedDate)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        List<String> tasks = (List<String>) documentSnapshot.get(Constants.FIELD_TASKS);
+                        List<String> tasks = (List<String>) documentSnapshot.get(Constants.COLLECTION_TASKS);
                         tasksByDate.put(selectedDate, tasks != null ? tasks : new ArrayList<>());
                         taskAdapter.updateTasks(tasksByDate.get(selectedDate));
                     } else {
@@ -148,20 +148,20 @@ public class CalendarFragment extends Fragment {
         }
 
         if (tasks.isEmpty()) {
-            firestore.collection(Constants.USER_COLLECTION)
+            firestore.collection(Constants.COLLECTION_USER)
                     .document(currentUserPhone)
-                    .collection(Constants.TASKS_COLLECTION)
+                    .collection(Constants.COLLECTION_TASKS)
                     .document(date)
                     .delete()
                     .addOnSuccessListener(aVoid -> Log.d(Constants.LOG_TAG_CALENDAR, "Date removed from Firestore."))
                     .addOnFailureListener(e -> Log.e(Constants.LOG_TAG_CALENDAR, "Failed to remove date from Firestore: " + e.getMessage()));
         } else {
-            firestore.collection(Constants.USER_COLLECTION)
+            firestore.collection(Constants.COLLECTION_USER)
                     .document(currentUserPhone)
-                    .collection(Constants.TASKS_COLLECTION)
+                    .collection(Constants.COLLECTION_TASKS)
                     .document(date)
                     .set(new HashMap<String, Object>() {{
-                        put(Constants.FIELD_TASKS, tasks);
+                        put(Constants.COLLECTION_TASKS, tasks);
                     }})
                     .addOnSuccessListener(aVoid -> Log.d(Constants.LOG_TAG_CALENDAR, "Task saved successfully!"))
                     .addOnFailureListener(e -> Log.e(Constants.LOG_TAG_CALENDAR, "Failed to save task: " + e.getMessage()));

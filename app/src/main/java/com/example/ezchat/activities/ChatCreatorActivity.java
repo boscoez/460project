@@ -77,7 +77,7 @@ public class ChatCreatorActivity extends AppCompatActivity {
 
     private void loadUsers() {
         progressBar.setVisibility(View.VISIBLE);
-        database.collection(Constants.USER_COLLECTION)
+        database.collection(Constants.COLLECTION_USER)
                 .get()
                 .addOnCompleteListener(task -> {
                     progressBar.setVisibility(View.GONE);
@@ -113,7 +113,7 @@ public class ChatCreatorActivity extends AppCompatActivity {
 
             // Pass the chat model to ChatActivity
             Intent intent = new Intent(ChatCreatorActivity.this, ChatActivity.class);
-            intent.putExtra(Constants.CHAT_MODEL, chat);
+            intent.putExtra(Constants.MODEL_CHAT, chat);
             startActivity(intent);
             finish();
         });

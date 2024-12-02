@@ -1,6 +1,5 @@
 package com.example.ezchat.fragments;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -80,8 +79,8 @@ public class ChatsFragment extends Fragment {
         loadingProgressBar.setVisibility(View.VISIBLE);
         String currentUserPhone = preferenceManager.get(Constants.FIELD_PHONE, "");
 
-        firestore.collection(Constants.CHAT_COLLECTION)
-                .whereArrayContains(Constants.FIELD_PHONE_NUMBERS, currentUserPhone)
+        firestore.collection(Constants.COLLECTION_CHAT)
+                .whereArrayContains(Constants.FIELD_PHONE, currentUserPhone)
                 .orderBy(Constants.FIELD_LAST_MESSAGE_TIMESTAMP, Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshots, error) -> {
                     if (error != null) {

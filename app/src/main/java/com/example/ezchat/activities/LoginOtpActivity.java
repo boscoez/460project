@@ -46,7 +46,7 @@ public class LoginOtpActivity extends AppCompatActivity {
         firebaseAuth = FirebaseAuth.getInstance();
 
         // Retrieve the phone number from the preferences
-        phoneNum = preferenceManager.get(Constants.PREF_KEY_PHONE, "");
+        phoneNum = preferenceManager.get(Constants.FIELD_PHONE, "");
         if (phoneNum.isEmpty()) {
             Log.e(Constants.LOG_TAG_PHONE_NUMBER, "Phone number missing. Redirecting to LoginPhoneNumberActivity.");
             Utilities.navigateToActivity(this, LoginPhoneNumberActivity.class, null);
@@ -195,8 +195,8 @@ public class LoginOtpActivity extends AppCompatActivity {
 
                 // Navigate to the next activity
                 Map<String, String> extras = new HashMap<>();
-                extras.put(Constants.PREF_KEY_PHONE, phoneNum);
-                Utilities.navigateToActivity(this, LoginUserNameActivity.class, extras);
+                extras.put(Constants.FIELD_PHONE, phoneNum);
+                Utilities.navigateToActivity(this, LoginDetailsActivity.class, extras);
                 finish();
             } else {
                 Log.e(Constants.LOG_TAG_PHONE_NUMBER, "Sign-in failed: " + task.getException().getMessage());

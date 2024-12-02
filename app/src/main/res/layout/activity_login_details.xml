@@ -8,7 +8,7 @@
     android:padding="16dp"
     android:gravity="center"
     android:orientation="vertical"
-    tools:context=".activities.LoginUserNameActivity">
+    tools:context=".activities.LoginDetailsActivity">
 
     <!-- Welcome Message -->
     <TextView

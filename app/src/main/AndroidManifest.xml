@@ -24,7 +24,7 @@
             android:name=".activities.SearchActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.LoginUserNameActivity"
+            android:name=".activities.LoginDetailsActivity"
             android:exported="false" />
         <activity
             android:name=".activities.LoginOtpActivity"

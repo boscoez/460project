@@ -1,6 +1,5 @@
 package com.example.ezchat.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -49,9 +48,9 @@ public class MainActivity extends AppCompatActivity {
      * Logs the current user's details for debugging.
      */
     private void logUserDetails() {
-        String phone = preferenceManager.get(Constants.PREF_KEY_PHONE, "N/A");
-        String username = preferenceManager.get(Constants.PREF_KEY_USERNAME, "N/A");
-        String email = preferenceManager.get(Constants.PREF_KEY_EMAIL, "N/A");
+        String phone = preferenceManager.get(Constants.FIELD_PHONE, "N/A");
+        String username = preferenceManager.get(Constants.FIELD_USERNAME, "N/A");
+        String email = preferenceManager.get(Constants.FIELD_EMAIL, "N/A");
 
         Log.d(Constants.LOG_TAG_MAIN_ACTIVITY, "User details:");
         Log.d(Constants.LOG_TAG_MAIN_ACTIVITY, "Phone: " + phone);
@@ -66,13 +65,13 @@ public class MainActivity extends AppCompatActivity {
         binding.bottomNavigation.setOnNavigationItemSelectedListener(item -> {
             Fragment selectedFragment = null;
 
-            if (item.getItemId() == R.id.menu_profile) {
+            if (item.getItemId() == R.id.nav_profile) {
                 Log.d(Constants.LOG_TAG_MAIN_ACTIVITY, "Navigating to ProfileFragment.");
                 selectedFragment = new ProfileFragment();
-            } else if (item.getItemId() == R.id.menu_chat) {
+            } else if (item.getItemId() == R.id.nav_chats) {
                 Log.d(Constants.LOG_TAG_MAIN_ACTIVITY, "Navigating to ChatsFragment.");
                 selectedFragment = new ChatsFragment();
-            } else if (item.getItemId() == R.id.menu_calendar) {
+            } else if (item.getItemId() == R.id.nav_calendar) {
                 Log.d(Constants.LOG_TAG_MAIN_ACTIVITY, "Navigating to CalendarFragment.");
                 selectedFragment = new CalendarFragment();
             }
@@ -86,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Load the default fragment (ChatsFragment)
-        binding.bottomNavigation.setSelectedItemId(R.id.menu_chat);
+        binding.bottomNavigation.setSelectedItemId(R.id.nav_chats);
     }
 
     /**

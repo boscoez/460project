@@ -21,19 +21,19 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-        Log.d(Constants.SPLASH_LOG_TAG, "Splash screen loaded.");
+        Log.d(Constants.LOG_TAG_SPLASH, "Splash screen loaded.");
 
         // Initialize PreferenceManager
         PreferenceManager preferenceManager = PreferenceManager.getInstance(this);
 
         // Check login status after a delay
         new Handler().postDelayed(() -> {
-            boolean isLoggedIn = preferenceManager.get(Constants.PREF_KEY_IS_LOGGED_IN, false);
+            boolean isLoggedIn = preferenceManager.get(Constants.KEY_IS_LOGGED_IN, false);
             if (isLoggedIn) {
-                Log.d(Constants.SPLASH_LOG_TAG, "User is logged in. Navigating to MainActivity.");
+                Log.d(Constants.LOG_TAG_SPLASH, "User is logged in. Navigating to MainActivity.");
                 navigateToMainActivity();
             } else {
-                Log.d(Constants.SPLASH_LOG_TAG, "User not logged in. Navigating to LoginPhoneNumberActivity.");
+                Log.d(Constants.LOG_TAG_SPLASH, "User not logged in. Navigating to LoginPhoneNumberActivity.");
                 navigateToLoginActivity();
             }
         }, Constants.SPLASH_DELAY);

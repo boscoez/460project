@@ -27,7 +27,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class ChatActivity extends AppCompatActivity {
@@ -94,9 +93,9 @@ public class ChatActivity extends AppCompatActivity {
             // Case 1: Existing chat
             chatId = intent.getStringExtra(Constants.FIELD_CHAT_ID);
             isNewChat = false;
-        } else if (intent.hasExtra(Constants.CHAT_MODEL)) {
+        } else if (intent.hasExtra(Constants.MODEL_CHAT)) {
             // Case 2: New chat
-            chatModel = (ChatModel) intent.getSerializableExtra(Constants.CHAT_MODEL);
+            chatModel = (ChatModel) intent.getSerializableExtra(Constants.MODEL_CHAT);
             isNewChat = true;
         } else {
             Log.e(TAG, "No valid data passed to ChatActivity.");
@@ -131,14 +130,14 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void createNewChat(String firstMessage) {
-        chatId = database.collection(Constants.CHAT_COLLECTION).document().getId();
+        chatId = database.collection(Constants.COLLECTION_CHAT).document().getId();
         chatModel.chatId = chatId;
 
         MessageModel message = new MessageModel(currentUserPhone, new ArrayList<>(chatModel.phoneNumbers), firstMessage);
         chatModel.lastMessage = message;
 
         // Add chat and first message to Firestore
-        database.collection(Constants.CHAT_COLLECTION)
+        database.collection(Constants.COLLECTION_CHAT)
                 .document(chatId)
                 .set(chatModel)
                 .addOnSuccessListener(aVoid -> sendMessage(firstMessage))
@@ -151,7 +150,7 @@ public class ChatActivity extends AppCompatActivity {
     private void loadMessages() {
         loadingProgressBar.setVisibility(View.VISIBLE);
 
-        database.collection(Constants.MESSAGE_COLLECTION)
+        database.collection(Constants.COLLECTION_MESSAGE)
                 .whereEqualTo(Constants.FIELD_CHAT_ID, chatId)
                 .orderBy(Constants.FIELD_TIMESTAMP, Query.Direction.ASCENDING)
                 .addSnapshotListener((value, error) -> {
@@ -177,7 +176,7 @@ public class ChatActivity extends AppCompatActivity {
     private void sendMessage(String content) {
         MessageModel message = new MessageModel(currentUserPhone, new ArrayList<>(chatModel.phoneNumbers), content);
 
-        database.collection(Constants.MESSAGE_COLLECTION)
+        database.collection(Constants.COLLECTION_MESSAGE)
                 .add(message)
                 .addOnSuccessListener(documentReference -> {
                     Log.d(TAG, "Message sent successfully.");

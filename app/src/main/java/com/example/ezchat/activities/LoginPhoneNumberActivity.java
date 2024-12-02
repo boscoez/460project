@@ -62,12 +62,12 @@ public class LoginPhoneNumberActivity extends AppCompatActivity {
         Log.d(Constants.LOG_TAG_PHONE_NUMBER, "Constructed Phone Number: " + fullPhoneNumber);
 
         // Save the phone number to preferences
-        preferenceManager.set(Constants.PREF_KEY_PHONE, fullPhoneNumber);
+        preferenceManager.set(Constants.FIELD_PHONE, fullPhoneNumber);
         Log.d(Constants.LOG_TAG_PHONE_NUMBER, "Phone number saved to preferences");
 
         // Navigate to the OTP Activity
         Map<String, String> extras = new HashMap<>();
-        extras.put(Constants.PREF_KEY_PHONE, fullPhoneNumber);
+        extras.put(Constants.FIELD_PHONE, fullPhoneNumber);
 
         binding.loginProgressBar.setVisibility(View.VISIBLE); // Show progress bar
         Utilities.navigateToActivity(this, LoginOtpActivity.class, extras);

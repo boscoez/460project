@@ -16,7 +16,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.example.ezchat.R;
 import com.example.ezchat.activities.SplashActivity;
 import com.example.ezchat.databinding.FragmentProfileBinding;
 import com.example.ezchat.utilities.Constants;
@@ -60,7 +59,7 @@ public class ProfileFragment extends Fragment {
     }
 
     private void fetchUserData() {
-        String phoneNumber = preferenceManager.get(Constants.PREF_KEY_PHONE, "");
+        String phoneNumber = preferenceManager.get(Constants.FIELD_PHONE, "");
 
         if (phoneNumber.isEmpty()) {
             Utilities.showToast(requireContext(), "No user logged in. Redirecting to login.", Utilities.ToastType.ERROR);
@@ -68,7 +67,7 @@ public class ProfileFragment extends Fragment {
             return;
         }
 
-        firestore.collection(Constants.USER_COLLECTION)
+        firestore.collection(Constants.COLLECTION_USER)
                 .document(phoneNumber)
                 .get()
                 .addOnCompleteListener(task -> {
@@ -85,10 +84,10 @@ public class ProfileFragment extends Fragment {
     }
 
     private void populateUserData(Object data) {
-        binding.profileUsername.setText(preferenceManager.get(Constants.PREF_KEY_USERNAME, ""));
-        binding.profileEmail.setText(preferenceManager.get(Constants.PREF_KEY_EMAIL, ""));
+        binding.profileUsername.setText(preferenceManager.get(Constants.FIELD_USERNAME, ""));
+        binding.profileEmail.setText(preferenceManager.get(Constants.FIELD_EMAIL, ""));
 
-        String profilePic = preferenceManager.get(Constants.PREF_KEY_PROFILE_PIC, "");
+        String profilePic = preferenceManager.get(Constants.FIELD_PROFILE_PIC, "");
         if (!profilePic.isEmpty()) {
             Bitmap bitmap = Utilities.decodeImage(profilePic);
             binding.profileImageView.setImageBitmap(bitmap);
@@ -126,7 +125,7 @@ public class ProfileFragment extends Fragment {
         binding.profileProgressBar.setVisibility(View.VISIBLE);
         binding.profileUpdateBtn.setVisibility(View.GONE);
 
-        String phoneNumber = preferenceManager.get(Constants.PREF_KEY_PHONE, "");
+        String phoneNumber = preferenceManager.get(Constants.FIELD_PHONE, "");
         if (phoneNumber.isEmpty()) return;
 
         // Prepare updated user data
@@ -137,7 +136,7 @@ public class ProfileFragment extends Fragment {
             updatedUser.put(Constants.FIELD_PROFILE_PIC, encodedImage);
         }
 
-        firestore.collection(Constants.USER_COLLECTION)
+        firestore.collection(Constants.COLLECTION_USER)
                 .document(phoneNumber)
                 .update(updatedUser)
                 .addOnCompleteListener(task -> {
@@ -145,10 +144,10 @@ public class ProfileFragment extends Fragment {
                     binding.profileUpdateBtn.setVisibility(View.VISIBLE);
 
                     if (task.isSuccessful()) {
-                        preferenceManager.set(Constants.PREF_KEY_USERNAME, username);
-                        preferenceManager.set(Constants.PREF_KEY_EMAIL, email);
+                        preferenceManager.set(Constants.FIELD_USERNAME, username);
+                        preferenceManager.set(Constants.FIELD_EMAIL, email);
                         if (!encodedImage.isEmpty()) {
-                            preferenceManager.set(Constants.PREF_KEY_PROFILE_PIC, encodedImage);
+                            preferenceManager.set(Constants.FIELD_PROFILE_PIC, encodedImage);
                         }
                         Utilities.showToast(requireContext(), "Profile updated successfully!", Utilities.ToastType.SUCCESS);
                     } else {

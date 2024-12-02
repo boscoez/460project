@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/menu_profile"
+        android:id="@+id/nav_profile"
         android:icon="@drawable/ic_person"
         android:title="PROFILE"
         android:scaleType="fitXY"
         />
     <item
-        android:id="@+id/menu_chat"
+        android:id="@+id/nav_chats"
         android:icon="@drawable/ic_chat"
         android:title="CHATS"
         android:scaleType="fitXY"
         />
     <item
-        android:id="@+id/menu_calendar"
+        android:id="@+id/nav_calendar"
         android:icon="@drawable/ic_calendar"
         android:title="CALENDER"
         android:scaleType="fitXY"/>

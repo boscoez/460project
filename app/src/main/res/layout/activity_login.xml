@@ -9,7 +9,7 @@
     android:orientation="vertical"
     android:padding="19dp"
     android:weightSum="100"
-    tools:context=".activities.LoginUserNameActivity">
+    tools:context=".activities.LoginDetailsActivity">
 
     <!-- Welcome Message -->
     <TextView

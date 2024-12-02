@@ -13,8 +13,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.ezchat.R;
-import com.example.ezchat.databinding.ActivityLoginUserNameBinding;
+import com.example.ezchat.databinding.ActivityLoginDetailsBinding;
 import com.example.ezchat.models.UserModel;
 import com.example.ezchat.utilities.Constants;
 import com.example.ezchat.utilities.PreferenceManager;
@@ -24,9 +23,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
-public class LoginUserNameActivity extends AppCompatActivity {
+public class LoginDetailsActivity extends AppCompatActivity {
 
-    private ActivityLoginUserNameBinding binding;
+    private ActivityLoginDetailsBinding binding;
     private FirebaseFirestore db;
     private PreferenceManager preferenceManager;
     private String phoneNumber;
@@ -36,13 +35,13 @@ public class LoginUserNameActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        binding = ActivityLoginUserNameBinding.inflate(getLayoutInflater());
+        binding = ActivityLoginDetailsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         preferenceManager = PreferenceManager.getInstance(this);
         db = FirebaseFirestore.getInstance();
 
-        phoneNumber = preferenceManager.get(Constants.PREF_KEY_PHONE, "");
+        phoneNumber = preferenceManager.get(Constants.FIELD_PHONE, "");
         if (phoneNumber.isEmpty()) {
             Log.e(Constants.LOG_TAG_PHONE_NUMBER, "Phone number missing. Redirecting to LoginPhoneNumberActivity.");
             Utilities.navigateToActivity(this, LoginPhoneNumberActivity.class, null);
@@ -65,7 +64,7 @@ public class LoginUserNameActivity extends AppCompatActivity {
     private void checkIfUserExists() {
         binding.loginProgressBar.setVisibility(View.VISIBLE);
 
-        db.collection(Constants.USER_COLLECTION)
+        db.collection(Constants.COLLECTION_USER)
                 .document(phoneNumber)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
@@ -77,9 +76,9 @@ public class LoginUserNameActivity extends AppCompatActivity {
 
                         if (existingUser != null) {
                             // Save user data to preferences
-                            preferenceManager.set(Constants.PREF_KEY_USERNAME, existingUser.username);
-                            preferenceManager.set(Constants.PREF_KEY_EMAIL, existingUser.email);
-                            preferenceManager.set(Constants.PREF_KEY_PROFILE_PIC, existingUser.profilePic);
+                            preferenceManager.set(Constants.FIELD_USERNAME, existingUser.username);
+                            preferenceManager.set(Constants.FIELD_EMAIL, existingUser.email);
+                            preferenceManager.set(Constants.FIELD_PROFILE_PIC, existingUser.profilePic);
 
                             // Populate UI with existing user data
                             populateExistingUserData(existingUser);
@@ -192,13 +191,13 @@ public class LoginUserNameActivity extends AppCompatActivity {
         newUser.hashedPassword = Utilities.hashPassword(password);
         newUser.profilePic = encodedImage;
 
-        db.collection(Constants.USER_COLLECTION)
+        db.collection(Constants.COLLECTION_USER)
                 .document(phoneNumber)
                 .set(newUser)
                 .addOnSuccessListener(aVoid -> {
-                    preferenceManager.set(Constants.PREF_KEY_USERNAME, username);
-                    preferenceManager.set(Constants.PREF_KEY_EMAIL, email);
-                    preferenceManager.set(Constants.PREF_KEY_IS_LOGGED_IN, true);
+                    preferenceManager.set(Constants.FIELD_USERNAME, username);
+                    preferenceManager.set(Constants.FIELD_EMAIL, email);
+                    preferenceManager.set(Constants.KEY_IS_LOGGED_IN, true);
 
                     navigateToMainActivity();
                 })
@@ -211,7 +210,7 @@ public class LoginUserNameActivity extends AppCompatActivity {
     }
 
     private void navigateToMainActivity() {
-        Utilities.navigateToActivity(LoginUserNameActivity.this, MainActivity.class, null);
+        Utilities.navigateToActivity(LoginDetailsActivity.this, MainActivity.class, null);
         finish();
     }
 }
