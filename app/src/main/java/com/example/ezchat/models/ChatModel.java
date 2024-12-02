@@ -3,25 +3,33 @@ package com.example.ezchat.models;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Represents a chat room with participants and metadata.
- * It contains details such as the chat ID, the participants' phone numbers,
- * the creator's phone number, the last message sent, the creation date, and the messages in the chat.
  */
 public class ChatModel implements Serializable {
 
-    public final String chatId; // Unique ID for the chat (final, immutable)
-    public final Date createdDate; // Date the chat was created (final, immutable)
-    public final String creatorPhone; // Phone number of the creator of the chat (final, immutable)
-    public final List<String> phoneNumbers; // List of participant phone numbers (can be modified by adding participants)
-    public final transient List<MessageModel> messages; // List of messages in the chat (can be modified by adding messages)
+    public String chatId; // Unique ID for the chat
+    public Date createdDate; // Date the chat was created
+    public String creatorPhone; // Phone number of the creator of the chat
+    public List<String> phoneNumbers; // Set of participant phone numbers
+    public List<MessageModel> messages; // List of messages in the chat
     public MessageModel lastMessage; // The last message sent in the chat
 
     /**
+     * Default constructor.
+     */
+    public ChatModel() {
+        this.phoneNumbers = new ArrayList<>();
+        this.messages = new ArrayList<>();
+        this.createdDate = new Date();
+    }
+
+    /**
      * Constructor for initializing the ChatModel.
-     * Throws IllegalArgumentException if any required field is null or empty.
      *
      * @param chatId        The unique ID for the chat.
      * @param phoneNumbers  The list of participant phone numbers.
@@ -29,45 +37,32 @@ public class ChatModel implements Serializable {
      * @param lastMessage   The last message sent in the chat (can be null if none).
      */
     public ChatModel(String chatId, List<String> phoneNumbers, String creatorPhone, MessageModel lastMessage) {
-        this.chatId = requireNonNullOrEmpty(chatId, "Chat ID cannot be null or empty.");
-        this.phoneNumbers = new ArrayList<>(requireNonNullOrEmpty(phoneNumbers, "Phone numbers cannot be null or empty."));
-        this.creatorPhone = requireNonNullOrEmpty(creatorPhone, "Creator phone cannot be null or empty.");
-        this.createdDate = new Date(); // Set the creation date to the current time when the chat is created
+        this.chatId = chatId;
+        this.phoneNumbers = phoneNumbers;
+        this.creatorPhone = creatorPhone;
+        this.createdDate = new Date();
         this.lastMessage = lastMessage;
-        this.messages = new ArrayList<>(); // Initialize messages list
+        this.messages = new ArrayList<>();
     }
 
     /**
-     * Add a participant to the chat (phone number).
+     * Adds a participant to the chat.
+     *
+     * @param phoneNumber The participant's phone number.
      */
     public void addParticipant(String phoneNumber) {
-        if (!phoneNumbers.contains(phoneNumber)) {
-            phoneNumbers.add(phoneNumber);
-        }
+        this.phoneNumbers.add(phoneNumber);
     }
 
     /**
-     * Add a message to the chat.
+     * Adds a message to the chat.
+     *
+     * @param message The message to add.
      */
     public void addMessage(MessageModel message) {
         if (message != null) {
-            messages.add(message);
+            this.messages.add(message);
+            this.lastMessage = message; // Update last message
         }
-    }
-
-    /**
-     * Utility method to ensure a string or list is not null or empty.
-     *
-     * @param value          The value to check.
-     * @param errorMessage   The error message to throw in case of invalid value.
-     * @return The validated value.
-     * @throws IllegalArgumentException if the value is null or empty.
-     */
-    private <T> T requireNonNullOrEmpty(T value, String errorMessage) {
-        if (value == null || (value instanceof String && ((String) value).trim().isEmpty()) ||
-                (value instanceof List && ((List<?>) value).isEmpty())) {
-            throw new IllegalArgumentException(errorMessage);
-        }
-        return value;
     }
 }

@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- displays realtime list of last message in chats from db. Only chats current user is engaged in are displayed -->
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:background="@drawable/bg_content_bottom">
+    android:background="@drawable/bg_content_bottom"
+    tools:context=".fragments.ChatsFragment">
 
-    <!-- Title for the Chat Room Screen -->
+    <!-- Title for the chats fragment -->
     <TextView
         android:id="@+id/textviewTitle"
         android:layout_width="0dp"
@@ -17,26 +20,26 @@
         android:textColor="@color/black"
         android:textSize="25sp"
         android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Button (FAB) to start a new chat -->
+    <!-- Button to start a new chat (passes the creator phone to the Chat Activity )-->
     <ImageButton
         android:id="@+id/fabNewChat"
         android:layout_width="56dp"
         android:layout_height="56dp"
-        android:clickable="true"
-        android:padding="7dp"
-        android:elevation="7dp"
         android:layout_marginEnd="17dp"
-        android:scaleType="fitXY"
-        android:hapticFeedbackEnabled="true"
         android:background="@drawable/bg_fab"
+        android:clickable="true"
+        android:elevation="7dp"
+        android:hapticFeedbackEnabled="true"
+        android:padding="7dp"
+        android:scaleType="fitXY"
         android:src="@drawable/ic_add_people"
+        app:layout_constraintBottom_toTopOf="@id/titleDivider"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/titleDivider"
         app:tint="@color/primary" />
 
     <!-- Divider Below Title -->
@@ -46,22 +49,22 @@
         android:layout_height="2dp"
         android:layout_marginTop="8dp"
         android:background="@color/primary"
-        app:layout_constraintTop_toBottomOf="@id/textviewTitle"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/textviewTitle" />
 
-    <!-- RecyclerView to display the list of chat rooms -->
+    <!-- RecyclerView to list the real live chats from db  -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/chatRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/titleDivider"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        tools:listitem="@layout/fragment_chat_collection_recycler_item"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/titleDivider"
+        tools:listitem="@layout/fragment_chats_recycler_item" />
 
-    <!-- Message to display when no chats exist -->
+    <!-- Message to display when no chats for current user -->
     <TextView
         android:id="@+id/noChatsMessage"
         android:layout_width="0dp"
@@ -73,9 +76,23 @@
         android:textSize="18sp"
         android:textStyle="italic"
         android:visibility="gone"
-        app:layout_constraintTop_toTopOf="@id/chatRecyclerView"
         app:layout_constraintBottom_toBottomOf="@id/chatRecyclerView"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toTopOf="@id/chatRecyclerView" />
+
+
+    <!-- Progress Bar to display while loading chats from db -->
+    <ProgressBar
+        android:id="@+id/chatsLoadingProgressBar"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_gravity="center"
+        android:indeterminateTint="@color/primary"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

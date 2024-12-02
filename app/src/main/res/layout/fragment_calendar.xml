@@ -1,9 +1,13 @@
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<!--User utility for creating and displaying tasks, interacting in realtime with database -->
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_content_bottom">
+    android:background="@drawable/bg_content_bottom"
+    tools:context=".fragments.CalendarFragment">
 
     <!-- Title for the Task Calendar -->
     <TextView
@@ -20,7 +24,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Button to Add a Task -->
+    <!-- Button to Add create a task -->
     <ImageButton
         android:id="@+id/add_task_btn"
         android:layout_width="56dp"
@@ -48,7 +52,7 @@
         app:layout_constraintTop_toBottomOf="@id/calendar_title"
         tools:layout_editor_absoluteX="0dp" />
 
-    <!-- Calendar View -->
+    <!-- Calendar View to navigate or plot tasks recycler -->
     <CalendarView
         android:id="@+id/calendar_view"
         android:layout_width="match_parent"

@@ -7,33 +7,32 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.ezchat.R;
 import com.example.ezchat.databinding.ActivityLoginUserNameBinding;
 import com.example.ezchat.models.UserModel;
+import com.example.ezchat.utilities.Constants;
 import com.example.ezchat.utilities.PreferenceManager;
 import com.example.ezchat.utilities.Utilities;
-import com.example.ezchat.utilities.Constants;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
-/**
- * Handles user registration and sign-in with username and profile information.
- */
 public class LoginUserNameActivity extends AppCompatActivity {
 
-    private ActivityLoginUserNameBinding binding; // View Binding
-    private String phoneNumber; // User's phone number
-    private String encodedImage = ""; // Encoded profile picture in Base64
-    private UserModel existingUser; // Existing user data if found
-    private final FirebaseFirestore db = FirebaseFirestore.getInstance(); // Firestore instance
-    private PreferenceManager preferenceManager; // Shared preferences manager
+    private ActivityLoginUserNameBinding binding;
+    private FirebaseFirestore db; // Firestore instance
+    private PreferenceManager preferenceManager; // Shared Preferences manager
+    private String phoneNumber; // User's phone number from previous activity
+    private String encodedImage = ""; // Holds the Base64-encoded profile picture
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,178 +41,144 @@ public class LoginUserNameActivity extends AppCompatActivity {
         // Initialize View Binding and PreferenceManager
         binding = ActivityLoginUserNameBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        preferenceManager = PreferenceManager.getInstance(getApplicationContext());
+        preferenceManager = PreferenceManager.getInstance(this);
 
-        // Retrieve phone number from intent
-        phoneNumber = getIntent().getStringExtra(Constants.PREF_KEY_PHONE);
-        if (phoneNumber == null || phoneNumber.isEmpty()) {
-            Log.e("LoginUserNameActivity", "Phone number missing. Redirecting to LoginPhoneNumberActivity.");
-            navigateToPhoneNumberActivity();
+        // Initialize Firestore
+        db = FirebaseFirestore.getInstance();
+
+        // Retrieve the phone number from preferences
+        phoneNumber = preferenceManager.get(Constants.PREF_KEY_PHONE, "");
+        if (phoneNumber.isEmpty()) {
+            Log.e(Constants.LOG_TAG_PHONE_NUMBER, "Phone number missing. Redirecting to LoginPhoneNumberActivity.");
+            Utilities.navigateToActivity(this, LoginPhoneNumberActivity.class, null);
+            finish();
             return;
         }
-        Log.d("LoginUserNameActivity", "Phone number received: " + phoneNumber);
 
-        // Check if the user already exists
-        checkIfUserExists();
+        Log.d(Constants.LOG_TAG_PHONE_NUMBER, "Phone number retrieved: " + phoneNumber);
 
         // Set up button click listeners
-        binding.loginCodeBtn.setOnClickListener(v -> {
-            if (existingUser != null) {
-                signInUser();
-            } else {
-                registerNewUser();
-            }
-        });
-
-        binding.layoutImage.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            pickImage.launch(intent);
-        });
+        binding.loginCodeBtn.setOnClickListener(v -> validateAndRegisterUser());
+        binding.layoutImage.setOnClickListener(v -> pickImage());
     }
 
     /**
-     * Checks if the user already exists in Firestore using their phone number.
+     * Launches an intent to pick an image for the profile picture.
      */
-    private void checkIfUserExists() {
-        setInProgress(true);
-
-        db.collection(Constants.USER_COLLECTION)
-                .document(phoneNumber)
-                .get()
-                .addOnCompleteListener(task -> {
-                    setInProgress(false);
-
-                    if (task.isSuccessful() && task.getResult() != null && task.getResult().exists()) {
-                        existingUser = task.getResult().toObject(UserModel.class);
-                        Log.d("LoginUserNameActivity", "Existing user found: " + existingUser.getUsername());
-                        preFillUserData();
-                    } else {
-                        Log.d("LoginUserNameActivity", "No existing user found for phone number: " + phoneNumber);
-                        existingUser = null;
-                    }
-                });
+    private void pickImage() {
+        Log.d(Constants.LOG_TAG_PHONE_NUMBER, "Image picker launched.");
+        Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        imagePickerLauncher.launch(intent);
     }
 
     /**
-     * Pre-fills the UI fields for existing users.
+     * ActivityResultLauncher for handling image picking result.
      */
-    private void preFillUserData() {
-        binding.loginUsername.setText(existingUser.getUsername());
-        binding.loginUsername.setEnabled(false);
-
-        if (existingUser.getProfilePic() != null && !existingUser.getProfilePic().isEmpty()) {
-            binding.imageProfile.setImageBitmap(Utilities.decodeImage(existingUser.getProfilePic()));
-        }
-
-        binding.layoutImage.setEnabled(false);
-        binding.loginCodeBtn.setText("Sign In");
-    }
-
-    /**
-     * Handles signing in an existing user.
-     */
-    private void signInUser() {
-        saveUserToPreferences(existingUser);
-        navigateToMainActivity();
-    }
-
-    /**
-     * Registers a new user by saving their details to Firestore.
-     */
-    private void registerNewUser() {
-        String username = binding.loginUsername.getText().toString().trim();
-        if (username.isEmpty() || username.length() < 3) {
-            binding.loginUsername.setError("Username must be at least 3 characters long.");
-            return;
-        }
-
-        setInProgress(true);
-
-        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                String fcmToken = task.getResult();
-                UserModel newUser = new UserModel(phoneNumber, username);
-                newUser.setFcmToken(fcmToken);
-                newUser.setProfilePic(encodedImage);
-
-                db.collection(Constants.USER_COLLECTION)
-                        .document(phoneNumber)
-                        .set(newUser)
-                        .addOnCompleteListener(saveTask -> {
-                            setInProgress(false);
-                            if (saveTask.isSuccessful()) {
-                                Log.d("LoginUserNameActivity", "New user registered: " + username);
-                                saveUserToPreferences(newUser);
-                                navigateToMainActivity();
-                            } else {
-                                Utilities.showToast(this, "Failed to register user. Please try again.", Utilities.ToastType.ERROR);
-                                Log.e("LoginUserNameActivity", "User registration failed: " + saveTask.getException().getMessage());
-                            }
-                        });
-            } else {
-                setInProgress(false);
-                Utilities.showToast(this, "Failed to retrieve FCM token. Please try again.", Utilities.ToastType.ERROR);
-                Log.e("LoginUserNameActivity", "FCM token retrieval failed: " + task.getException().getMessage());
-            }
-        });
-    }
-
-    /**
-     * Saves user data to SharedPreferences for local access.
-     */
-    private void saveUserToPreferences(UserModel user) {
-        preferenceManager.putString(Constants.PREF_KEY_PHONE, user.getPhone());
-        preferenceManager.putString(Constants.PREF_KEY_USERNAME, user.getUsername());
-        preferenceManager.putString(Constants.FIELD_PROFILE_PIC, user.getProfilePic());
-        preferenceManager.putString(Constants.PREF_KEY_FCM_TOKEN, user.getFcmToken());
-        Log.d("LoginUserNameActivity", "User data saved to preferences: " + user.getUsername());
-    }
-
-    /**
-     * Navigates to MainActivity after successful registration or sign-in.
-     */
-    private void navigateToMainActivity() {
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-    }
-
-    /**
-     * Redirects the user to LoginPhoneNumberActivity if the phone number is missing.
-     */
-    private void navigateToPhoneNumberActivity() {
-        Intent intent = new Intent(this, LoginPhoneNumberActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-    }
-
-    /**
-     * Toggles the progress state of the activity.
-     */
-    private void setInProgress(boolean inProgress) {
-        binding.loginProgressBar.setVisibility(inProgress ? View.VISIBLE : View.GONE);
-        binding.loginCodeBtn.setEnabled(!inProgress);
-    }
-
-    /**
-     * Launches the image picker and encodes the selected image.
-     */
-    private final ActivityResultLauncher<Intent> pickImage = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
+    private final ActivityResultLauncher<Intent> imagePickerLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                     Uri imageUri = result.getData().getData();
                     try {
                         InputStream inputStream = getContentResolver().openInputStream(imageUri);
                         Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-                        encodedImage = Utilities.encodeImage(bitmap);
+                        encodedImage = Utilities.encodeImage(bitmap, 100);
                         binding.imageProfile.setImageBitmap(bitmap);
+                        binding.textAddImage.setVisibility(View.GONE);
+                        Log.d(Constants.LOG_TAG_PHONE_NUMBER, "Image successfully selected and encoded.");
                     } catch (FileNotFoundException e) {
-                        Log.e("LoginUserNameActivity", "Image file not found.", e);
+                        Log.e(Constants.LOG_TAG_PHONE_NUMBER, "Image file not found: " + e.getMessage());
                         Utilities.showToast(this, "Failed to load image.", Utilities.ToastType.ERROR);
                     }
                 }
-            }
-    );
+            });
+
+    /**
+     * Validates input fields and registers the user.
+     */
+    private void validateAndRegisterUser() {
+        String username = binding.loginUsername.getText().toString().trim();
+        String email = binding.loginEmail.getText().toString().trim();
+        String password = binding.loginPassword.getText().toString();
+        String confirmPassword = binding.loginConfirmedPassword.getText().toString();
+
+        // Validate username
+        if (username.isEmpty() || username.length() < 3) {
+            showError(binding.loginUsername, "Username must be at least 3 characters.");
+            return;
+        }
+
+        // Validate email
+        if (!Utilities.isValidEmail(email)) {
+            showError(binding.loginEmail, "Enter a valid email address.");
+            return;
+        }
+
+        // Validate password
+        if (password.isEmpty() || password.length() < 6) {
+            showError(binding.loginPassword, "Password must be at least 6 characters.");
+            return;
+        }
+
+        // Validate confirm password
+        if (!password.equals(confirmPassword)) {
+            showError(binding.loginConfirmedPassword, "Passwords do not match.");
+            return;
+        }
+
+        // Register user
+        registerNewUser(username, email, password);
+    }
+
+    /**
+     * Displays an error on an EditText field.
+     *
+     * @param field The EditText field to show the error on.
+     * @param message The error message to display.
+     */
+    private void showError(EditText field, String message) {
+        field.setError(message);
+        field.requestFocus();
+    }
+
+    /**
+     * Registers a new user in Firestore.
+     *
+     * @param username The user's username.
+     * @param email    The user's email.
+     * @param password The user's password (to be hashed).
+     */
+    private void registerNewUser(String username, String email, String password) {
+        binding.loginProgressBar.setVisibility(View.VISIBLE);
+        binding.loginCodeBtn.setVisibility(View.INVISIBLE);
+
+        // Create a new user model
+        UserModel newUser = new UserModel(phoneNumber, username);
+        newUser.email = email;
+        newUser.hashedPassword = Utilities.hashPassword(password);
+        newUser.profilePic = encodedImage;
+
+        Log.d(Constants.LOG_TAG_PHONE_NUMBER, "Registering new user: " + newUser);
+
+        // Save user to Firestore
+        db.collection(Constants.USER_COLLECTION)
+                .document(phoneNumber)
+                .set(newUser)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(Constants.LOG_TAG_PHONE_NUMBER, "User successfully registered in Firestore.");
+                    preferenceManager.set(Constants.PREF_KEY_USERNAME, username);
+                    preferenceManager.set(Constants.PREF_KEY_EMAIL, email);
+                    preferenceManager.set(Constants.PREF_KEY_IS_LOGGED_IN, true);
+
+                    // Navigate to MainActivity
+                    Utilities.navigateToActivity(LoginUserNameActivity.this, MainActivity.class, null);
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    binding.loginProgressBar.setVisibility(View.GONE);
+                    binding.loginCodeBtn.setVisibility(View.VISIBLE);
+                    Log.e(Constants.LOG_TAG_PHONE_NUMBER, "Failed to register user: " + e.getMessage());
+                    Utilities.showToast(this, "Failed to register user. Please try again.", Utilities.ToastType.ERROR);
+                });
+    }
 }

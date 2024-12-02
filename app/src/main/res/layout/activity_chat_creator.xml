@@ -49,6 +49,18 @@
         app:layout_constraintTop_toBottomOf="@id/textviewTitle"
         tools:listitem="@layout/activity_chat_creator_item" />
 
+    <!-- Progress Bar -->
+    <ProgressBar
+        android:id="@+id/chatCreatorProgressBar"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_gravity="center"
+        android:visibility="invisible"
+        app:layout_constraintTop_toTopOf="@id/recyclerviewUsers"
+        app:layout_constraintBottom_toBottomOf="@id/recyclerviewUsers"
+        app:layout_constraintLeft_toLeftOf="@id/recyclerviewUsers"
+        app:layout_constraintRight_toRightOf="@id/recyclerviewUsers"/>
+
     <!-- Button to Start the Chat with Selected Users -->
     <ImageButton
         android:id="@+id/btnStartChat"

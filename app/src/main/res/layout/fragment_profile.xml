@@ -8,7 +8,7 @@
     android:background="@drawable/bg_content_bottom"
     tools:context=".fragments.ProfileFragment">
 
-    <!-- Title for the Profile Screen -->
+    <!-- Title for the Profile fragment -->
     <TextView
         android:id="@+id/textviewTitle"
         android:layout_width="0dp"
@@ -61,7 +61,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/divider">
 
-        <!-- Profile Image -->
+        <!-- User profile image -->
         <com.makeramen.roundedimageview.RoundedImageView
             android:id="@+id/profile_image_view"
             android:layout_width="170dp"
@@ -189,7 +189,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/profile_confirm_password">
 
-        <!-- Update Button -->
+        <!-- Update Button to display while progress bar is hidden -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/profile_update_btn"
             android:layout_width="match_parent"
@@ -201,7 +201,7 @@
             android:textStyle="bold"
             app:cornerRadius="8dp" />
 
-        <!-- Progress Bar -->
+        <!-- Progress Bar to display while the update button is hidden -->
         <ProgressBar
             android:id="@+id/profile_progress_bar"
             android:layout_width="32dp"

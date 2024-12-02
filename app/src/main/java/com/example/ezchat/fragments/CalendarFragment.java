@@ -2,13 +2,14 @@ package com.example.ezchat.fragments;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CalendarView;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,12 +18,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ezchat.R;
-import com.example.ezchat.databinding.FragmentCalendarBinding;
-import com.example.ezchat.models.UserModel;
-import com.example.ezchat.utilities.PreferenceManager;
 import com.example.ezchat.utilities.Constants;
+import com.example.ezchat.utilities.PreferenceManager;
 import com.example.ezchat.utilities.Utilities;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
@@ -33,89 +31,83 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * A fragment for managing a user's tasks by date. Tasks can be added, edited, and deleted, with data stored in Firestore.
+ * Manages a user's tasks by date, including adding, editing, and deleting tasks.
  */
 public class CalendarFragment extends Fragment {
-    private static final String FIELD_COLLECTION_TASKS = "tasks";
 
-    private FragmentCalendarBinding binding; // View Binding
     private FirebaseFirestore firestore;
-    private String currentUserPhone; // Stores the current user's phone number
-    private HashMap<String, List<String>> tasksByDate; // Stores tasks mapped to their dates
-    private TaskAdapter taskAdapter; // Adapter for RecyclerView
-    private String selectedDate; // Tracks the currently selected date
-    private PreferenceManager preferenceManager; // Preference manager to fetch user data
+    private PreferenceManager preferenceManager;
+    private String currentUserPhone;
+    private HashMap<String, List<String>> tasksByDate;
+    private TaskAdapter taskAdapter;
+    private String selectedDate;
+
+    private View rootView;
+    private CalendarView calendarView;
+    private TextView taskHeader;
+    private RecyclerView taskRecyclerView;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        binding = FragmentCalendarBinding.inflate(inflater, container, false);
+        rootView = inflater.inflate(R.layout.fragment_calendar, container, false);
 
-        // Initialize Firestore and get the current user's phone number
+        // Initialize Firestore and PreferenceManager
         firestore = FirebaseFirestore.getInstance();
         preferenceManager = PreferenceManager.getInstance(requireContext());
-        currentUserPhone = preferenceManager.getString(Constants.FIELD_PHONE);
+        currentUserPhone = preferenceManager.get(Constants.PREF_KEY_PHONE, "");
 
-        // Initialize task storage
         tasksByDate = new HashMap<>();
         selectedDate = getCurrentDate();
 
-        // Set up RecyclerView
-        taskAdapter = new TaskAdapter(new ArrayList<>());
-        binding.taskRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        binding.taskRecyclerView.setAdapter(taskAdapter);
+        // Bind views
+        calendarView = rootView.findViewById(R.id.calendar_view);
+        taskHeader = rootView.findViewById(R.id.task_header);
+        taskRecyclerView = rootView.findViewById(R.id.task_recycler_view);
+        ImageButton addTaskBtn = rootView.findViewById(R.id.add_task_btn);
 
-        // Set initial header text
-        binding.taskHeader.setText(String.format("Tasks for %s", selectedDate));
+        // Initialize RecyclerView
+        taskAdapter = new TaskAdapter(new ArrayList<>());
+        taskRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        taskRecyclerView.setAdapter(taskAdapter);
+
+        // Set header text
+        taskHeader.setText(String.format("Tasks for %s", selectedDate));
 
         // Load tasks for the current date
         loadTasksFromFirestore();
 
         // Set calendar date change listener
-        binding.calendarView.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
+        calendarView.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
             selectedDate = String.format(Locale.getDefault(), "%d-%02d-%02d", year, month + 1, dayOfMonth);
-            binding.taskHeader.setText(String.format("Tasks   for   %s", selectedDate));
+            taskHeader.setText(String.format("Tasks for %s", selectedDate));
             loadTasksFromFirestore();
         });
 
-        // Add Task button listener
-        binding.addTaskBtn.setOnClickListener(v -> showAddTaskDialog());
+        // Set Add Task button listener
+        addTaskBtn.setOnClickListener(v -> showAddTaskDialog());
 
-        return binding.getRoot();
+        return rootView;
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
-    }
-
-    /**
-     * Gets the current date in "yyyy-MM-dd" format.
-     *
-     * @return The current date as a string.
-     */
     private String getCurrentDate() {
         return new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
     }
 
-    /**
-     * Loads tasks from Firestore for the selected date.
-     */
     private void loadTasksFromFirestore() {
-        if (currentUserPhone == null) {
-            Utilities.showToast(requireContext(), "User not logged in.", Utilities.ToastType.WARNING);
+        if (currentUserPhone.isEmpty()) {
+            Utilities.showToast(requireContext(), "User not logged in.", Utilities.ToastType.ERROR);
             return;
         }
 
         firestore.collection(Constants.USER_COLLECTION)
                 .document(currentUserPhone)
-                .collection(FIELD_COLLECTION_TASKS)
+                .collection(Constants.TASKS_COLLECTION)
                 .document(selectedDate)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        List<String> tasks = (List<String>) documentSnapshot.get("tasks");
+                        List<String> tasks = (List<String>) documentSnapshot.get(Constants.FIELD_TASKS);
                         tasksByDate.put(selectedDate, tasks != null ? tasks : new ArrayList<>());
                         taskAdapter.updateTasks(tasksByDate.get(selectedDate));
                     } else {
@@ -123,12 +115,9 @@ public class CalendarFragment extends Fragment {
                         taskAdapter.updateTasks(new ArrayList<>());
                     }
                 })
-                .addOnFailureListener(e -> Utilities.showToast(requireContext(), "Failed to load tasks: " + e.getMessage(), Utilities.ToastType.ERROR));
+                .addOnFailureListener(e -> Log.e(Constants.LOG_TAG_CALENDAR, "Failed to load tasks: " + e.getMessage()));
     }
 
-    /**
-     * Displays a dialog to add a new task.
-     */
     private void showAddTaskDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Add Task");
@@ -140,60 +129,86 @@ public class CalendarFragment extends Fragment {
         builder.setPositiveButton("Add", (dialog, which) -> {
             String newTask = taskInput.getText().toString().trim();
             if (!newTask.isEmpty()) {
-                List<String> tasks = tasksByDate.getOrDefault(selectedDate, new ArrayList<>());
-                tasks.add(newTask);
-                tasksByDate.put(selectedDate, tasks);
-                taskAdapter.updateTasks(tasks);
-                saveTasksToFirestore(selectedDate, tasks);
+                tasksByDate.computeIfAbsent(selectedDate, k -> new ArrayList<>()).add(newTask);
+                taskAdapter.updateTasks(tasksByDate.get(selectedDate));
+                saveTasksToFirestore(selectedDate, tasksByDate.get(selectedDate));
             } else {
                 Utilities.showToast(requireContext(), "Task details cannot be empty!", Utilities.ToastType.WARNING);
             }
         });
 
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
-
         builder.show();
     }
 
-    /**
-     * Saves tasks to Firestore for the specified date.
-     *
-     * @param date  The date for which the tasks should be saved or deleted.
-     * @param tasks The list of tasks to save.
-     */
     private void saveTasksToFirestore(String date, List<String> tasks) {
-        if (currentUserPhone == null) {
-            Utilities.showToast(requireContext(), "User not logged in.", Utilities.ToastType.WARNING);
+        if (currentUserPhone.isEmpty()) {
+            Utilities.showToast(requireContext(), "User not logged in.", Utilities.ToastType.ERROR);
             return;
         }
 
         if (tasks.isEmpty()) {
             firestore.collection(Constants.USER_COLLECTION)
                     .document(currentUserPhone)
-                    .collection(FIELD_COLLECTION_TASKS)
+                    .collection(Constants.TASKS_COLLECTION)
                     .document(date)
                     .delete()
-                    .addOnSuccessListener(aVoid -> Utilities.showToast(requireContext(), "No tasks left for this date. Date removed from Firestore.", Utilities.ToastType.INFO))
-                    .addOnFailureListener(e -> Utilities.showToast(requireContext(), "Failed to remove date from Firestore: " + e.getMessage(), Utilities.ToastType.ERROR));
+                    .addOnSuccessListener(aVoid -> Log.d(Constants.LOG_TAG_CALENDAR, "Date removed from Firestore."))
+                    .addOnFailureListener(e -> Log.e(Constants.LOG_TAG_CALENDAR, "Failed to remove date from Firestore: " + e.getMessage()));
         } else {
             firestore.collection(Constants.USER_COLLECTION)
                     .document(currentUserPhone)
-                    .collection(FIELD_COLLECTION_TASKS)
+                    .collection(Constants.TASKS_COLLECTION)
                     .document(date)
                     .set(new HashMap<String, Object>() {{
-                        put(FIELD_COLLECTION_TASKS, tasks);
+                        put(Constants.FIELD_TASKS, tasks);
                     }})
-                    .addOnSuccessListener(aVoid -> Utilities.showToast(requireContext(), "Task saved successfully!", Utilities.ToastType.SUCCESS))
-                    .addOnFailureListener(e -> Utilities.showToast(requireContext(), "Failed to save task: " + e.getMessage(), Utilities.ToastType.ERROR));
+                    .addOnSuccessListener(aVoid -> Log.d(Constants.LOG_TAG_CALENDAR, "Task saved successfully!"))
+                    .addOnFailureListener(e -> Log.e(Constants.LOG_TAG_CALENDAR, "Failed to save task: " + e.getMessage()));
         }
     }
 
+    private void showEditTaskDialog(int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Edit Task");
+
+        final EditText taskInput = new EditText(requireContext());
+        String existingTask = tasksByDate.get(selectedDate).get(position);
+        taskInput.setText(existingTask);
+        builder.setView(taskInput);
+
+        builder.setPositiveButton("Save", (dialog, which) -> {
+            String updatedTask = taskInput.getText().toString().trim();
+            if (!updatedTask.isEmpty()) {
+                tasksByDate.get(selectedDate).set(position, updatedTask);
+                taskAdapter.updateTasks(tasksByDate.get(selectedDate));
+                saveTasksToFirestore(selectedDate, tasksByDate.get(selectedDate));
+            } else {
+                Utilities.showToast(requireContext(), "Task details cannot be empty!", Utilities.ToastType.WARNING);
+            }
+        });
+
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+        builder.show();
+    }
+
+    private void deleteTask(int position) {
+        tasksByDate.get(selectedDate).remove(position);
+        taskAdapter.updateTasks(tasksByDate.get(selectedDate));
+        saveTasksToFirestore(selectedDate, tasksByDate.get(selectedDate));
+        Utilities.showToast(requireContext(), "Task deleted successfully!", Utilities.ToastType.SUCCESS);
+    }
+
+
+
+
+
     /**
-     * Adapter for displaying tasks in a RecyclerView.
+     * Adapter for managing tasks in the RecyclerView.
      */
     private class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
 
-        private List<String> tasks;
+        private final List<String> tasks;
 
         TaskAdapter(List<String> tasks) {
             this.tasks = tasks;
@@ -209,15 +224,9 @@ public class CalendarFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
             String task = tasks.get(position);
-            holder.taskTextView.setText(task);
-
+            holder.taskText.setText(task);
             holder.editButton.setOnClickListener(v -> showEditTaskDialog(position));
-            holder.deleteButton.setOnClickListener(v -> {
-                tasks.remove(position);
-                notifyItemRemoved(position);
-                saveTasksToFirestore(selectedDate, tasks);
-                Utilities.showToast(requireContext(), "Task deleted successfully!", Utilities.ToastType.SUCCESS);
-            });
+            holder.deleteButton.setOnClickListener(v -> deleteTask(position));
         }
 
         @Override
@@ -225,46 +234,22 @@ public class CalendarFragment extends Fragment {
             return tasks.size();
         }
 
-        void updateTasks(List<String> tasks) {
-            this.tasks = tasks;
+        void updateTasks(List<String> newTasks) {
+            tasks.clear();
+            tasks.addAll(newTasks);
             notifyDataSetChanged();
         }
 
         class TaskViewHolder extends RecyclerView.ViewHolder {
-            TextView taskTextView;
-            View editButton, deleteButton;
+            TextView taskText;
+            ImageButton editButton, deleteButton;
 
             TaskViewHolder(@NonNull View itemView) {
                 super(itemView);
-                taskTextView = itemView.findViewById(R.id.task_text);
+                taskText = itemView.findViewById(R.id.task_text);
                 editButton = itemView.findViewById(R.id.edit_button);
                 deleteButton = itemView.findViewById(R.id.delete_button);
             }
-        }
-
-        private void showEditTaskDialog(int taskPosition) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-            builder.setTitle("Edit Task");
-
-            final EditText taskInput = new EditText(requireContext());
-            String existingTask = tasks.get(taskPosition);
-            taskInput.setText(existingTask);
-            builder.setView(taskInput);
-
-            builder.setPositiveButton("Save", (dialog, which) -> {
-                String updatedTask = taskInput.getText().toString().trim();
-                if (!updatedTask.isEmpty()) {
-                    tasks.set(taskPosition, updatedTask);
-                    notifyItemChanged(taskPosition);
-                    saveTasksToFirestore(selectedDate, tasks);
-                } else {
-                    Utilities.showToast(requireContext(), "Task details cannot be empty!", Utilities.ToastType.WARNING);
-                }
-            });
-
-            builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
-
-            builder.show();
         }
     }
 }

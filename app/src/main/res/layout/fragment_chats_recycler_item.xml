@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Displays the summary of the last message in chat,
+  When clicked, passes the chatId to the Chat Activity -->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -8,30 +9,42 @@
     android:paddingHorizontal="10dp"
     android:paddingVertical="5dp">
 
-    <!-- Profile Image of the User -->
+    <!--holds the chatId -->
+    <TextView
+        android:id="@+id/textViewChatId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:visibility="invisible"
+        android:text="chatId"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"/>
+
+    <!-- Last sender profile image -->
     <com.makeramen.roundedimageview.RoundedImageView
         android:id="@+id/imageViewProfilePic"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:src="@drawable/ic_person"
-        app:riv_border_color="@color/black"
-        app:riv_border_width="2dp"
-        app:riv_corner_radius="24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:riv_border_color="@color/black"
+        app:riv_border_width="2dp"
+        app:riv_corner_radius="24dp" />
 
-    <!-- User Info: Name and Phone -->
+    <!-- Last sender Info: Name and Phone -->
     <LinearLayout
         android:id="@+id/textviewDivider"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/imageViewProfilePic"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
+        app:layout_constraintTop_toTopOf="parent">
+        <!--user name -->
         <TextView
             android:id="@+id/textViewUserName"
             android:layout_width="wrap_content"
@@ -41,7 +54,7 @@
             android:textColor="@color/black"
             android:textSize="17sp"
             android:textStyle="bold" />
-
+        <!-- phone -->
         <TextView
             android:id="@+id/textviewPhone"
             android:layout_width="wrap_content"
@@ -51,27 +64,27 @@
             android:textSize="17sp" />
     </LinearLayout>
 
-    <!-- Last Message and Timestamp -->
+    <!-- Last sent message and its timestamp -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="10dp"
         android:layout_marginStart="10dp"
-       android:layout_marginHorizontal="10dp"
-        android:paddingBottom="10dp"
         android:orientation="vertical"
+        android:paddingBottom="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/imageViewProfilePic"
-        app:layout_constraintTop_toBottomOf="@id/textviewDivider"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/textviewDivider">
 
         <TextView
             android:id="@+id/textViewLastMessage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:text="Last message here"
             android:textColor="@color/black"
-            android:textSize="17sp"
-            android:maxLines="1"
-            android:ellipsize="end" />
+            android:textSize="17sp" />
 
         <TextView
             android:id="@+id/textViewTimestamp"
@@ -89,6 +102,6 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/primary"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

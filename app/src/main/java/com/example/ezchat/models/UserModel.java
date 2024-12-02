@@ -1,165 +1,122 @@
 package com.example.ezchat.models;
 
-import android.util.Base64;
-
 import java.io.Serializable;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * Represents a user in the chat application.
- * This model contains user profile details such as phone number, username, profile picture,
- * email, hashed password, fcm token, and the list of chat room IDs the user is part of.
+ *
+ * This model includes fields for user profile information, chat room participation,
+ * and tasks mapped to specific dates. It is designed for direct serialization
+ * and deserialization with Firestore or other storage mechanisms.
  */
-public class UserModel implements Serializable{
+public class UserModel implements Serializable {
 
-    private String phone; // The phone number of the user
-    private String username; // The username of the user
-    private String profilePic; // The profile picture URL or identifier (Base64 encoded)
-    private String email; // The email address of the user
-    private String hashedPassword; // The hashed password of the user
-    private String fcmToken; // The FCM token for push notifications
-    private transient List<String> chats; // Set of chats the user is part
+    /** The phone number of the user (used as a unique identifier in Firestore). */
+    public String phone;
 
-    public UserModel(){}
+    /** The username chosen by the user. */
+    public String username;
+
+    /** The Base64-encoded string representing the user's profile picture. */
+    public String profilePic;
+
+    /** The email address of the user. */
+    public String email;
+
+    /** The hashed version of the user's password for secure storage. */
+    public String hashedPassword;
+
+    /** The Firebase Cloud Messaging (FCM) token for push notifications. */
+    public String fcmToken;
+
+    /** A set of unique chat room IDs the user participates in. */
+    public transient List<String> chats;
+
+    /** A map of tasks, where the key is a date (in "yyyy-MM-dd" format) and the value is a list of tasks for that date. */
+    public transient Map<String, List<String>> tasksByDate;
 
     /**
-     * Constructor to initialize a new UserModel with phone number and username.
-     * Throws IllegalArgumentException if any required field is null or empty.
+     * Default constructor required for serialization/deserialization.
+     */
+    public UserModel() {
+        this.chats = new ArrayList<>(); // Initialize an empty set for unique chats
+        this.tasksByDate = new HashMap<>(); // Initialize an empty map for tasks
+    }
+
+    /**
+     * Parameterized constructor for creating a new UserModel.
      *
-     * @param phone    The phone number of the user.
-     * @param username The username of the user.
+     * @param phone    The user's phone number.
+     * @param username The user's username.
      */
     public UserModel(String phone, String username) {
-        this.phone = requireNonNullOrEmpty(phone, "Phone number cannot be null or empty.");
-        this.username = requireNonNullOrEmpty(username, "Username cannot be null or empty.");
-
-        // Initialize optional fields with null or default values
-        this.profilePic = null; // No profile picture initially
-        this.email = null; // No email initially
-        this.hashedPassword = null; // Password will be set later
-        this.fcmToken = null; // No FCM token initially
-        this.chats = new ArrayList<>(); // Set of chat rooms initially (no duplicates)
+        this.phone = phone;
+        this.username = username;
+        this.chats = new ArrayList<>(); // Initialize an empty set for unique chats
+        this.tasksByDate = new HashMap<>(); // Initialize an empty map for tasks
     }
 
-    // Getters and Setters
-
-    public String getPhone() {
-        return phone;
+    /**
+     * Adds a task to a specific date.
+     *
+     * @param date The date to associate the task with (in "yyyy-MM-dd" format).
+     * @param task The task to add.
+     */
+    public void addTask(String date, String task) {
+        tasksByDate.computeIfAbsent(date, k -> new java.util.ArrayList<>()).add(task);
     }
 
-    public void setPhone(String phone) {
-        this.phone = requireNonNullOrEmpty(phone, "Phone number cannot be null or empty.");
+    /**
+     * Removes a task from a specific date.
+     *
+     * @param date The date to remove the task from (in "yyyy-MM-dd" format).
+     * @param task The task to remove.
+     */
+    public void removeTask(String date, String task) {
+        if (tasksByDate.containsKey(date)) {
+            tasksByDate.get(date).remove(task);
+            if (tasksByDate.get(date).isEmpty()) {
+                tasksByDate.remove(date); // Remove the date if no tasks are left
+            }
+        }
     }
 
-    public String getUsername() {
-        return username;
+    /**
+     * Retrieves the list of tasks for a specific date.
+     *
+     * @param date The date to retrieve tasks for (in "yyyy-MM-dd" format).
+     * @return A list of tasks for the given date, or an empty list if none exist.
+     */
+    public List<String> getTasksForDate(String date) {
+        return tasksByDate.getOrDefault(date, new java.util.ArrayList<>());
     }
 
-    public void setUsername(String username) {
-        this.username = requireNonNullOrEmpty(username, "Username cannot be null or empty.");
-    }
-
-    public String getProfilePic() {
-        return profilePic;
-    }
-
-    public void setProfilePic(String profilePic) {
-        this.profilePic = profilePic;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = requireNonNullOrEmpty(email, "Email cannot be null or empty.");
-    }
-
-    public String getHashedPassword() {
-        return hashedPassword;
-    }
-
-    public void setHashedPassword(String password) {
-        if (password != null && !password.trim().isEmpty()) {
-            this.hashedPassword = hashPassword(password); // Hash the password before storing
+    /**
+     * Adds a chat room ID to the user's chat set.
+     *
+     * @param chatId The chat room ID to add.
+     */
+    public void addChat(String chatId) {
+        if (chatId != null && !chatId.trim().isEmpty()) {
+            this.chats.add(chatId);
         } else {
-            throw new IllegalArgumentException("Password cannot be null or empty.");
-        }
-    }
-
-    public String getFcmToken() {
-        return fcmToken;
-    }
-
-    public void setFcmToken(String fcmToken) {
-        this.fcmToken = fcmToken;
-    }
-
-    public List<String> getChats() {
-        return chats;
-    }
-
-    public void setChats(List<String> chats) {
-        this.chats = requireNonNullOrEmpty(chats, "Chat room IDs cannot be null or empty.");
-    }
-
-    /**
-     * Removes a chat room ID from the set of chat room IDs.
-     *
-     * @param chatRoomId The chat room ID to remove.
-     * @return True if the chat room ID was removed, false if it was not found.
-     */
-    public boolean removeChatRoomId(String chatRoomId) {
-        return this.chats.remove(chatRoomId); // Removes the chat room ID if present
-    }
-
-    /**
-     * Hashes a plain text password using SHA-256 algorithm.
-     *
-     * @param password The plain text password to hash.
-     * @return The hashed password (Base64 encoded).
-     */
-    public static String hashPassword(String password) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(password.getBytes());
-            return Base64.encodeToString(hash, Base64.DEFAULT); // Return Base64 encoded hashed password
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Password hashing failed", e);
+            throw new IllegalArgumentException("Chat ID cannot be null or empty.");
         }
     }
 
     /**
-     * Verifies if a plain text password matches the stored hashed password.
+     * Removes a chat room ID from the user's chat set.
      *
-     * @param plainPassword     The plain text password to verify.
-     * @param storedHashedPassword The hashed password stored in the system.
-     * @return True if the passwords match, false otherwise.
+     * @param chatId The chat room ID to remove.
+     * @return True if the chat ID was removed, false otherwise.
      */
-    public static boolean verifyPassword(String plainPassword, String storedHashedPassword) {
-        String hashedInput = hashPassword(plainPassword);
-        return hashedInput.equals(storedHashedPassword); // Compare hashed values
+    public boolean removeChat(String chatId) {
+        return this.chats.remove(chatId);
     }
-
-    /**
-     * Utility method to ensure a string is not null or empty.
-     *
-     * @param value          The value to check.
-     * @param errorMessage   The error message to throw in case of invalid value.
-     * @return The validated value.
-     * @throws IllegalArgumentException if the value is null or empty.
-     */
-    private <T> T requireNonNullOrEmpty(T value, String errorMessage) {
-        if (value == null || (value instanceof String && ((String) value).trim().isEmpty())) {
-            throw new IllegalArgumentException(errorMessage);
-        }
-        return value;
-    }
-
-    // Image encoding and decoding methods (same as before)...
 }

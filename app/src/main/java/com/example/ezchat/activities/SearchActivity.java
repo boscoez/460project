@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ezchat.R;
 import com.example.ezchat.databinding.ActivityChatCreatorItemBinding;
-import com.example.ezchat.databinding.ActivitySearchUserBinding;
+import com.example.ezchat.databinding.ActivitySearchBinding;
 import com.example.ezchat.models.UserModel;
 import com.example.ezchat.utilities.Constants;
 import com.example.ezchat.utilities.PreferenceManager;
@@ -33,11 +32,11 @@ import java.util.Set;
  * Activity for searching users by username, email, or phone number.
  * Users can select a contact to start a new chat room.
  */
-public class SearchUserActivity extends AppCompatActivity {
+public class SearchActivity extends AppCompatActivity {
 
     private final List<UserModel> userList = new ArrayList<>(); // List of users
     private final Set<UserModel> selectedUsers = new HashSet<>(); // Set of selected users
-    private ActivitySearchUserBinding binding; // View binding
+    private ActivitySearchBinding binding; // View binding
     private FirebaseFirestore db; // Firestore instance
     private SearchUserRecyclerAdapter adapter; // Adapter for RecyclerView
     private String currentUserPhone; // Current user's phone number
@@ -47,7 +46,7 @@ public class SearchUserActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // Initialize View Binding
-        binding = ActivitySearchUserBinding.inflate(getLayoutInflater());
+        binding = ActivitySearchBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         // Initialize Firestore
@@ -101,10 +100,10 @@ public class SearchUserActivity extends AppCompatActivity {
 
                         // Check if the user's username, phone, or email matches the query
                         if (user != null &&
-                                (user.getUsername().toLowerCase().contains(lowerQuery) ||
-                                        user.getPhone().replaceAll("\\s", "").toLowerCase().contains(lowerQuery) ||
-                                        (user.getEmail() != null && user.getEmail().toLowerCase().contains(lowerQuery))) &&
-                                !user.getPhone().equals(currentUserPhone)) { // Exclude current user
+                                (user.username.toLowerCase().contains(lowerQuery) ||
+                                        user.phone.replaceAll("\\s", "").toLowerCase().contains(lowerQuery) ||
+                                        (user.email != null && user.email.toLowerCase().contains(lowerQuery))) &&
+                                !user.phone.equals(currentUserPhone)) { // Exclude current user
                             userList.add(user);
                         }
                     }
@@ -125,14 +124,14 @@ public class SearchUserActivity extends AppCompatActivity {
         // Create a list with the phone numbers of the selected users
         List<String> selectedUserPhones = new ArrayList<>();
         for (UserModel user : selectedUsers) {
-            selectedUserPhones.add(user.getPhone());
+            selectedUserPhones.add(user.phone);
         }
 
         // Add the current user to the list of participants (phone number)
         selectedUserPhones.add(currentUserPhone);
 
         // Start the ChatActivity and pass the selected users' phone numbers
-        Intent intent = new Intent(SearchUserActivity.this, ChatActivity.class);
+        Intent intent = new Intent(SearchActivity.this, ChatActivity.class);
         intent.putStringArrayListExtra(Constants.FIELD_PHONE_NUMBERS, (ArrayList<String>) selectedUserPhones); // Pass selected users' phone numbers
         startActivity(intent);
     }
@@ -198,12 +197,12 @@ public class SearchUserActivity extends AppCompatActivity {
             }
 
             public void bind(UserModel user) {
-                binding.userNameText.setText(user.getUsername());
-                binding.textviewPhone.setText(user.getPhone());
+                binding.userNameText.setText(user.username);
+                binding.textviewPhone.setText(user.phone);
 
                 // Load profile picture
-                if (user.getProfilePic() != null && !user.getProfilePic().isEmpty()) {
-                    Bitmap bitmap = Utilities.decodeImage(user.getProfilePic());
+                if (user.profilePic != null && !user.profilePic.isEmpty()) {
+                    Bitmap bitmap = Utilities.decodeImage(user.profilePic);
                     binding.roundedviewProfilePic.setImageBitmap(bitmap);
                 } else {
                     binding.roundedviewProfilePic.setImageResource(R.drawable.ic_person);

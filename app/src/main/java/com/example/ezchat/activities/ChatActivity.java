@@ -1,224 +1,212 @@
 package com.example.ezchat.activities;
 
-import android.content.Context;
+import static com.example.ezchat.utilities.Utilities.formatTimestamp;
+
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.ezchat.databinding.ActivityChatBinding;
-import com.example.ezchat.databinding.ActivityChatRecyclerItemBinding;
+import com.example.ezchat.R;
 import com.example.ezchat.models.ChatModel;
 import com.example.ezchat.models.MessageModel;
 import com.example.ezchat.utilities.Constants;
+import com.example.ezchat.utilities.PreferenceManager;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 public class ChatActivity extends AppCompatActivity {
 
-    private ActivityChatBinding binding;
-    private String chatId; // Unique ID for the chat
+    private static final String TAG = "ChatActivity";
+
+    private String chatId; // Chat ID if available
+    private ChatModel chatModel; // Chat model if created by ChatCreatorActivity
     private String currentUserPhone;
-    private List<MessageModel> messageList;
-    private MessageAdapter messageAdapter;
-    private boolean isChatCreated = false; // Flag to check if the chat is created
-    private FirebaseFirestore db;
-    private ListenerRegistration chatListener;
+    private boolean isNewChat = false;
+
+    private FirebaseFirestore database;
+    private PreferenceManager preferenceManager;
+
+    private RecyclerView chatRecyclerView;
+    private ChatAdapter chatAdapter;
+    private EditText inputMessage;
+    private ImageButton btnSendMessage;
+    private ProgressBar loadingProgressBar;
+
+    private List<MessageModel> messages;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_chat);
 
-        // Initialize view binding
-        binding = ActivityChatBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
+        initializeViews();
+        initializeDependencies();
+        handleIntent();
 
-        // Initialize Firestore and shared preference manager
-        db = FirebaseFirestore.getInstance();
-        currentUserPhone = getIntent().getStringExtra(Constants.FIELD_PHONE); // Get the current user's phone from intent
-
-        // Validate current user phone number
-        if (currentUserPhone == null) {
-            Toast.makeText(this, "Unable to fetch current user details.", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
-
-        // Retrieve chatId or phone numbers passed via intent
-        chatId = getIntent().getStringExtra(Constants.FIELD_CHAT_ID);
-        List<String> selectedPhones = getIntent().getStringArrayListExtra(Constants.FIELD_PHONE_NUMBERS);
-
-        // If chatId exists, load the existing chat, else start a new chat
-        if (chatId != null) {
-            loadChat(chatId);
-        } else if (selectedPhones != null && selectedPhones.size() >= 2) {
-            startNewChat(selectedPhones); // Will be triggered when the user sends the first message
+        setupListeners();
+        if (isNewChat) {
+            // For a new chat, wait for the first message to create the chat
+            showWaitingForMessage();
         } else {
-            Toast.makeText(this, "Invalid chat details.", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
+            // For an existing chat, load messages from Firestore
+            loadMessages();
         }
-
-        // Initialize UI components and listeners
-        setupRecyclerView();
-        setupButtonListeners();
     }
 
-    /**
-     * Loads an existing chat from Firestore using chatId.
-     */
-    private void loadChat(String chatId) {
-        db.collection(Constants.CHAT_COLLECTION).document(chatId)
-                .addSnapshotListener((documentSnapshot, e) -> {
-                    if (e != null) {
-                        Toast.makeText(ChatActivity.this, "Error loading chat: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+    private void initializeViews() {
+        chatRecyclerView = findViewById(R.id.chatRecyclerView);
+        chatRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        inputMessage = findViewById(R.id.inputMessage);
+        btnSendMessage = findViewById(R.id.messageSendButton);
+        loadingProgressBar = findViewById(R.id.chatLoadingProgressBar);
+
+        messages = new ArrayList<>();
+        chatAdapter = new ChatAdapter(messages);
+        chatRecyclerView.setAdapter(chatAdapter);
+    }
+
+    private void initializeDependencies() {
+        preferenceManager = PreferenceManager.getInstance(getApplicationContext());
+        database = FirebaseFirestore.getInstance();
+        currentUserPhone = preferenceManager.get(Constants.FIELD_PHONE, "");
+    }
+
+    private void handleIntent() {
+        Intent intent = getIntent();
+        if (intent.hasExtra(Constants.FIELD_CHAT_ID)) {
+            // Case 1: Existing chat
+            chatId = intent.getStringExtra(Constants.FIELD_CHAT_ID);
+            isNewChat = false;
+        } else if (intent.hasExtra(Constants.CHAT_MODEL)) {
+            // Case 2: New chat
+            chatModel = (ChatModel) intent.getSerializableExtra(Constants.CHAT_MODEL);
+            isNewChat = true;
+        } else {
+            Log.e(TAG, "No valid data passed to ChatActivity.");
+            finish();
+        }
+    }
+
+    private void setupListeners() {
+        btnSendMessage.setOnClickListener(v -> {
+            String messageContent = inputMessage.getText().toString().trim();
+            if (messageContent.isEmpty()) {
+                Toast.makeText(this, "Message cannot be empty", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            inputMessage.setText("");
+
+            if (isNewChat) {
+                createNewChat(messageContent);
+            } else {
+                sendMessage(messageContent);
+            }
+        });
+
+        findViewById(R.id.btnBack).setOnClickListener(v -> onBackPressed());
+    }
+
+    private void showWaitingForMessage() {
+        btnSendMessage.setEnabled(true);
+        loadingProgressBar.setVisibility(View.GONE);
+        chatRecyclerView.setVisibility(View.GONE);
+    }
+
+    private void createNewChat(String firstMessage) {
+        chatId = database.collection(Constants.CHAT_COLLECTION).document().getId();
+        chatModel.chatId = chatId;
+
+        MessageModel message = new MessageModel(currentUserPhone, new ArrayList<>(chatModel.phoneNumbers), firstMessage);
+        chatModel.lastMessage = message;
+
+        // Add chat and first message to Firestore
+        database.collection(Constants.CHAT_COLLECTION)
+                .document(chatId)
+                .set(chatModel)
+                .addOnSuccessListener(aVoid -> sendMessage(firstMessage))
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to create chat", e);
+                    Toast.makeText(this, "Failed to start chat.", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void loadMessages() {
+        loadingProgressBar.setVisibility(View.VISIBLE);
+
+        database.collection(Constants.MESSAGE_COLLECTION)
+                .whereEqualTo(Constants.FIELD_CHAT_ID, chatId)
+                .orderBy(Constants.FIELD_TIMESTAMP, Query.Direction.ASCENDING)
+                .addSnapshotListener((value, error) -> {
+                    loadingProgressBar.setVisibility(View.GONE);
+
+                    if (error != null) {
+                        Log.e(TAG, "Error loading messages", error);
+                        Toast.makeText(this, "Failed to load messages.", Toast.LENGTH_SHORT).show();
                         return;
                     }
 
-                    if (documentSnapshot != null && documentSnapshot.exists()) {
-                        ChatModel chat = documentSnapshot.toObject(ChatModel.class);
-                        if (chat != null) {
-                            messageList.clear();
-                            messageList.addAll(chat.messages);
-                            messageAdapter.notifyDataSetChanged();
+                    if (value != null) {
+                        messages.clear();
+                        for (com.google.firebase.firestore.DocumentSnapshot doc : value.getDocuments()) {
+                            messages.add(doc.toObject(MessageModel.class));
                         }
+                        chatAdapter.notifyDataSetChanged();
+                        chatRecyclerView.scrollToPosition(messages.size() - 1);
                     }
                 });
     }
 
-    /**
-     * Starts a new chat by adding the current user and the selected users to the chat.
-     * Waits for the user to send the first message before creating the chat.
-     */
-    private void startNewChat(List<String> selectedPhones) {
-        chatId = db.collection(Constants.CHAT_COLLECTION).document().getId();  // Generate a new chat ID
-        List<String> phoneNumbers = new ArrayList<>(selectedPhones);
-        phoneNumbers.add(currentUserPhone); // Add current user to the chat
+    private void sendMessage(String content) {
+        MessageModel message = new MessageModel(currentUserPhone, new ArrayList<>(chatModel.phoneNumbers), content);
 
-        // Set up the empty message waiting for user input
-        binding.messageSendButton.setOnClickListener(v -> {
-            String messageText = binding.inputMessage.getText().toString().trim();
-            if (!TextUtils.isEmpty(messageText)) {
-                sendMessage(messageText, phoneNumbers); // Send first message when user clicks send
-            } else {
-                Toast.makeText(this, "Message cannot be empty", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    /**
-     * Sends the first message and creates the chat document in Firestore.
-     *
-     * @param messageText The text of the message to be sent.
-     * @param phoneNumbers The list of phone numbers of participants.
-     */
-    private void sendMessage(String messageText, List<String> phoneNumbers) {
-        // Create the first message
-        MessageModel message = new MessageModel(currentUserPhone, phoneNumbers, messageText);
-
-        // Create the chat in Firestore
-        ChatModel chat = new ChatModel(chatId, phoneNumbers, currentUserPhone, message);
-        db.collection(Constants.CHAT_COLLECTION).document(chatId).set(chat)
-                .addOnSuccessListener(aVoid -> {
-                    isChatCreated = true; // Set flag that the chat has been created
-                    addMessageToChat(message); // Send the first message
-                })
-                .addOnFailureListener(e -> Toast.makeText(ChatActivity.this, "Failed to create chat.", Toast.LENGTH_SHORT).show());
-    }
-
-    /**
-     * Adds a message to the chat and updates the local UI with the new message.
-     *
-     * @param message The message to be added.
-     */
-    private void addMessageToChat(MessageModel message) {
-        db.collection(Constants.CHAT_COLLECTION).document(chatId)
-                .collection(Constants.MESSAGE_COLLECTION).add(message)
+        database.collection(Constants.MESSAGE_COLLECTION)
+                .add(message)
                 .addOnSuccessListener(documentReference -> {
-                    messageList.add(message);
-                    messageAdapter.notifyItemInserted(messageList.size() - 1);
-                    binding.chatRecyclerView.scrollToPosition(messageList.size() - 1);
+                    Log.d(TAG, "Message sent successfully.");
+                    chatRecyclerView.scrollToPosition(messages.size() - 1);
                 })
-                .addOnFailureListener(e -> Toast.makeText(ChatActivity.this, "Failed to send message.", Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to send message", e);
+                    Toast.makeText(this, "Failed to send message.", Toast.LENGTH_SHORT).show();
+                });
     }
 
-    /**
-     * Configures the RecyclerView to display chat messages.
-     */
-    private void setupRecyclerView() {
-        messageList = new ArrayList<>();
-        messageAdapter = new MessageAdapter(this, messageList, currentUserPhone, true);
-        binding.chatRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        binding.chatRecyclerView.setAdapter(messageAdapter);
-    }
-
-    /**
-     * Sets up click listeners for UI elements, such as the back button and the send message button.
-     */
-    private void setupButtonListeners() {
-        // Handle back button click
-        binding.btnBack.setOnClickListener(v -> onBackPressed());
-
-        // Handle send message button click
-        binding.messageSendButton.setOnClickListener(v -> {
-            String messageText = binding.inputMessage.getText().toString().trim();
-            if (!TextUtils.isEmpty(messageText)) {
-                sendMessage(messageText, new ArrayList<>()); // Will be initialized once users are added to the chat
-                binding.inputMessage.setText(""); // Clear the input field
-            } else {
-                Toast.makeText(this, "Message cannot be empty", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    /**
-     * Adapter for managing and displaying chat messages in the RecyclerView.
-     */
-    static class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
-
-        private final Context context;
+    public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessageViewHolder> {
         private final List<MessageModel> messages;
-        private final String currentUserPhone;
-        private final boolean isTwoUsers;
 
-        public MessageAdapter(Context context, List<MessageModel> messages, String currentUserPhone, boolean isTwoUsers) {
-            this.context = context;
+        public ChatAdapter(List<MessageModel> messages) {
             this.messages = messages;
-            this.currentUserPhone = currentUserPhone;
-            this.isTwoUsers = isTwoUsers;
-        }
-
-        @NonNull
-        @Override
-        public MessageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            ActivityChatRecyclerItemBinding binding = ActivityChatRecyclerItemBinding.inflate(LayoutInflater.from(context), parent, false);
-            return new MessageViewHolder(binding);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
+        public MessageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.activity_chat_recycler_item, parent, false);
+            return new MessageViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(MessageViewHolder holder, int position) {
             MessageModel message = messages.get(position);
-            boolean isSentByCurrentUser = message.getSenderPhone().equals(currentUserPhone);
-
-            if (isSentByCurrentUser) {
-                holder.bindSentMessage(message);
-            } else {
-                holder.bindReceivedMessage(message);
-            }
+            holder.bind(message);
         }
 
         @Override
@@ -226,33 +214,35 @@ public class ChatActivity extends AppCompatActivity {
             return messages.size();
         }
 
-        class MessageViewHolder extends RecyclerView.ViewHolder {
+        public class MessageViewHolder extends RecyclerView.ViewHolder {
+            private final TextView messageTextLeft, usernameTextLeft, timestampTextLeft;
+            private final TextView messageTextRight, usernameTextRight, timestampTextRight;
 
-            private final ActivityChatRecyclerItemBinding binding;
+            public MessageViewHolder(View itemView) {
+                super(itemView);
+                messageTextLeft = itemView.findViewById(R.id.messageTextLeft);
+                usernameTextLeft = itemView.findViewById(R.id.usernameTextLeft);
+                timestampTextLeft = itemView.findViewById(R.id.timestampTextLeft);
 
-            public MessageViewHolder(@NonNull ActivityChatRecyclerItemBinding binding) {
-                super(binding.getRoot());
-                this.binding = binding;
+                messageTextRight = itemView.findViewById(R.id.messageTextRight);
+                usernameTextRight = itemView.findViewById(R.id.usernameTextRight);
+                timestampTextRight = itemView.findViewById(R.id.timestampTextRight);
             }
 
-            void bindSentMessage(MessageModel message) {
-                binding.messageLayoutLeft.setVisibility(View.GONE);
-                binding.messageLayoutRight.setVisibility(View.VISIBLE);
-                binding.messageTextRight.setText(message.getMessage());
-                binding.timestampTextRight.setText(formatTimestamp(message.getTimestamp()));
-            }
-
-            void bindReceivedMessage(MessageModel message) {
-                binding.messageLayoutRight.setVisibility(View.GONE);
-                binding.messageLayoutLeft.setVisibility(View.VISIBLE);
-                binding.messageTextLeft.setText(message.getMessage());
-                binding.timestampTextLeft.setText(formatTimestamp(message.getTimestamp()));
-            }
-
-            private String formatTimestamp(Date timestamp) {
-                if (timestamp == null) return "";
-                SimpleDateFormat sdf = new SimpleDateFormat("MMM d, h:mm a", Locale.getDefault());
-                return sdf.format(timestamp);
+            public void bind(MessageModel message) {
+                if (message.senderPhone.equals(preferenceManager.get(Constants.FIELD_PHONE, ""))) {
+                    // Sent message
+                    messageTextRight.setText(message.message);
+                    usernameTextRight.setText(Constants.LABEL_YOU);
+                    timestampTextRight.setText(formatTimestamp(message.timestamp));
+                    messageTextRight.setVisibility(View.VISIBLE);
+                } else {
+                    // Received message
+                    messageTextLeft.setText(message.message);
+                    usernameTextLeft.setText(message.senderPhone);
+                    timestampTextLeft.setText(formatTimestamp(message.timestamp));
+                    messageTextLeft.setVisibility(View.VISIBLE);
+                }
             }
         }
     }

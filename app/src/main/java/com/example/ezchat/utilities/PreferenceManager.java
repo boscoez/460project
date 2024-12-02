@@ -4,11 +4,11 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 /**
- * This class manages the application's shared preferences, providing methods
+ * This class manages the application's shared preferences, providing generic methods
  * to store and retrieve various types of data.
- *
  */
 public class PreferenceManager {
+    // Preference file name
     public static final String KEY_PREFERENCE_NAME = "chatAppPreferences";
 
     private static PreferenceManager instance;
@@ -16,6 +16,7 @@ public class PreferenceManager {
 
     /**
      * Private constructor to enforce Singleton pattern.
+     *
      * @param context The context used to access SharedPreferences.
      */
     private PreferenceManager(Context context) {
@@ -24,6 +25,7 @@ public class PreferenceManager {
 
     /**
      * Provides the Singleton instance of PreferenceManager.
+     *
      * @param context The context used to access SharedPreferences.
      * @return The Singleton instance of PreferenceManager.
      */
@@ -35,71 +37,86 @@ public class PreferenceManager {
     }
 
     /**
-     * Saves a boolean value in SharedPreferences.
+     * Saves a value of any type in SharedPreferences.
+     *
      * @param key   The key under which the value is saved.
-     * @param value The boolean value to save.
+     * @param value The value to save (String, Integer, Boolean, Float, Long).
      */
-    public void putBoolean(String key, boolean value) {
+    public void set(String key, Object value) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean(key, value);
-        editor.apply(); // Save the changes
+
+        if (value instanceof String) {
+            editor.putString(key, (String) value);
+        } else if (value instanceof Integer) {
+            editor.putInt(key, (Integer) value);
+        } else if (value instanceof Boolean) {
+            editor.putBoolean(key, (Boolean) value);
+        } else if (value instanceof Float) {
+            editor.putFloat(key, (Float) value);
+        } else if (value instanceof Long) {
+            editor.putLong(key, (Long) value);
+        } else {
+            throw new IllegalArgumentException("Unsupported type for SharedPreferences");
+        }
+
+        editor.apply(); // Save the changes asynchronously
     }
 
-    /**
-     * Retrieves a boolean value from SharedPreferences.
-     * @param key The key of the value to retrieve.
-     * @return The boolean value associated with the key, or false if not found.
-     */
-    public boolean getBoolean(String key) {
-        return sharedPreferences.getBoolean(key, false);
-    }
+    // ** Generic Get Method **
 
     /**
-     * Saves a string value in SharedPreferences.
-     * @param key   The key under which the value is saved.
-     * @param value The string value to save.
+     * Retrieves a value of any type from SharedPreferences.
+     *
+     * @param key          The key of the value to retrieve.
+     * @param defaultValue The default value to return if the key does not exist.
+     * @return The value associated with the key, or the default value if not found.
      */
-    public void putString(String key, String value) {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(key, value);
-        editor.apply(); // Save the changes
+    @SuppressWarnings("unchecked")
+    public <T> T get(String key, T defaultValue) {
+        Object result;
+
+        if (defaultValue instanceof String) {
+            result = sharedPreferences.getString(key, (String) defaultValue);
+        } else if (defaultValue instanceof Integer) {
+            result = sharedPreferences.getInt(key, (Integer) defaultValue);
+        } else if (defaultValue instanceof Boolean) {
+            result = sharedPreferences.getBoolean(key, (Boolean) defaultValue);
+        } else if (defaultValue instanceof Float) {
+            result = sharedPreferences.getFloat(key, (Float) defaultValue);
+        } else if (defaultValue instanceof Long) {
+            result = sharedPreferences.getLong(key, (Long) defaultValue);
+        } else {
+            throw new IllegalArgumentException("Unsupported type for SharedPreferences");
+        }
+
+        return (T) result;
     }
 
-    /**
-     * Retrieves a string value from SharedPreferences.
-     * @param key The key of the value to retrieve.
-     * @return The string value associated with the key, or null if not found.
-     */
-    public String getString(String key) {
-        return sharedPreferences.getString(key, null);
-    }
+    // ** Utility Methods **
 
     /**
-     * Saves an integer value in SharedPreferences.
-     * @param key   The key under which the value is saved.
-     * @param value The integer value to save.
+     * Removes a specific key from SharedPreferences.
+     *
+     * @param key The key to remove.
      */
-    public void putInt(String key, int value) {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt(key, value);
-        editor.apply(); // Save the changes
-    }
-
-    /**
-     * Retrieves an integer value from SharedPreferences.
-     * @param key The key of the value to retrieve.
-     * @return The integer value associated with the key, or 0 if not found.
-     */
-    public int getInt(String key) {
-        return sharedPreferences.getInt(key, 0);
+    public void remove(String key) {
+        sharedPreferences.edit().remove(key).apply();
     }
 
     /**
      * Clears all values from SharedPreferences.
      */
     public void clear() {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.clear();
-        editor.apply(); // Save the changes
+        sharedPreferences.edit().clear().apply();
+    }
+
+    /**
+     * Checks if a key exists in SharedPreferences.
+     *
+     * @param key The key to check.
+     * @return True if the key exists, false otherwise.
+     */
+    public boolean contains(String key) {
+        return sharedPreferences.contains(key);
     }
 }

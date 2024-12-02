@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- holds ongoing chat  -->
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
@@ -22,6 +24,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:tint="@color/white" />
 
+    <!--Title for this activity-->
     <TextView
         android:id="@+id/textviewTitle"
         android:layout_width="0dp"
@@ -38,7 +41,7 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="@+id/btnBack" />
 
-    <!-- Delete Chat Button: Visible only to the chat creator for deleting the chat room -->
+    <!-- Delete Chat Button (visible & functional to only to the chat creator) -->
     <Button
         android:id="@+id/deleteChatButton"
         android:layout_width="0dp"
@@ -66,6 +69,19 @@
         app:layout_constraintTop_toBottomOf="@id/btnBack"
         app:stackFromEnd="true"
         tools:listitem="@layout/activity_chat_recycler_item" />
+
+    <!-- Progress Bar -->
+    <ProgressBar
+        android:id="@+id/chatLoadingProgressBar"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
+        android:layout_gravity="center"
+        android:indeterminateTint="@color/primary"
+        android:visibility="invisible"
+        app:layout_constraintTop_toTopOf="@id/chatRecyclerView"
+        app:layout_constraintLeft_toLeftOf="@id/chatRecyclerView"
+        app:layout_constraintRight_toRightOf="@id/chatRecyclerView"
+        app:layout_constraintBottom_toBottomOf="@id/chatRecyclerView"/>
 
     <!-- EditText: Input field for composing chat messages -->
     <EditText
