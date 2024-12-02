@@ -1,21 +1,53 @@
 package com.example.myapplication;
 
+
+/**
+         Task model class for representing task data.
+ **/
 public class Task {
     public String id;
-    public String title;
     public String description;
-    public String date; // Format: yyyy-MM-dd
-    public long notificationTime; // Time in milliseconds for notification
+    public boolean completed;
 
+    // Default constructor for Firebase
     public Task() {
-        // Default constructor for Firebase
     }
 
-    public Task(String id, String title, String description, String date, long notificationTime) {
+    // Constructor with parameters
+    public Task(String id, String description, boolean completed) {
         this.id = id;
-        this.title = title;
         this.description = description;
-        this.date = date;
-        this.notificationTime = notificationTime;
+        this.completed = completed;
+    }
+
+    // Getter for ID
+    public String getId() {
+        return id;
+    }
+
+    // Setter for ID
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    // Getter for description
+    public String getDescription() {
+        return description;
+    }
+
+    // Setter for description
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    // Getter for completed status
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    // Setter for completed status
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
     }
 }
+

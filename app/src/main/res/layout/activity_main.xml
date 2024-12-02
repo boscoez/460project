@@ -22,7 +22,7 @@
             android:layout_centerVertical="true"
             android:layout_marginStart="10dp"
             android:layout_toRightOf="@id/profile_pic_layout"
-            android:text="Username's Calendar"
+            android:text="Calendar"
             android:textColor="@color/white"
             android:textSize="22sp"
             android:textStyle="bold" />
@@ -53,57 +53,36 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="0dp"
         android:layout_marginTop="50dp"
-        android:background="@color/my_primary"
-        android:text="Set the Date"
+        android:text="Select the Date"
         android:layout_gravity="center"
-        android:textColor="@color/white"
+        android:textColor="@color/my_primary"
         android:textSize="22sp" />
 
     <!-- Add CalendarView to display the Calendar -->
 
     <CalendarView
         android:id="@+id/calendarView"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/addTaskButton"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginLeft="30dp"
-        android:layout_marginTop="0dp"
-        android:weekDayTextAppearance="@color/black"
-        android:background="@color/CaldendarBackground" />
+        android:text="Add Task"
+        android:background="@color/my_primary"/>
 
     <TextView
-        android:id="@+id/To_DoListTitle"
+        android:id="@+id/selectedDateText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="30dp"
-        android:layout_marginRight="30dp"
-        android:textAlignment="center"
-        android:text="To Do List"
-        android:textStyle="bold"
-        android:textSize="14dp"
-        android:background="@color/my_primary"
-        android:textColor="@color/white">
-    </TextView>
+        android:gravity="center"
+        android:text="Selected Date: None"
+        android:textAppearance="@color/black"
+        android:textSize="18sp"
+        android:padding="10dp"
+        android:background="@color/LightBlue"/>
 
-    <!-- display updated tasks blow the calendar -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewTasks"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_marginLeft="30dp"
-        android:layout_marginRight="31dp"
-        android:background="@color/ToDoBackground"/>
-
-    <!-- add a add task button -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabAddTask"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity=""
-        android:layout_margin="16dp"
-        android:background="@color/black"
-        app:srcCompat="@android:drawable/ic_input_add" />
 
 </LinearLayout>
 

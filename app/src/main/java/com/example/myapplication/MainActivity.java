@@ -2,173 +2,117 @@
 package com.example.myapplication;
 
 //import statements
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.app.AlertDialog;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.os.Build;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import android.widget.Toast;
+
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import java.util.ArrayList;
-import java.util.List;
+
+import java.util.Calendar;
+import java.util.HashMap;
 
 
-//create MainActivity class that extends AppCompactActivity
-public class MainActivity extends AppCompatActivity {
 
-    private FirebaseDatabase database;
-    private DatabaseReference tasksRef;
-    private RecyclerView recyclerViewTasks;
-    private TaskAdapter taskAdapter;
 
-    // Define the variable of CalendarView type
-    CalendarView calendarView;
+    public class MainActivity extends AppCompatActivity {
 
-    // TextView type
-    TextView date_view;
+        private CalendarView calendarView;
+        private Button addTaskButton;
+        private TextView textView;
+        private String selectedDate;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        private FirebaseDatabase firebaseDatabase;
+        private DatabaseReference tasksReference;
 
-        // Initialize Firebase Database
-        database = FirebaseDatabase.getInstance();
-        tasksRef = database.getReference("tasks");
+        @Override
+        protected void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            setContentView(R.layout.activity_main);
 
-        // Initialize Views
-        recyclerViewTasks = findViewById(R.id.recyclerViewTasks);
-        calendarView = findViewById(R.id.calendarView);
-        taskAdapter = new TaskAdapter();
-        recyclerViewTasks.setLayoutManager(new LinearLayoutManager(this));
-        recyclerViewTasks.setAdapter(taskAdapter);
+            // Initialize Firebase
+            firebaseDatabase = FirebaseDatabase.getInstance();
+            tasksReference = firebaseDatabase.getReference("tasks");
 
-        // By ID we can use each component which id is assign in xml file use findViewById() to get the CalendarView and TextView
-        calendarView = (CalendarView)
-                findViewById(R.id.calendarView);
-        date_view = (TextView)
-                findViewById(R.id.date_view);
 
-        // Add Listener in calendar
-        calendarView.setOnDateChangeListener(
-                        new CalendarView
-                                .OnDateChangeListener() {
-                            @Override
+            // Initialize Views
+            calendarView = findViewById(R.id.calendarView);
+            addTaskButton = findViewById(R.id.addTaskButton);
+            textView = findViewById(R.id.selectedDateText);
 
-                            // In this Listener have one method
-                            // and in this method we will
-                            // get the value of DAYS, MONTH, YEARS
-                            public void onSelectedDayChange(
-                                    @NonNull CalendarView view,
-                                    int year,
-                                    int month,
-                                    int dayOfMonth)
-                            {
-
-                                // Store the value of date with
-                                // format in String type Variable
-                                // Add 1 in month because month
-                                // index is start with 0
-                                String Date
-                                        = dayOfMonth + "-"
-                                        + (month + 1) + "-" + year;
-
-                                // set this date in TextView for Display
-                                date_view.setText(Date);
-                            }
-                        });
-
-//        initialize the database
-//        TaskDatabase db = Room.databaseBuilder(getApplicationContext(),
-//                TaskDatabase.class, "task_database").build()
-
-        //create notification channel
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                    "todo_channel", "To-Do Notifications", NotificationManager.IMPORTANCE_HIGH);
-            NotificationManager manager = getSystemService(NotificationManager.class);
-            manager.createNotificationChannel(channel);
-        }
-    }
-
-    private void showAddTaskDialog(String selectedDate) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Add Task");
-
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-
-        EditText titleInput = new EditText(this);
-        titleInput.setHint("Task Title");
-        layout.addView(titleInput);
-
-        EditText descInput = new EditText(this);
-        descInput.setHint("Task Description");
-        layout.addView(descInput);
-
-        builder.setView(layout);
-
-        builder.setPositiveButton("Save", (dialog, which) -> {
-            String title = titleInput.getText().toString();
-            String description = descInput.getText().toString();
-            long notificationTime = System.currentTimeMillis() + 1800000; // Example: 30 minutes from now
-
-            String taskId = tasksRef.push().getKey();
-            Task newTask = new Task(taskId, title, description, selectedDate, notificationTime);
-
-            tasksRef.child(taskId).setValue(newTask).addOnSuccessListener(unused -> {
-                scheduleNotification(newTask);
-            });
-        });
-
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
-
-        builder.show();
-    }
-
-    //Load tasks for the selected date
-    private void loadTasks(String selectedDate) {
-        taskRef.orderByChild("date").equalTo(selectedDate).addValueEventListener(new ValueEventLister())
-        {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot){
-            List<Task> tasks = new ArrayList<>();
-            for (DataSnapshot taskSnapshot : snapshot.getChildren()) {
-                Task task = taskSnapshot.getValue(Task.class);
-                tasks.add(task);
-            }
-            taskAdapter.setTasks(tasks);
-        }
-
+            // Handle Calendar Date Selection
             calendarView.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
-                String selectedDate = year + "-" + (month + 1) + "-" + dayOfMonth;
-                loadTasks(selectedDate);
+                selectedDate = year + "-" + (month + 1) + "-" + dayOfMonth;
+                textView.setText("Selected Date: " + selectedDate);
             });
-        });
+
+            // Add Task Button Click
+            addTaskButton.setOnClickListener(v -> showAddTaskDialog());
+        }
+
+        private void saveTaskToFirebase(String taskDescription) {
+            String taskId = tasksReference.push().getKey();
+            HashMap<String, String> taskData = new HashMap<>();
+            taskData.put("date", selectedDate);
+            taskData.put("description", taskDescription);
+
+            tasksReference.child(taskId).setValue(taskData)
+                    .addOnSuccessListener(aVoid -> Toast.makeText(this, "Task added successfully!", Toast.LENGTH_SHORT).show())
+                    .addOnFailureListener(e -> Toast.makeText(this, "Failed to add task.", Toast.LENGTH_SHORT).show());
+        }
+
+        private void showAddTaskDialog() {
+            if (selectedDate == null) {
+                Toast.makeText(this, "Please select a date first!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Add Task");
+
+            final EditText input = new EditText(this);
+            builder.setView(input);
+
+            //add data into firebase console
+
+            builder.setPositiveButton("Add", (dialog, which) -> {
+                String taskDescription = input.getText().toString().trim();
+                if (!taskDescription.isEmpty()) {
+                    saveTaskToFirebase(taskDescription);
+                    scheduleNotification(this, taskDescription, selectedDate);
+                } else {
+                    Toast.makeText(this, "Task cannot be empty!", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+            builder.show();
+        }
+
+        private void scheduleNotification(Context context, String taskDescription, String date) {
+            Intent intent = new Intent(context, NotificationReceiver.class);
+            intent.putExtra("taskDescription", taskDescription);
+
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            Calendar calendar = Calendar.getInstance();
+            // Notify at 9 AM
+            calendar.set(Calendar.HOUR_OF_DAY, 9);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+
+            NotificationScheduler.schedule(context, pendingIntent, calendar.getTimeInMillis());
+        }
+
     }
-
-    //create notification channel
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        NotificationChannel channel = new NotificationChannel(
-                "todo_channel", "To-Do Notifications", NotificationManager.IMPORTANCE_HIGH);
-        NotificationManager manager = getSystemService(NotificationManager.class);
-        manager.createNotificationChannel(channel);
-    }
-}
-
-
-
-
-
-
-
-

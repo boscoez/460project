@@ -13,4 +13,5 @@
     <color name="chat_color_receiver">#000833</color>
     <color name="ToDoList">#9EA2BF</color>
     <color name="ToDoBackground">#9EA2BF</color>
+    <color name="LightBlue">#A7ADE0</color>
 </resources>
