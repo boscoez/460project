@@ -64,7 +64,7 @@ public class LoginDetailsActivity extends AppCompatActivity {
     private void checkIfUserExists() {
         binding.loginProgressBar.setVisibility(View.VISIBLE);
 
-        db.collection(Constants.COLLECTION_USER)
+        db.collection(Constants.COLLECTION_USERS)
                 .document(phoneNumber)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
@@ -191,7 +191,7 @@ public class LoginDetailsActivity extends AppCompatActivity {
         newUser.hashedPassword = Utilities.hashPassword(password);
         newUser.profilePic = encodedImage;
 
-        db.collection(Constants.COLLECTION_USER)
+        db.collection(Constants.COLLECTION_USERS)
                 .document(phoneNumber)
                 .set(newUser)
                 .addOnSuccessListener(aVoid -> {

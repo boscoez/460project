@@ -36,10 +36,10 @@ public class UserModel implements Serializable {
     public String fcmToken;
 
     /** A set of unique chat room IDs the user participates in. */
-    public transient List<String> chats;
+    public List<String> chats;
 
     /** A map of tasks, where the key is a date (in "yyyy-MM-dd" format) and the value is a list of tasks for that date. */
-    public transient Map<String, List<String>> tasksByDate;
+    public Map<String, List<String>> tasksByDate;
 
     /**
      * Default constructor required for serialization/deserialization.

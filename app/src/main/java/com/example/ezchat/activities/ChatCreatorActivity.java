@@ -43,6 +43,13 @@ public class ChatCreatorActivity extends AppCompatActivity {
     private Set<String> selectedUserPhones = new HashSet<>();
     private String currentUserPhone;
 
+    // Top-level interface
+    public interface OnSelectionChangedListener {
+        void onSelectionChanged(int selectedCount);
+    }
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,40 +70,65 @@ public class ChatCreatorActivity extends AppCompatActivity {
         setupListeners();
     }
 
+
+
     private void initializeViews() {
         recyclerViewUsers = findViewById(R.id.recyclerviewUsers);
         btnStartChat = findViewById(R.id.btnStartChat);
         progressBar = findViewById(R.id.chatCreatorProgressBar);
 
         recyclerViewUsers.setLayoutManager(new LinearLayoutManager(this));
-        userAdapter = new UserAdapter(userList, selectedUserPhones);
+        userAdapter = new UserAdapter(userList, selectedUserPhones, selectedCount -> {
+            // Enable or disable the "Begin Chat" button
+            btnStartChat.setVisibility(selectedCount > 0 ? View.VISIBLE : View.GONE);
+        });
         recyclerViewUsers.setAdapter(userAdapter);
 
-        btnStartChat.setEnabled(false); // Disable start button until users are selected
+        btnStartChat.setVisibility(View.GONE); // Initially hide the button
     }
 
+
+
     private void loadUsers() {
+        // Show progress bar while loading users
         progressBar.setVisibility(View.VISIBLE);
-        database.collection(Constants.COLLECTION_USER)
+        recyclerViewUsers.setVisibility(View.GONE); // Hide the list during loading
+        TextView messageText = findViewById(R.id.message_text);
+        messageText.setVisibility(View.GONE); // Hide the message text initially
+
+        database.collection(Constants.COLLECTION_USERS)
                 .get()
                 .addOnCompleteListener(task -> {
-                    progressBar.setVisibility(View.GONE);
+                    progressBar.setVisibility(View.GONE); // Hide the progress bar after loading
                     if (task.isSuccessful() && task.getResult() != null) {
                         userList.clear();
                         for (com.google.firebase.firestore.QueryDocumentSnapshot document : task.getResult()) {
                             UserModel user = document.toObject(UserModel.class);
-                            if (!user.phone.equals(currentUserPhone)) { // Exclude the current user
+                            if (!user.phone.equals(currentUserPhone)) { // Exclude current user
                                 userList.add(user);
                             }
                         }
-                        userAdapter.notifyDataSetChanged();
+                        if (userList.isEmpty()) {
+                            // Show a message if no users are found
+                            messageText.setText("No Contacts Found");
+                            messageText.setVisibility(View.VISIBLE);
+                        } else {
+                            // Show the RecyclerView if users are found
+                            recyclerViewUsers.setVisibility(View.VISIBLE);
+                            userAdapter.notifyDataSetChanged();
+                        }
                         Log.d(TAG, "Users loaded successfully.");
                     } else {
+                        // Show a network error message if loading fails
                         Log.e(TAG, "Error loading users.", task.getException());
+                        messageText.setText("Failed to load users. Please check your connection.");
+                        messageText.setVisibility(View.VISIBLE);
                         Toast.makeText(this, "Failed to load users.", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
+
+
 
     private void setupListeners() {
         btnStartChat.setOnClickListener(v -> {
@@ -107,8 +139,8 @@ public class ChatCreatorActivity extends AppCompatActivity {
 
             // Create a new chat model
             ChatModel chat = new ChatModel();
-            chat.phoneNumbers.add(currentUserPhone); // Add the current user
-            chat.phoneNumbers.addAll(selectedUserPhones); // Add selected users
+            chat.contacts.add(currentUserPhone); // Add the current user
+            chat.contacts.addAll(selectedUserPhones); // Add selected users
             chat.creatorPhone = currentUserPhone;
 
             // Pass the chat model to ChatActivity
@@ -121,14 +153,19 @@ public class ChatCreatorActivity extends AppCompatActivity {
         findViewById(R.id.btnBack).setOnClickListener(v -> onBackPressed());
     }
 
+
+
     // Adapter for RecyclerView
-    public static class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
+    public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
+
         private final List<UserModel> users;
         private final Set<String> selectedPhones;
+        private final OnSelectionChangedListener listener;
 
-        public UserAdapter(List<UserModel> users, Set<String> selectedPhones) {
+        public UserAdapter(List<UserModel> users, Set<String> selectedPhones, OnSelectionChangedListener listener) {
             this.users = users;
             this.selectedPhones = selectedPhones;
+            this.listener = listener; // Callback to notify changes
         }
 
         @Override
@@ -141,7 +178,7 @@ public class ChatCreatorActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(UserViewHolder holder, int position) {
             UserModel user = users.get(position);
-            holder.bind(user, selectedPhones);
+            holder.bind(user, selectedPhones, listener);
         }
 
         @Override
@@ -149,7 +186,9 @@ public class ChatCreatorActivity extends AppCompatActivity {
             return users.size();
         }
 
-        public static class UserViewHolder extends RecyclerView.ViewHolder {
+
+
+        public class UserViewHolder extends RecyclerView.ViewHolder {
             private final TextView userNameText;
             private final TextView userPhoneText;
             private final RoundedImageView profilePic;
@@ -163,7 +202,7 @@ public class ChatCreatorActivity extends AppCompatActivity {
                 userCheckBox = itemView.findViewById(R.id.userCheckBox);
             }
 
-            public void bind(UserModel user, Set<String> selectedPhones) {
+            public void bind(UserModel user, Set<String> selectedPhones, OnSelectionChangedListener listener) {
                 userNameText.setText(user.username);
                 userPhoneText.setText(user.phone);
                 userCheckBox.setChecked(selectedPhones.contains(user.phone));
@@ -173,6 +212,7 @@ public class ChatCreatorActivity extends AppCompatActivity {
                     } else {
                         selectedPhones.remove(user.phone);
                     }
+                    listener.onSelectionChanged(selectedPhones.size()); // Notify the change
                 });
             }
         }

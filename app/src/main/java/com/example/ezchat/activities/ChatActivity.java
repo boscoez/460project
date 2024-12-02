@@ -8,93 +8,92 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ezchat.R;
+import com.example.ezchat.databinding.ActivityChatBinding;
+import com.example.ezchat.databinding.ActivityChatRecyclerItemBinding;
 import com.example.ezchat.models.ChatModel;
 import com.example.ezchat.models.MessageModel;
 import com.example.ezchat.utilities.Constants;
 import com.example.ezchat.utilities.PreferenceManager;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Activity for managing and displaying chat messages.
+ */
 public class ChatActivity extends AppCompatActivity {
 
     private static final String TAG = "ChatActivity";
 
-    private String chatId; // Chat ID if available
-    private ChatModel chatModel; // Chat model if created by ChatCreatorActivity
+    // View binding instance
+    private ActivityChatBinding binding;
+
+    // Chat and user details
+    private String chatId;
+    private ChatModel chatModel;
     private String currentUserPhone;
     private boolean isNewChat = false;
 
+    // Firebase and preferences
     private FirebaseFirestore database;
     private PreferenceManager preferenceManager;
 
-    private RecyclerView chatRecyclerView;
+    // Adapter and message list
     private ChatAdapter chatAdapter;
-    private EditText inputMessage;
-    private ImageButton btnSendMessage;
-    private ProgressBar loadingProgressBar;
-
-    private List<MessageModel> messages;
+    private final List<MessageModel> messages = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_chat);
 
-        initializeViews();
+        // Initialize view binding
+        binding = ActivityChatBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
         initializeDependencies();
         handleIntent();
-
+        initializeRecyclerView();
         setupListeners();
+
         if (isNewChat) {
-            // For a new chat, wait for the first message to create the chat
             showWaitingForMessage();
         } else {
-            // For an existing chat, load messages from Firestore
             loadMessages();
         }
     }
 
-    private void initializeViews() {
-        chatRecyclerView = findViewById(R.id.chatRecyclerView);
-        chatRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-        inputMessage = findViewById(R.id.inputMessage);
-        btnSendMessage = findViewById(R.id.messageSendButton);
-        loadingProgressBar = findViewById(R.id.chatLoadingProgressBar);
-
-        messages = new ArrayList<>();
-        chatAdapter = new ChatAdapter(messages);
-        chatRecyclerView.setAdapter(chatAdapter);
-    }
-
+    /**
+     * Initialize Firebase and PreferenceManager instances.
+     */
     private void initializeDependencies() {
         preferenceManager = PreferenceManager.getInstance(getApplicationContext());
         database = FirebaseFirestore.getInstance();
         currentUserPhone = preferenceManager.get(Constants.FIELD_PHONE, "");
     }
 
+    /**
+     * Extracts chat information from the Intent.
+     */
     private void handleIntent() {
         Intent intent = getIntent();
         if (intent.hasExtra(Constants.FIELD_CHAT_ID)) {
-            // Case 1: Existing chat
             chatId = intent.getStringExtra(Constants.FIELD_CHAT_ID);
             isNewChat = false;
         } else if (intent.hasExtra(Constants.MODEL_CHAT)) {
-            // Case 2: New chat
             chatModel = (ChatModel) intent.getSerializableExtra(Constants.MODEL_CHAT);
             isNewChat = true;
         } else {
@@ -103,15 +102,28 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Setup RecyclerView with the chat adapter.
+     */
+    private void initializeRecyclerView() {
+        chatAdapter = new ChatAdapter(messages);
+        binding.chatRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        binding.chatRecyclerView.setAdapter(chatAdapter);
+    }
+
+    /**
+     * Setup event listeners for the UI components.
+     */
     private void setupListeners() {
-        btnSendMessage.setOnClickListener(v -> {
-            String messageContent = inputMessage.getText().toString().trim();
+        // Send message button
+        binding.messageSendButton.setOnClickListener(v -> {
+            String messageContent = binding.inputMessage.getText().toString().trim();
             if (messageContent.isEmpty()) {
                 Toast.makeText(this, "Message cannot be empty", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            inputMessage.setText("");
+            binding.inputMessage.setText("");
 
             if (isNewChat) {
                 createNewChat(messageContent);
@@ -120,92 +132,135 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.btnBack).setOnClickListener(v -> onBackPressed());
+        // Back button
+        binding.btnBack.setOnClickListener(v -> onBackPressed());
     }
 
+    /**
+     * Display waiting UI for the first message in a new chat.
+     */
     private void showWaitingForMessage() {
-        btnSendMessage.setEnabled(true);
-        loadingProgressBar.setVisibility(View.GONE);
-        chatRecyclerView.setVisibility(View.GONE);
+        binding.messageSendButton.setEnabled(true);
+        binding.chatLoadingProgressBar.setVisibility(View.GONE);
     }
 
+    /**
+     * Creates a new chat and sends the first message.
+     *
+     * @param firstMessage The first message to send.
+     */
     private void createNewChat(String firstMessage) {
-        chatId = database.collection(Constants.COLLECTION_CHAT).document().getId();
+        binding.chatLoadingProgressBar.setVisibility(View.VISIBLE);
+
+        chatId = database.collection(Constants.COLLECTION_CHATS).document().getId();
         chatModel.chatId = chatId;
 
-        MessageModel message = new MessageModel(currentUserPhone, new ArrayList<>(chatModel.phoneNumbers), firstMessage);
+        MessageModel message = new MessageModel(currentUserPhone, firstMessage);
         chatModel.lastMessage = message;
 
-        // Add chat and first message to Firestore
-        database.collection(Constants.COLLECTION_CHAT)
+        database.collection(Constants.COLLECTION_CHATS)
                 .document(chatId)
                 .set(chatModel)
-                .addOnSuccessListener(aVoid -> sendMessage(firstMessage))
+                .addOnSuccessListener(aVoid -> {
+                    database.collection(Constants.COLLECTION_CHATS)
+                            .document(chatId)
+                            .collection(Constants.COLLECTION_MESSAGES)
+                            .add(message)
+                            .addOnSuccessListener(documentReference -> enableRealTimeUpdates())
+                            .addOnFailureListener(e -> {
+                                Log.e(TAG, "Failed to add first message", e);
+                                Toast.makeText(this, "Failed to send the first message.", Toast.LENGTH_SHORT).show();
+                                binding.chatLoadingProgressBar.setVisibility(View.GONE);
+                            });
+                })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Failed to create chat", e);
                     Toast.makeText(this, "Failed to start chat.", Toast.LENGTH_SHORT).show();
+                    binding.chatLoadingProgressBar.setVisibility(View.GONE);
                 });
     }
 
-    private void loadMessages() {
-        loadingProgressBar.setVisibility(View.VISIBLE);
-
-        database.collection(Constants.COLLECTION_MESSAGE)
-                .whereEqualTo(Constants.FIELD_CHAT_ID, chatId)
-                .orderBy(Constants.FIELD_TIMESTAMP, Query.Direction.ASCENDING)
-                .addSnapshotListener((value, error) -> {
-                    loadingProgressBar.setVisibility(View.GONE);
-
-                    if (error != null) {
-                        Log.e(TAG, "Error loading messages", error);
-                        Toast.makeText(this, "Failed to load messages.", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    if (value != null) {
-                        messages.clear();
-                        for (com.google.firebase.firestore.DocumentSnapshot doc : value.getDocuments()) {
-                            messages.add(doc.toObject(MessageModel.class));
-                        }
-                        chatAdapter.notifyDataSetChanged();
-                        chatRecyclerView.scrollToPosition(messages.size() - 1);
-                    }
-                });
-    }
-
+    /**
+     * Sends a message in the current chat.
+     *
+     * @param content The message content.
+     */
     private void sendMessage(String content) {
-        MessageModel message = new MessageModel(currentUserPhone, new ArrayList<>(chatModel.phoneNumbers), content);
+        binding.chatLoadingProgressBar.setVisibility(View.VISIBLE);
 
-        database.collection(Constants.COLLECTION_MESSAGE)
+        MessageModel message = new MessageModel(currentUserPhone, content);
+
+        database.collection(Constants.COLLECTION_CHATS)
+                .document(chatId)
+                .collection(Constants.COLLECTION_MESSAGES)
                 .add(message)
                 .addOnSuccessListener(documentReference -> {
-                    Log.d(TAG, "Message sent successfully.");
-                    chatRecyclerView.scrollToPosition(messages.size() - 1);
+                    database.collection(Constants.COLLECTION_CHATS)
+                            .document(chatId)
+                            .update(Constants.FIELD_LAST_MESSAGE, message);
+                    binding.chatLoadingProgressBar.setVisibility(View.GONE);
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Failed to send message", e);
                     Toast.makeText(this, "Failed to send message.", Toast.LENGTH_SHORT).show();
+                    binding.chatLoadingProgressBar.setVisibility(View.GONE);
                 });
     }
 
-    public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessageViewHolder> {
+    /**
+     * Loads messages from Firestore with real-time updates.
+     */
+    private void loadMessages() {
+        enableRealTimeUpdates();
+    }
+
+    /**
+     * Enable real-time updates for messages in the chat.
+     */
+    private void enableRealTimeUpdates() {
+        database.collection(Constants.COLLECTION_CHATS)
+                .document(chatId)
+                .collection(Constants.COLLECTION_MESSAGES)
+                .orderBy(Constants.FIELD_TIMESTAMP, Query.Direction.ASCENDING)
+                .addSnapshotListener((value, error) -> {
+                    if (error != null) {
+                        Log.e(TAG, "Error fetching real-time updates", error);
+                        return;
+                    }
+
+                    if (value != null) {
+                        for (DocumentChange change : value.getDocumentChanges()) {
+                            if (change.getType() == DocumentChange.Type.ADDED) {
+                                MessageModel message = change.getDocument().toObject(MessageModel.class);
+                                messages.add(message);
+                                chatAdapter.notifyItemInserted(messages.size() - 1);
+                                binding.chatRecyclerView.scrollToPosition(messages.size() - 1);
+                            }
+                        }
+                    }
+                });
+    }
+
+    /**
+     * Adapter for RecyclerView to display chat messages.
+     */
+    private class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessageViewHolder> {
+
         private final List<MessageModel> messages;
 
-        public ChatAdapter(List<MessageModel> messages) {
+        ChatAdapter(List<MessageModel> messages) {
             this.messages = messages;
         }
 
+        @NonNull
         @Override
-        public MessageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.activity_chat_recycler_item, parent, false);
-            return new MessageViewHolder(view);
+        public MessageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return new MessageViewHolder(ActivityChatBinding.inflate(LayoutInflater.from(parent.getContext())));
         }
 
         @Override
-        public void onBindViewHolder(MessageViewHolder holder, int position) {
-            MessageModel message = messages.get(position);
-            holder.bind(message);
+        public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
+            holder.bind(messages.get(position));
         }
 
         @Override
@@ -213,34 +268,29 @@ public class ChatActivity extends AppCompatActivity {
             return messages.size();
         }
 
-        public class MessageViewHolder extends RecyclerView.ViewHolder {
-            private final TextView messageTextLeft, usernameTextLeft, timestampTextLeft;
-            private final TextView messageTextRight, usernameTextRight, timestampTextRight;
+        /**
+         * ViewHolder for binding message data.
+         */
+        class MessageViewHolder extends RecyclerView.ViewHolder {
+            ActivityChatRecyclerItemBinding binding = ActivityChatRecyclerItemBinding.inflate(getLayoutInflater());
 
-            public MessageViewHolder(View itemView) {
-                super(itemView);
-                messageTextLeft = itemView.findViewById(R.id.messageTextLeft);
-                usernameTextLeft = itemView.findViewById(R.id.usernameTextLeft);
-                timestampTextLeft = itemView.findViewById(R.id.timestampTextLeft);
+            MessageViewHolder(ActivityChatBinding binding) { super(binding.getRoot()); }
 
-                messageTextRight = itemView.findViewById(R.id.messageTextRight);
-                usernameTextRight = itemView.findViewById(R.id.usernameTextRight);
-                timestampTextRight = itemView.findViewById(R.id.timestampTextRight);
-            }
-
-            public void bind(MessageModel message) {
-                if (message.senderPhone.equals(preferenceManager.get(Constants.FIELD_PHONE, ""))) {
+            void bind(MessageModel message) {
+                if (message.senderPhone.equals(currentUserPhone)) {
                     // Sent message
-                    messageTextRight.setText(message.message);
-                    usernameTextRight.setText(Constants.LABEL_YOU);
-                    timestampTextRight.setText(formatTimestamp(message.timestamp));
-                    messageTextRight.setVisibility(View.VISIBLE);
+                    binding.messageTextRight.setText(message.message);
+                    binding.usernameTextRight.setText("You");
+                    binding.timestampTextRight.setText(formatTimestamp(message.timestamp));
+                    binding.messageLayoutRight.setVisibility(View.VISIBLE);
+                    binding.messageLayoutLeft.setVisibility(View.GONE);
                 } else {
                     // Received message
-                    messageTextLeft.setText(message.message);
-                    usernameTextLeft.setText(message.senderPhone);
-                    timestampTextLeft.setText(formatTimestamp(message.timestamp));
-                    messageTextLeft.setVisibility(View.VISIBLE);
+                    binding.messageTextLeft.setText(message.message);
+                    binding.usernameTextLeft.setText(message.senderPhone);
+                    binding.timestampTextLeft.setText(formatTimestamp(message.timestamp));
+                    binding.messageLayoutLeft.setVisibility(View.VISIBLE);
+                    binding.messageLayoutRight.setVisibility(View.GONE);
                 }
             }
         }

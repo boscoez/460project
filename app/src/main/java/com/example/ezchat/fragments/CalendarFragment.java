@@ -100,7 +100,7 @@ public class CalendarFragment extends Fragment {
             return;
         }
 
-        firestore.collection(Constants.COLLECTION_USER)
+        firestore.collection(Constants.COLLECTION_USERS)
                 .document(currentUserPhone)
                 .collection(Constants.COLLECTION_TASKS)
                 .document(selectedDate)
@@ -148,7 +148,7 @@ public class CalendarFragment extends Fragment {
         }
 
         if (tasks.isEmpty()) {
-            firestore.collection(Constants.COLLECTION_USER)
+            firestore.collection(Constants.COLLECTION_USERS)
                     .document(currentUserPhone)
                     .collection(Constants.COLLECTION_TASKS)
                     .document(date)
@@ -156,7 +156,7 @@ public class CalendarFragment extends Fragment {
                     .addOnSuccessListener(aVoid -> Log.d(Constants.LOG_TAG_CALENDAR, "Date removed from Firestore."))
                     .addOnFailureListener(e -> Log.e(Constants.LOG_TAG_CALENDAR, "Failed to remove date from Firestore: " + e.getMessage()));
         } else {
-            firestore.collection(Constants.COLLECTION_USER)
+            firestore.collection(Constants.COLLECTION_USERS)
                     .document(currentUserPhone)
                     .collection(Constants.COLLECTION_TASKS)
                     .document(date)

@@ -91,7 +91,7 @@ public class SearchActivity extends AppCompatActivity {
     private void searchUsers(String query) {
         String lowerQuery = query.toLowerCase().replaceAll("\\s", ""); // Normalize query
 
-        db.collection(Constants.COLLECTION_USER)  // Use the correct collection name from Constants
+        db.collection(Constants.COLLECTION_USERS)  // Use the correct collection name from Constants
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
                     userList.clear();
@@ -132,7 +132,7 @@ public class SearchActivity extends AppCompatActivity {
 
         // Start the ChatActivity and pass the selected users' phone numbers
         Intent intent = new Intent(SearchActivity.this, ChatActivity.class);
-        intent.putStringArrayListExtra(Constants.COLLECTION_PHONE, (ArrayList<String>) selectedUserPhones); // Pass selected users' phone numbers
+        intent.putStringArrayListExtra(Constants.COLLECTION_PHONES, (ArrayList<String>) selectedUserPhones); // Pass selected users' phone numbers
         startActivity(intent);
     }
 

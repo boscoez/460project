@@ -67,7 +67,7 @@ public class ProfileFragment extends Fragment {
             return;
         }
 
-        firestore.collection(Constants.COLLECTION_USER)
+        firestore.collection(Constants.COLLECTION_USERS)
                 .document(phoneNumber)
                 .get()
                 .addOnCompleteListener(task -> {
@@ -136,7 +136,7 @@ public class ProfileFragment extends Fragment {
             updatedUser.put(Constants.FIELD_PROFILE_PIC, encodedImage);
         }
 
-        firestore.collection(Constants.COLLECTION_USER)
+        firestore.collection(Constants.COLLECTION_USERS)
                 .document(phoneNumber)
                 .update(updatedUser)
                 .addOnCompleteListener(task -> {

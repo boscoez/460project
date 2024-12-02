@@ -79,7 +79,7 @@ public class ChatsFragment extends Fragment {
         loadingProgressBar.setVisibility(View.VISIBLE);
         String currentUserPhone = preferenceManager.get(Constants.FIELD_PHONE, "");
 
-        firestore.collection(Constants.COLLECTION_CHAT)
+        firestore.collection(Constants.COLLECTION_CHATS)
                 .whereArrayContains(Constants.FIELD_PHONE, currentUserPhone)
                 .orderBy(Constants.FIELD_LAST_MESSAGE_TIMESTAMP, Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshots, error) -> {
