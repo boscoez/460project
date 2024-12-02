@@ -2,54 +2,72 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
-    android:background="@color/my_primary"
     android:layout_height="match_parent"
+    android:background="@color/my_primary"
     tools:context=".SplashActivity">
-
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical">
-
-        <FrameLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center">
 
-            <!-- Overlayed Image (e.g., icon) -->
             <ImageView
-                android:layout_width="333dp"
-                android:layout_height="333dp"
-                android:layout_gravity="center"
+                android:id="@+id/chatIcon"
+                android:layout_width="180dp"
+                android:layout_height="180dp"
                 android:src="@drawable/chat_icon"
-                app:tint="@color/my_secondary" />
-            <!-- Background Image (e.g., logo) -->
+                app:tint="@color/white"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:importantForAccessibility="no"/>
+
             <ImageView
-                android:id="@+id/logoImageView"
-                android:layout_width="280dp"
-                android:layout_height="220dp"
-                android:layout_gravity="center"
-                android:padding="15dp"
-                android:src="@drawable/academicalliancepng" />
-        </FrameLayout>
+                android:id="@+id/academicAllianceIcon"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:importantForAccessibility="no"
+                android:scaleType="centerInside"
+                android:src="@drawable/academicalliancepng"
+                app:layout_constraintBottom_toBottomOf="@id/chatIcon"
+                app:layout_constraintEnd_toEndOf="@id/chatIcon"
+                app:layout_constraintStart_toStartOf="@id/chatIcon"
+                app:layout_constraintTop_toTopOf="@id/chatIcon"
+                app:layout_constraintVertical_bias="0.325" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textSize="30sp"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:fontFamily="monospace"
+            android:layout_marginTop="20dp"/>
 
         <ProgressBar
             android:layout_width="32dp"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"/>
+
 
     </LinearLayout>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/developer_info"
+        android:text="@string/developed_by_group_9"
         android:layout_alignParentBottom="true"
         android:gravity="center"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="20dp"
         android:textColor="@color/off_white"/>
+
 
 </RelativeLayout>

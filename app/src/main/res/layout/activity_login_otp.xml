@@ -2,30 +2,19 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="20dp"
-    android:gravity="center"
     android:orientation="vertical"
+    android:gravity="center"
+    android:layout_margin="20dp"
     android:weightSum="100"
     tools:context=".LoginOtpActivity">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:text="Welcome to Academic Alliance"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="@color/primary_dark"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="20"
-        android:gravity="center">
-
+        android:gravity="center"
+        android:layout_weight="20">
         <RelativeLayout
             android:layout_width="32dp"
             android:layout_height="32dp"
@@ -37,11 +26,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:text="1"
                 android:textColor="@color/white"
-                android:textSize="18sp" />
+                android:textSize="18sp"
+                android:text="@string/_1_"/>
         </RelativeLayout>
-
         <RelativeLayout
             android:layout_width="32dp"
             android:layout_height="32dp"
@@ -53,11 +41,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:text="2"
                 android:textColor="@color/white"
-                android:textSize="18sp" />
+                android:textSize="18sp"
+                android:text="2"/>
         </RelativeLayout>
-
         <RelativeLayout
             android:layout_width="32dp"
             android:layout_height="32dp"
@@ -69,80 +56,80 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:text="3"
                 android:textColor="@color/white"
-                android:textSize="18sp" />
+                android:textSize="18sp"
+                android:text="@string/_3_"/>
         </RelativeLayout>
     </LinearLayout>
 
     <ImageView
-        android:layout_width="222dp"
-        android:layout_height="222dp"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:src="@drawable/otp_icon"
+        app:tint="@color/my_primary"
         android:layout_weight="20"
-        android:src="@drawable/code_icon"
-        app:tint="@color/my_primary" />
+        android:importantForAccessibility="no" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:text="@string/enter_code"
         android:layout_gravity="center_vertical"
-        android:layout_weight="5"
-        android:letterSpacing="0.07"
-        android:text="Enter CODE sent to your SMS."
-        android:textSize="22sp"
-        android:textStyle="bold" />
+        android:letterSpacing="0.08"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:layout_weight="2"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="5"
+        android:orientation="horizontal"
         android:gravity="center"
-        android:orientation="horizontal">
+        android:layout_weight="5">
+
+
 
         <EditText
-            android:id="@+id/login_otp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:background="@drawable/edit_text_rounded_corner"
-            android:elevation="5dp"
+            android:padding="10dp"
             android:hint="CODE"
             android:inputType="number"
             android:maxLength="6"
-            android:padding="10dp" />
+            android:layout_margin="10dp"
+            android:background="@drawable/edit_text_rounded_corner"
+            android:elevation="5dp"
+            android:id="@+id/login_otp"
+            />
 
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="100dp"
-        android:layout_weight="10"
         android:gravity="center_vertical"
-        android:orientation="vertical">
-
+        android:orientation="vertical"
+        android:layout_weight="10">
         <Button
-            android:id="@+id/login_next_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/btn_rounded_corner"
-            android:text=" NEXT " />
-
+            android:text="NEXT"
+            android:id="@+id/login_next_btn"/>
         <ProgressBar
-            android:id="@+id/login_progress_bar"
             android:layout_width="32dp"
             android:layout_height="wrap_content"
+            android:indeterminateTint="@color/my_primary"
             android:layout_gravity="center"
-            android:indeterminateTint="@color/my_primary" />
-
+            android:id="@+id/login_progress_bar"/>
     </LinearLayout>
 
     <TextView
-        android:id="@+id/resend_otp_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="10"
         android:gravity="center"
-        android:text="Resend CODE in 30 seconds." />
-
+        android:text="Resend Code in 30 sec"
+        android:id="@+id/resend_otp_textview"/>
 
 </LinearLayout>
