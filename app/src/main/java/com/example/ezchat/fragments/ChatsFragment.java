@@ -1,5 +1,6 @@
 package com.example.ezchat.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ezchat.R;
+import com.example.ezchat.activities.ChatCreatorActivity;
 import com.example.ezchat.activities.ChatActivity;
 import com.example.ezchat.models.ChatModel;
 import com.example.ezchat.utilities.Constants;
@@ -65,6 +67,9 @@ public class ChatsFragment extends Fragment {
         // Load chats from Firestore
         loadChats();
 
+        // Set up the FAB for creating a new chat
+        setupFabNewChat(view);
+
         return view;
     }
 
@@ -103,6 +108,27 @@ public class ChatsFragment extends Fragment {
 
                     loadingProgressBar.setVisibility(View.GONE);
                 });
+    }
+
+    /**
+     * Sets up the Floating Action Button (FAB) to open the ChatCreatorActivity.
+     */
+    private void setupFabNewChat(View view) {
+        View fabNewChat = view.findViewById(R.id.fabNewChat);
+        fabNewChat.setOnClickListener(v -> {
+            String currentUserPhone = preferenceManager.get(Constants.FIELD_PHONE, "");
+            if (currentUserPhone.isEmpty()) {
+                Log.e(Constants.LOG_CHATS_FRAGMENT, "Current user phone is missing from preferences.");
+                return;
+            }
+
+            // Navigate to ChatCreatorActivity, passing the current user's phone number
+            Utilities.navigateToActivity(
+                    requireContext(),
+                    ChatCreatorActivity.class,
+                    Utilities.createExtras(Constants.FIELD_PHONE, currentUserPhone)
+            );
+        });
     }
 
     /**

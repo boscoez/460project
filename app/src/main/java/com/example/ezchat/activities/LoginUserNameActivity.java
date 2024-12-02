@@ -23,30 +23,25 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 public class LoginUserNameActivity extends AppCompatActivity {
 
     private ActivityLoginUserNameBinding binding;
-    private FirebaseFirestore db; // Firestore instance
-    private PreferenceManager preferenceManager; // Shared Preferences manager
-    private String phoneNumber; // User's phone number from previous activity
-    private String encodedImage = ""; // Holds the Base64-encoded profile picture
+    private FirebaseFirestore db;
+    private PreferenceManager preferenceManager;
+    private String phoneNumber;
+    private String encodedImage = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Initialize View Binding and PreferenceManager
         binding = ActivityLoginUserNameBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        preferenceManager = PreferenceManager.getInstance(this);
 
-        // Initialize Firestore
+        preferenceManager = PreferenceManager.getInstance(this);
         db = FirebaseFirestore.getInstance();
 
-        // Retrieve the phone number from preferences
         phoneNumber = preferenceManager.get(Constants.PREF_KEY_PHONE, "");
         if (phoneNumber.isEmpty()) {
             Log.e(Constants.LOG_TAG_PHONE_NUMBER, "Phone number missing. Redirecting to LoginPhoneNumberActivity.");
@@ -57,9 +52,73 @@ public class LoginUserNameActivity extends AppCompatActivity {
 
         Log.d(Constants.LOG_TAG_PHONE_NUMBER, "Phone number retrieved: " + phoneNumber);
 
-        // Set up button click listeners
+        // Check if user already exists in Firestore
+        checkIfUserExists();
+
         binding.loginCodeBtn.setOnClickListener(v -> validateAndRegisterUser());
         binding.layoutImage.setOnClickListener(v -> pickImage());
+    }
+
+    /**
+     * Checks if a user with the current phone number exists in Firestore.
+     */
+    private void checkIfUserExists() {
+        binding.loginProgressBar.setVisibility(View.VISIBLE);
+
+        db.collection(Constants.USER_COLLECTION)
+                .document(phoneNumber)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    binding.loginProgressBar.setVisibility(View.GONE);
+
+                    if (documentSnapshot.exists()) {
+                        Log.d(Constants.LOG_TAG_PHONE_NUMBER, "User already exists in Firestore.");
+                        UserModel existingUser = documentSnapshot.toObject(UserModel.class);
+
+                        if (existingUser != null) {
+                            // Save user data to preferences
+                            preferenceManager.set(Constants.PREF_KEY_USERNAME, existingUser.username);
+                            preferenceManager.set(Constants.PREF_KEY_EMAIL, existingUser.email);
+                            preferenceManager.set(Constants.PREF_KEY_PROFILE_PIC, existingUser.profilePic);
+
+                            // Populate UI with existing user data
+                            populateExistingUserData(existingUser);
+                        }
+                    } else {
+                        Log.d(Constants.LOG_TAG_PHONE_NUMBER, "No user found. Proceeding with registration.");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    binding.loginProgressBar.setVisibility(View.GONE);
+                    Log.e(Constants.LOG_TAG_PHONE_NUMBER, "Failed to check if user exists: " + e.getMessage());
+                    Utilities.showToast(this, "Failed to check user status. Please try again.", Utilities.ToastType.ERROR);
+                });
+    }
+
+    /**
+     * Populates the fields with existing user data and hides non-editable fields.
+     */
+    private void populateExistingUserData(UserModel user) {
+        // Populate the username and profile picture fields
+        binding.loginUsername.setText(user.username);
+        binding.loginUsername.setEnabled(false); // Make username uneditable
+
+        if (user.profilePic != null && !user.profilePic.isEmpty()) {
+            binding.imageProfile.setImageBitmap(Utilities.decodeImage(user.profilePic));
+            binding.textAddImage.setVisibility(View.GONE);
+        }
+
+        // Hide other fields (email, password, etc.)
+        binding.loginEmail.setVisibility(View.GONE);
+        binding.loginPassword.setVisibility(View.GONE);
+        binding.loginConfirmedPassword.setVisibility(View.GONE);
+        binding.loginCodeBtn.setText("Continue");
+
+        // Disable profile picture click
+        binding.layoutImage.setOnClickListener(null);
+
+        // Adjust the flow to simply continue to the MainActivity
+        binding.loginCodeBtn.setOnClickListener(v -> navigateToMainActivity());
     }
 
     /**
@@ -72,9 +131,6 @@ public class LoginUserNameActivity extends AppCompatActivity {
         imagePickerLauncher.launch(intent);
     }
 
-    /**
-     * ActivityResultLauncher for handling image picking result.
-     */
     private final ActivityResultLauncher<Intent> imagePickerLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == RESULT_OK && result.getData() != null) {
@@ -93,86 +149,58 @@ public class LoginUserNameActivity extends AppCompatActivity {
                 }
             });
 
-    /**
-     * Validates input fields and registers the user.
-     */
     private void validateAndRegisterUser() {
         String username = binding.loginUsername.getText().toString().trim();
         String email = binding.loginEmail.getText().toString().trim();
         String password = binding.loginPassword.getText().toString();
         String confirmPassword = binding.loginConfirmedPassword.getText().toString();
 
-        // Validate username
         if (username.isEmpty() || username.length() < 3) {
             showError(binding.loginUsername, "Username must be at least 3 characters.");
             return;
         }
 
-        // Validate email
         if (!Utilities.isValidEmail(email)) {
             showError(binding.loginEmail, "Enter a valid email address.");
             return;
         }
 
-        // Validate password
         if (password.isEmpty() || password.length() < 6) {
             showError(binding.loginPassword, "Password must be at least 6 characters.");
             return;
         }
 
-        // Validate confirm password
         if (!password.equals(confirmPassword)) {
             showError(binding.loginConfirmedPassword, "Passwords do not match.");
             return;
         }
 
-        // Register user
         registerNewUser(username, email, password);
     }
 
-    /**
-     * Displays an error on an EditText field.
-     *
-     * @param field The EditText field to show the error on.
-     * @param message The error message to display.
-     */
     private void showError(EditText field, String message) {
         field.setError(message);
         field.requestFocus();
     }
 
-    /**
-     * Registers a new user in Firestore.
-     *
-     * @param username The user's username.
-     * @param email    The user's email.
-     * @param password The user's password (to be hashed).
-     */
     private void registerNewUser(String username, String email, String password) {
         binding.loginProgressBar.setVisibility(View.VISIBLE);
         binding.loginCodeBtn.setVisibility(View.INVISIBLE);
 
-        // Create a new user model
         UserModel newUser = new UserModel(phoneNumber, username);
         newUser.email = email;
         newUser.hashedPassword = Utilities.hashPassword(password);
         newUser.profilePic = encodedImage;
 
-        Log.d(Constants.LOG_TAG_PHONE_NUMBER, "Registering new user: " + newUser);
-
-        // Save user to Firestore
         db.collection(Constants.USER_COLLECTION)
                 .document(phoneNumber)
                 .set(newUser)
                 .addOnSuccessListener(aVoid -> {
-                    Log.d(Constants.LOG_TAG_PHONE_NUMBER, "User successfully registered in Firestore.");
                     preferenceManager.set(Constants.PREF_KEY_USERNAME, username);
                     preferenceManager.set(Constants.PREF_KEY_EMAIL, email);
                     preferenceManager.set(Constants.PREF_KEY_IS_LOGGED_IN, true);
 
-                    // Navigate to MainActivity
-                    Utilities.navigateToActivity(LoginUserNameActivity.this, MainActivity.class, null);
-                    finish();
+                    navigateToMainActivity();
                 })
                 .addOnFailureListener(e -> {
                     binding.loginProgressBar.setVisibility(View.GONE);
@@ -180,5 +208,10 @@ public class LoginUserNameActivity extends AppCompatActivity {
                     Log.e(Constants.LOG_TAG_PHONE_NUMBER, "Failed to register user: " + e.getMessage());
                     Utilities.showToast(this, "Failed to register user. Please try again.", Utilities.ToastType.ERROR);
                 });
+    }
+
+    private void navigateToMainActivity() {
+        Utilities.navigateToActivity(LoginUserNameActivity.this, MainActivity.class, null);
+        finish();
     }
 }
